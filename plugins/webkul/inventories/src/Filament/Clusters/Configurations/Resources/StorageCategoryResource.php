@@ -65,7 +65,9 @@ class StorageCategoryResource extends Resource
                         Forms\Components\TextInput::make('max_weight')
                             ->label(__('inventories::filament/clusters/configurations/resources/storage-category.form.sections.general.fields.max-weight'))
                             ->numeric()
-                            ->default(0.0000),
+                            ->default(0.0000)
+                            ->minValue(0)
+                            ->maxValue(99999999),
                         Forms\Components\Select::make('allow_new_products')
                             ->label(__('inventories::filament/clusters/configurations/resources/storage-category.form.sections.general.fields.allow-new-products'))
                             ->options(AllowNewProduct::class)
@@ -201,9 +203,15 @@ class StorageCategoryResource extends Resource
 
     public static function getSubNavigationPosition(): SubNavigationPosition
     {
-        $currentRoute = request()->route()?->getName();
+        $route = request()->route()?->getName() ?? session('current_route');
 
-        if (in_array($currentRoute, [self::getRouteBaseName().'.index', self::getRouteBaseName().'.create'])) {
+        if ($route && $route != 'livewire.update') {
+            session(['current_route' => $route]);
+        } else {
+            $route = session('current_route');
+        }
+
+        if ($route === self::getRouteBaseName().'.index') {
             return SubNavigationPosition::Start;
         }
 

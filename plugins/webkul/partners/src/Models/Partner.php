@@ -2,22 +2,28 @@
 
 namespace Webkul\Partner\Models;
 
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Partner\Database\Factories\PartnerFactory;
 use Webkul\Partner\Enums\AccountType;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
+use Webkul\Support\Models\Country;
+use Webkul\Support\Models\State;
 
-class Partner extends Model
+class Partner extends Authenticatable implements FilamentUser
 {
-    use HasChatter, HasFactory, HasLogActivity, SoftDeletes;
+    use HasChatter, HasFactory, HasLogActivity, Notifiable, SoftDeletes;
 
     /**
      * Table name.
@@ -45,6 +51,12 @@ class Partner extends Model
         'color',
         'company_registry',
         'reference',
+        'street1',
+        'street2',
+        'city',
+        'zip',
+        'state_id',
+        'country_id',
         'parent_id',
         'creator_id',
         'user_id',
@@ -62,6 +74,38 @@ class Partner extends Model
         'account_type' => AccountType::class,
         'is_active'    => 'boolean',
     ];
+
+    /**
+     * Determine if the user can access the Filament panel.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get image url for the product image.
+     *
+     * @return string
+     */
+    public function getAvatarUrlAttribute()
+    {
+        if (! $this->avatar) {
+            return;
+        }
+
+        return Storage::url($this->avatar);
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    public function state(): BelongsTo
+    {
+        return $this->belongsTo(State::class);
+    }
 
     public function parent(): BelongsTo
     {
@@ -95,12 +139,14 @@ class Partner extends Model
 
     public function addresses(): HasMany
     {
-        return $this->hasMany(Address::class);
+        return $this->hasMany(self::class, 'parent_id')
+            ->where('account_type', AccountType::ADDRESS);
     }
 
     public function contacts(): HasMany
     {
-        return $this->hasMany(self::class, 'parent_id');
+        return $this->hasMany(self::class, 'parent_id')
+            ->where('account_type', '!=', AccountType::ADDRESS);
     }
 
     public function bankAccounts(): HasMany

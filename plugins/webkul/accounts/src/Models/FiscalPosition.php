@@ -2,7 +2,6 @@
 
 namespace Webkul\Account\Models;
 
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Security\Models\User;
@@ -26,7 +25,6 @@ class FiscalPosition extends Model
         'foreign_vat',
         'name',
         'notes',
-        'is_active',
         'auto_reply',
         'vat_required',
     ];

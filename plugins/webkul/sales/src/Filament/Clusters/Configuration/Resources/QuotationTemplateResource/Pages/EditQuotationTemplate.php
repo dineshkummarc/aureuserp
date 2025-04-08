@@ -2,10 +2,11 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource\Pages;
 
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\EditRecord;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\QuotationTemplateResource;
 
 class EditQuotationTemplate extends EditRecord
 {
@@ -21,11 +22,25 @@ class EditQuotationTemplate extends EditRecord
         return SubNavigationPosition::Top;
     }
 
+    protected function getSavedNotification(): ?Notification
+    {
+        return Notification::make()
+            ->success()
+            ->title(__('sales::filament/clusters/configurations/resources/quotation-template/pages/edit-quotation-template.notification.title'))
+            ->body(__('sales::filament/clusters/configurations/resources/quotation-template/pages/edit-quotation-template.notification.body'));
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->successNotification(
+                    Notification::make()
+                        ->success()
+                        ->title(__('sales::filament/clusters/configurations/resources/quotation-template/pages/edit-quotation-template.header-actions.notification.delete.title'))
+                        ->body(__('sales::filament/clusters/configurations/resources/quotation-template/pages/edit-quotation-template.header-actions.notification.delete.body'))
+                ),
         ];
     }
 }

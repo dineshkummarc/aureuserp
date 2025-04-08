@@ -15,7 +15,7 @@ return [
                     'name-placeholder'   => 'eg. Central Warehouse',
                     'code'               => 'Short Name',
                     'code-placeholder'   => 'eg. CW',
-                    'code-hint-tooltip'  => 'The short name is used to identify the warehouse.',
+                    'code-hint-tooltip'  => 'The short name serves as an identifier for the warehouse.',
                     'company'            => 'Company',
                     'address'            => 'Address',
                 ],
@@ -31,7 +31,7 @@ return [
                     'outgoing-shipments'               => 'Outgoing Shipments',
                     'outgoing-shipments-hint-tooltip'  => 'Default outgoing route to follow',
                     'resupply-management'              => 'Resupply Management',
-                    'resupply-management-hint-tooltip' => 'Routes will be created automatically to resupply this warehouse from the warehouses ticked',
+                    'resupply-management-hint-tooltip' => 'Routes will be automatically generated to resupply this warehouse from the selected warehouses.',
                     'resupply-from'                    => 'Resupply From',
                 ],
             ],
@@ -81,8 +81,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Warehouse force deleted',
-                    'body'  => 'The warehouse has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Warehouse force deleted',
+                        'body'  => 'The warehouse has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Warehouse could not be deleted',
+                        'body'  => 'The warehouse cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -104,8 +111,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Warehouses force deleted',
-                    'body'  => 'The warehouses has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Warehouses force deleted',
+                        'body'  => 'The warehouses has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Warehouses could not be deleted',
+                        'body'  => 'The warehouses cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

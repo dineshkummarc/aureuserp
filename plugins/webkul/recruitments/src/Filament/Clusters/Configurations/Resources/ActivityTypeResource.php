@@ -5,10 +5,13 @@ namespace Webkul\Recruitment\Filament\Clusters\Configurations\Resources;
 use Filament\Tables\Table;
 use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\ActivityTypeResource\Pages;
+use Webkul\Recruitment\Models\ActivityType;
 use Webkul\Support\Filament\Resources\ActivityTypeResource as BaseActivityTypeResource;
 
 class ActivityTypeResource extends BaseActivityTypeResource
 {
+    protected static ?string $model = ActivityType::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $cluster = Configurations::class;

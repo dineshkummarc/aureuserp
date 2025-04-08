@@ -4,6 +4,7 @@ namespace Webkul\Product\Filament\Resources\ProductResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Filament\Resources\ProductResource;
@@ -15,6 +16,14 @@ class ListProducts extends ListRecords
     use HasTableViews;
 
     protected static string $resource = ProductResource::class;
+
+    public function table(Table $table): Table
+    {
+        return parent::table($table)
+            ->modifyQueryUsing(function (Builder $query) {
+                $query->whereNull('parent_id');
+            });
+    }
 
     public function getPresetTableViews(): array
     {

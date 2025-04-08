@@ -14,7 +14,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Webkul\Employee\Filament\Clusters\Configurations;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\JobPositionResource\Pages;
 use Webkul\Employee\Filament\Resources\DepartmentResource;
@@ -43,28 +42,6 @@ class JobPositionResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('employees::filament/clusters/configurations/resources/job-position.navigation.title');
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'name',
-            'department.name',
-            'employmentType.name',
-            'company.name',
-            'creator.name',
-        ];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('employees::filament/clusters/configurations/resources/job-position.global-search.name')            => $record->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/job-position.global-search.department')      => $record->department?->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/job-position.global-search.employment-type') => $record->employmentType?->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/job-position.global-search.company')         => $record->company?->name ?? '—',
-            __('employees::filament/clusters/configurations/resources/job-position.global-search.created-by')      => $record->createdBy?->name ?? '—',
-        ];
     }
 
     public static function form(Form $form): Form
@@ -137,6 +114,7 @@ class JobPositionResource extends Resource
                                             ->label(__('employees::filament/clusters/configurations/resources/job-position.form.sections.workforce-planning.fields.recruitment-target'))
                                             ->numeric()
                                             ->minValue(0)
+                                            ->maxValue(99999999999)
                                             ->default(0),
                                         Forms\Components\TextInput::make('no_of_employee')
                                             ->disabled()

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
@@ -18,7 +19,7 @@ use Webkul\Support\Models\Currency;
 
 class Requisition extends Model
 {
-    use HasChatter, HasCustomFields, HasFactory, HasLogActivity;
+    use HasChatter, HasCustomFields, HasFactory, HasLogActivity, SoftDeletes;
 
     /**
      * Table name.
@@ -54,9 +55,22 @@ class Requisition extends Model
      */
     protected $casts = [
         'state' => Enums\RequisitionState::class,
+        'type'  => Enums\RequisitionType::class,
     ];
 
     protected array $logAttributes = [
+        'name',
+        'type',
+        'state',
+        'reference',
+        'starts_at',
+        'ends_at',
+        'description',
+        'currency.name' => 'Currency',
+        'partner.name'  => 'Partner',
+        'user.name'     => 'Buyer',
+        'company.name'  => 'Company',
+        'creator.name'  => 'Creator',
     ];
 
     public function partner(): BelongsTo
@@ -110,7 +124,11 @@ class Requisition extends Model
      */
     public function updateName()
     {
-        $this->name = 'BO/'.$this->id;
+        if ($this->type == Enums\RequisitionType::BLANKET_ORDER) {
+            $this->name = 'BO/'.$this->id;
+        } else {
+            $this->name = 'PT/'.$this->id;
+        }
     }
 
     protected static function newFactory(): RequisitionFactory

@@ -17,18 +17,20 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Inventory\Enums;
+use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\LotResource;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\PackageResource;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\Operation;
 use Webkul\Inventory\Models\OperationType;
+use Webkul\Inventory\Models\Packaging;
 use Webkul\Inventory\Models\Product;
 use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Settings;
-use Webkul\Partner\Filament\Resources\AddressResource;
 use Webkul\Partner\Filament\Resources\PartnerResource;
 use Webkul\Product\Enums\ProductType;
+use Webkul\Support\Models\UOM;
 use Webkul\TableViews\Filament\Components\PresetView;
 
 class OperationResource extends Resource
@@ -49,6 +51,15 @@ class OperationResource extends Resource
                     ->hiddenLabel()
                     ->inline()
                     ->options(Enums\OperationState::options())
+                    ->options(function ($record) {
+                        $options = Enums\OperationState::options();
+
+                        if ($record && $record->state !== Enums\OperationState::CANCELED) {
+                            unset($options[Enums\OperationState::CANCELED->value]);
+                        }
+
+                        return $options;
+                    })
                     ->default(Enums\OperationState::DRAFT)
                     ->disabled(),
                 Forms\Components\Section::make(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.title'))
@@ -69,12 +80,12 @@ class OperationResource extends Resource
                             ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form))
                             ->visible(fn (Forms\Get $get): bool => OperationType::find($get('operation_type_id'))?->type == Enums\OperationType::INTERNAL)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
-                        Forms\Components\Select::make('partner_address_id')
+                        Forms\Components\Select::make('partner_id')
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.sections.general.fields.delivery-address'))
-                            ->relationship('partnerAddress', 'name')
+                            ->relationship('partner', 'name')
                             ->searchable()
                             ->preload()
-                            ->createOptionForm(fn (Form $form): Form => AddressResource::form($form))
+                            ->createOptionForm(fn (Form $form): Form => PartnerResource::form($form))
                             ->visible(fn (Forms\Get $get): bool => OperationType::find($get('operation_type_id'))?->type == Enums\OperationType::OUTGOING)
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('operation_type_id')
@@ -94,8 +105,8 @@ class OperationResource extends Resource
                             ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                 $operationType = OperationType::find($get('operation_type_id'));
 
-                                $set('source_location_id', $operationType->source_location_id);
-                                $set('destination_location_id', $operationType->destination_location_id);
+                                $set('source_location_id', $operationType?->source_location_id);
+                                $set('destination_location_id', $operationType?->destination_location_id);
                             })
                             ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                         Forms\Components\Select::make('source_location_id')
@@ -148,6 +159,7 @@ class OperationResource extends Resource
                                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                                 Forms\Components\TextInput::make('origin')
                                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.additional.fields.source-document'))
+                                    ->maxLength(255)
                                     ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/operations/resources/operation.form.tabs.additional.fields.source-document-hint-tooltip'))
                                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])),
                             ])
@@ -452,11 +464,11 @@ class OperationResource extends Resource
                                                     ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings)
                                                     ->placeholder('—'),
 
-                                                Infolists\Components\TextEntry::make('requested_qty')
+                                                Infolists\Components\TextEntry::make('product_qty')
                                                     ->label(__('inventories::filament/clusters/operations/resources/operation.infolist.tabs.operations.entries.demand'))
                                                     ->icon('heroicon-o-calculator'),
 
-                                                Infolists\Components\TextEntry::make('received_qty')
+                                                Infolists\Components\TextEntry::make('quantity')
                                                     ->label(__('inventories::filament/clusters/operations/resources/operation.infolist.tabs.operations.entries.quantity'))
                                                     ->icon('heroicon-o-scale')
                                                     ->placeholder('—'),
@@ -538,7 +550,7 @@ class OperationResource extends Resource
                     ->relationship(
                         'product',
                         'name',
-                        fn ($query) => $query->where('type', ProductType::GOODS),
+                        fn ($query) => $query->where('type', ProductType::GOODS)->whereNull('is_configurable'),
                     )
                     ->required()
                     ->searchable()
@@ -547,11 +559,7 @@ class OperationResource extends Resource
                     ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                     ->live()
                     ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                        if ($product = Product::find($get('product_id'))) {
-                            $set('product_packaging_id', $product->product_packaging_id);
-
-                            $set('uom_id', $product->uom_id);
-                        }
+                        static::afterProductUpdated($set, $get);
                     })
                     ->disabled(fn (Move $move): bool => $move->id && $move->state !== Enums\MoveState::DRAFT),
                 Forms\Components\Select::make('final_location_id')
@@ -563,6 +571,7 @@ class OperationResource extends Resource
                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
                 Forms\Components\TextInput::make('description')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.description'))
+                    ->maxLength(255)
                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
                 Forms\Components\DateTimePicker::make('scheduled_at')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.scheduled-at'))
@@ -580,17 +589,23 @@ class OperationResource extends Resource
                     ->preload()
                     ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_packagings)
                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
-                Forms\Components\TextInput::make('requested_qty')
+                Forms\Components\TextInput::make('product_uom_qty')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.demand'))
                     ->numeric()
                     ->minValue(0)
+                    ->maxValue(99999999999)
                     ->default(0)
                     ->required()
+                    ->live()
+                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                        static::afterProductUOMQtyUpdated($set, $get);
+                    })
                     ->disabled(fn (Move $move): bool => $move->id && $move->state !== Enums\MoveState::DRAFT),
-                Forms\Components\TextInput::make('received_qty')
+                Forms\Components\TextInput::make('quantity')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.quantity'))
                     ->numeric()
                     ->minValue(0)
+                    ->maxValue(99999999999)
                     ->default(0)
                     ->required()
                     ->visible(fn (Move $move): bool => $move->id && $move->state !== Enums\MoveState::DRAFT)
@@ -606,13 +621,19 @@ class OperationResource extends Resource
                     ->searchable()
                     ->preload()
                     ->required()
-                    ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom)
+                    ->live()
+                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                        static::afterUOMUpdated($set, $get);
+                    })
+                    ->visible(fn (Settings\ProductSettings $settings): bool => $settings->enable_uom)
                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
                 Forms\Components\Toggle::make('is_picked')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.picked'))
                     ->default(0)
                     ->inline(false)
                     ->disabled(fn ($record): bool => in_array($record?->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
+                Forms\Components\Hidden::make('product_qty')
+                    ->default(0),
             ])
             ->columns(4)
             ->mutateRelationshipDataBeforeCreateUsing(function (array $data, $record) {
@@ -626,9 +647,8 @@ class OperationResource extends Resource
                     'name'                    => $product->name,
                     'procure_method'          => Enums\ProcureMethod::MAKE_TO_STOCK,
                     'uom_id'                  => $data['uom_id'] ?? $product->uom_id,
-                    'requested_uom_qty'       => $data['requested_qty'],
                     'operation_type_id'       => $record->operation_type_id,
-                    'received_qty'            => null,
+                    'quantity'                => null,
                     'source_location_id'      => $record->source_location_id,
                     'destination_location_id' => $record->destination_location_id,
                     'scheduled_at'            => $record->scheduled_at ?? now(),
@@ -638,14 +658,14 @@ class OperationResource extends Resource
                 return $data;
             })
             ->mutateRelationshipDataBeforeSaveUsing(function (array $data, $record) {
-                if (isset($data['received_qty'])) {
+                if (isset($data['quantity'])) {
                     $record->fill([
-                        'received_qty' => $data['received_qty'] ?? null,
+                        'quantity' => $data['quantity'] ?? null,
                     ]);
 
-                    static::updateOrCreateMoveLines($record);
+                    Inventory::computeTransferMove($record);
 
-                    static::updateOperationState($record->operation);
+                    Inventory::computeTransferState($record->operation);
                 }
 
                 return $data;
@@ -678,10 +698,6 @@ class OperationResource extends Resource
         }
 
         if (app(Settings\OperationSettings::class)->enable_packages) {
-            $columns++;
-        }
-
-        if (app(Settings\ProductSettings::class)->enable_uom) {
             $columns++;
         }
 
@@ -748,14 +764,20 @@ class OperationResource extends Resource
 
                                 $component->state($productQuantity?->id);
                             })
-                            ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                            ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) use ($move) {
                                 $productQuantity = ProductQuantity::find($get('quantity_id'));
 
                                 $set('lot_id', $productQuantity?->lot_id);
 
                                 $set('result_package_id', $productQuantity?->package_id);
 
-                                $set('qty', $productQuantity?->quantity);
+                                if ($productQuantity?->quantity) {
+                                    if (! $move->uom_id) {
+                                        $set('qty', $productQuantity->quantity);
+                                    } else {
+                                        $set('qty', (float) ($productQuantity->quantity ?? 0) * $move->uom->factor);
+                                    }
+                                }
                             })
                             ->visible($move->sourceLocation->type == Enums\LocationType::INTERNAL)
                             ->disabled(fn (): bool => in_array($move->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
@@ -837,20 +859,16 @@ class OperationResource extends Resource
                             ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.lines.fields.quantity'))
                             ->numeric()
                             ->minValue(0)
+                            ->maxValue(99999999999)
                             ->maxValue(fn () => $move->product->tracking == Enums\ProductTracking::SERIAL ? 1 : 999999999)
                             ->required()
-                            ->disabled(fn (): bool => in_array($move->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
-                        Forms\Components\Select::make('uom_id')
-                            ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.lines.fields.uom'))
-                            ->relationship(
-                                'uom',
-                                'name',
-                                fn ($query) => $query->where('category_id', 1),
-                            )
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->visible(fn (Settings\ProductSettings $settings) => $settings->enable_uom)
+                            ->suffix(function () use ($move) {
+                                if (! app(Settings\ProductSettings::class)->enable_uom) {
+                                    return false;
+                                }
+
+                                return $move->uom->name;
+                            })
                             ->disabled(fn (): bool => in_array($move->state, [Enums\MoveState::DONE, Enums\MoveState::CANCELED])),
                     ])
                     ->defaultItems(0)
@@ -867,7 +885,7 @@ class OperationResource extends Resource
 
                         $data['reference'] = $move->reference;
                         $data['state'] = $move->state;
-                        $data['uom_qty'] = $data['qty'];
+                        $data['uom_qty'] = static::calculateProductQuantity($data['uom_id'] ?? $move->uom_id, $data['qty']);
                         $data['scheduled_at'] = $move->scheduled_at;
                         $data['operation_id'] = $move->operation_id;
                         $data['move_id'] = $move->id;
@@ -901,12 +919,12 @@ class OperationResource extends Resource
                 $totalQty = $record->lines()->sum('qty');
 
                 $record->fill([
-                    'received_qty' => $totalQty,
+                    'quantity' => $totalQty,
                 ]);
 
-                static::updateOrCreateMoveLines($record);
+                Inventory::computeTransferMove($record);
 
-                $set('received_qty', $totalQty);
+                $set('quantity', $totalQty);
             });
     }
 
@@ -947,198 +965,83 @@ class OperationResource extends Resource
         ];
     }
 
-    public static function updateOrCreateMoveLines(Move $record)
+    private static function afterProductUpdated(Forms\Set $set, Forms\Get $get): void
     {
-        $lines = $record->lines()->orderBy('created_at')->get();
-
-        $remainingQty = $record->received_qty ?? $record->requested_qty;
-
-        $updatedLines = collect();
-
-        $availableQuantity = 0;
-
-        $isSupplierSource = $record->sourceLocation->type === Enums\LocationType::SUPPLIER;
-
-        $productQuantities = collect();
-
-        if (! $isSupplierSource) {
-            $productQuantities = ProductQuantity::with(['location', 'lot', 'package'])
-                ->where('product_id', $record->product_id)
-                // Todo: Fix this to handle nesting
-                ->whereHas('location', function (Builder $query) use ($record) {
-                    $query->where('id', $record->source_location_id)
-                        ->orWhere('parent_id', $record->source_location_id);
-                })
-                ->when(
-                    $record->sourceLocation->type != Enums\LocationType::SUPPLIER
-                    && $record->product->tracking == Enums\ProductTracking::LOT,
-                    fn ($query) => $query->whereNotNull('lot_id')
-                )
-                ->get();
-        }
-
-        foreach ($lines as $line) {
-            $currentLocationQty = null;
-
-            if (! $isSupplierSource) {
-                $currentLocationQty = $productQuantities
-                    ->where('location_id', $line->source_location_id)
-                    ->where('lot_id', $line->lot_id)
-                    ->where('package_id', $line->package_id)
-                    ->first()?->quantity ?? 0;
-
-                if ($currentLocationQty <= 0) {
-                    $line->delete();
-
-                    continue;
-                }
-            }
-
-            if ($remainingQty > 0) {
-                $newQty = $isSupplierSource
-                    ? $newQty = min($line->qty, $remainingQty)
-                    : min($line->qty, $currentLocationQty, $remainingQty);
-
-                if ($newQty != $line->qty) {
-                    $line->update([
-                        'qty'     => $newQty,
-                        'uom_qty' => $newQty,
-                        'state'   => Enums\MoveState::ASSIGNED,
-                    ]);
-                }
-
-                $updatedLines->push($line->source_location_id.'-'.$line->lot_id.'-'.$line->package_id);
-
-                $remainingQty -= $newQty;
-
-                $availableQuantity += $newQty;
-            } else {
-                $line->delete();
-            }
-        }
-
-        if ($remainingQty > 0) {
-            if ($isSupplierSource) {
-                while ($remainingQty > 0) {
-                    $newQty = $remainingQty;
-
-                    if ($record->product->tracking == Enums\ProductTracking::SERIAL) {
-                        $newQty = 1;
-                    }
-
-                    $record->lines()->create([
-                        'qty'                     => $newQty,
-                        'uom_qty'                 => $newQty,
-                        'source_location_id'      => $record->source_location_id,
-                        'state'                   => Enums\MoveState::ASSIGNED,
-                        'reference'               => $record->reference,
-                        'picking_description'     => $record->description_picking,
-                        'is_picked'               => $record->is_picked,
-                        'scheduled_at'            => $record->scheduled_at,
-                        'operation_id'            => $record->operation_id,
-                        'product_id'              => $record->product_id,
-                        'uom_id'                  => $record->uom_id,
-                        'destination_location_id' => $record->destination_location_id,
-                        'company_id'              => $record->company_id,
-                        'creator_id'              => Auth::id(),
-                    ]);
-
-                    $remainingQty -= $newQty;
-
-                    $availableQuantity += $newQty;
-                }
-            } else {
-                foreach ($productQuantities as $productQuantity) {
-                    if ($remainingQty <= 0) {
-                        break;
-                    }
-
-                    if ($updatedLines->contains($productQuantity->location_id.'-'.$productQuantity->lot_id.'-'.$productQuantity->package_id)) {
-                        continue;
-                    }
-
-                    if ($productQuantity->quantity <= 0) {
-                        continue;
-                    }
-
-                    $newQty = min($productQuantity->quantity, $remainingQty);
-
-                    $availableQuantity += $newQty;
-
-                    $record->lines()->create([
-                        'qty'                     => $newQty,
-                        'uom_qty'                 => $newQty,
-                        'lot_name'                => $productQuantity->lot?->name,
-                        'lot_id'                  => $productQuantity->lot_id,
-                        'package_id'              => $productQuantity->package_id,
-                        'result_package_id'       => $newQty == $productQuantity->quantity ? $productQuantity->package_id : null,
-                        'source_location_id'      => $productQuantity->location_id,
-                        'state'                   => Enums\MoveState::ASSIGNED,
-                        'reference'               => $record->reference,
-                        'picking_description'     => $record->description_picking,
-                        'is_picked'               => $record->is_picked,
-                        'scheduled_at'            => $record->scheduled_at,
-                        'operation_id'            => $record->operation_id,
-                        'product_id'              => $record->product_id,
-                        'uom_id'                  => $record->uom_id,
-                        'destination_location_id' => $record->destination_location_id,
-                        'company_id'              => $record->company_id,
-                        'creator_id'              => Auth::id(),
-                    ]);
-
-                    $remainingQty -= $newQty;
-                }
-            }
-        }
-
-        $requestedQty = $record->requested_qty;
-
-        if ($availableQuantity <= 0) {
-            $record->update([
-                'state'        => Enums\MoveState::CONFIRMED,
-                'received_qty' => null,
-            ]);
-
-            $record->lines()->update([
-                'state' => Enums\MoveState::CONFIRMED,
-            ]);
-        } elseif ($availableQuantity < $requestedQty) {
-            $record->update([
-                'state'        => Enums\MoveState::PARTIALLY_ASSIGNED,
-                'received_qty' => $availableQuantity,
-            ]);
-
-            $record->lines()->update([
-                'state' => Enums\MoveState::PARTIALLY_ASSIGNED,
-            ]);
-        } else {
-            $record->update([
-                'state'        => Enums\MoveState::ASSIGNED,
-                'received_qty' => $availableQuantity,
-            ]);
-        }
-
-        return $record;
-    }
-
-    public static function updateOperationState(Operation $record)
-    {
-        $record->refresh();
-
-        if (in_array($record->state, [Enums\OperationState::DONE, Enums\OperationState::CANCELED])) {
+        if (! $get('product_id')) {
             return;
         }
 
-        if ($record->moves->every(fn ($move) => $move->state === Enums\MoveState::CONFIRMED)) {
-            $record->update(['state' => Enums\OperationState::CONFIRMED]);
-        } elseif ($record->moves->every(fn ($move) => $move->state === Enums\MoveState::DONE)) {
-            $record->update(['state' => Enums\OperationState::DONE]);
-        } elseif ($record->moves->every(fn ($move) => $move->state === Enums\MoveState::CANCELED)) {
-            $record->update(['state' => Enums\OperationState::CANCELED]);
-        } elseif ($record->moves->contains(fn ($move) => $move->state === Enums\MoveState::ASSIGNED ||
-            $move->state === Enums\MoveState::PARTIALLY_ASSIGNED
-        )) {
-            $record->update(['state' => Enums\OperationState::ASSIGNED]);
+        $product = Product::find($get('product_id'));
+
+        $set('uom_id', $product->uom_id);
+
+        $productQuantity = static::calculateProductQuantity($get('uom_id'), $get('product_uom_qty'));
+
+        $set('product_qty', round($productQuantity, 2));
+
+        $packaging = static::getBestPackaging($get('product_id'), round($productQuantity, 2));
+
+        $set('product_packaging_id', $packaging['packaging_id'] ?? null);
+    }
+
+    private static function afterProductUOMQtyUpdated(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            return;
         }
+
+        $productQuantity = static::calculateProductQuantity($get('uom_id'), $get('product_uom_qty'));
+
+        $set('product_qty', round($productQuantity, 2));
+
+        $packaging = static::getBestPackaging($get('product_id'), $productQuantity);
+
+        $set('product_packaging_id', $packaging['packaging_id'] ?? null);
+    }
+
+    private static function afterUOMUpdated(Forms\Set $set, Forms\Get $get): void
+    {
+        if (! $get('product_id')) {
+            return;
+        }
+
+        $productQuantity = static::calculateProductQuantity($get('uom_id'), $get('product_uom_qty'));
+
+        $set('product_qty', round($productQuantity, 2));
+
+        $packaging = static::getBestPackaging($get('product_id'), $productQuantity);
+
+        $set('product_packaging_id', $packaging['packaging_id'] ?? null);
+    }
+
+    public static function calculateProductQuantity($uomId, $uomQuantity)
+    {
+        if (! $uomId) {
+            return $uomQuantity;
+        }
+
+        $uom = Uom::find($uomId);
+
+        return (float) ($uomQuantity ?? 0) / $uom->factor;
+    }
+
+    private static function getBestPackaging($productId, $quantity)
+    {
+        $product = Product::find($productId);
+
+        $packagings = Packaging::where('product_id', $productId)
+            ->orderByDesc('qty')
+            ->get();
+
+        foreach ($packagings as $packaging) {
+            if ($quantity && $quantity % $packaging->qty == 0) {
+                return [
+                    'packaging_id'  => $packaging->id,
+                    'packaging_qty' => round($quantity / $packaging->qty, 2),
+                ];
+            }
+        }
+
+        return null;
     }
 }

@@ -31,7 +31,7 @@ class FollowerAction extends Action
         return $this;
     }
 
-    public function setFollowerMailView(string $mailView): self
+    public function setFollowerMailView(?string $mailView): self
     {
         $mailView = $this->evaluate($mailView);
 

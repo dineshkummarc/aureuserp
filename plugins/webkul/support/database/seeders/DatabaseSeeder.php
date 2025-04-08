@@ -25,6 +25,8 @@ class DatabaseSeeder extends Seeder
             UOMSeeder::class,
             UtmStageSeeder::class,
             UtmCampaignSeeder::class,
+            UTMMediumSeeder::class,
+            UTMSourceSeeder::class,
         ]);
     }
 }

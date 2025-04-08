@@ -20,17 +20,17 @@ return [
 
             'applicable-on' => [
                 'title'       => 'Applicable On',
-                'description' => 'Select the places where this route can be selected.',
+                'description' => 'Choose the locations where this route can be applied.',
 
                 'fields' => [
                     'products'                        => 'Products',
-                    'products-hint-tooltip'           => 'When checked, the route will be selectable on the Product.',
+                    'products-hint-tooltip'           => 'If selected, this route will be available for selection on the product.',
                     'product-categories'              => 'Product Categories',
-                    'product-categories-hint-tooltip' => 'When checked, the route will be selectable on the Product Category.',
+                    'product-categories-hint-tooltip' => 'If selected, this route will be available for selection on the product category.',
                     'warehouses'                      => 'Warehouses',
-                    'warehouses-hint-tooltip'         => 'When a warehouse is selected for this route, this route should be seen as the default route when products pass through this warehouse.',
+                    'warehouses-hint-tooltip'         => 'When a warehouse is assigned to this route, it will be considered the default route for products moving through that warehouse.',
                     'packaging'                       => 'Packaging',
-                    'packaging-hint-tooltip'          => 'When checked, the route will be selectable on the Packaging.',
+                    'packaging-hint-tooltip'          => 'If selected, this route will be available for selection on the packaging.',
                 ],
             ],
         ],
@@ -78,8 +78,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Route force deleted',
-                    'body'  => 'The route has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Route force deleted',
+                        'body'  => 'The route has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Route could not be deleted',
+                        'body'  => 'The route cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -101,8 +108,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Routes force deleted',
-                    'body'  => 'The routes has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Routes force deleted',
+                        'body'  => 'The routes has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Routes could not be deleted',
+                        'body'  => 'The routes cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -126,13 +140,13 @@ return [
 
                 'entries' => [
                     'products'                        => 'Products',
-                    'products-hint-tooltip'           => 'When checked, the route will be selectable on the Product.',
+                    'products-hint-tooltip'           => 'If selected, this route will be available for selection on the product.',
                     'product-categories'              => 'Product Categories',
-                    'product-categories-hint-tooltip' => 'When checked, the route will be selectable on the Product Category.',
+                    'product-categories-hint-tooltip' => 'If selected, this route will be available for selection on the product category.',
                     'warehouses'                      => 'Warehouses',
-                    'warehouses-hint-tooltip'         => 'When a warehouse is selected for this route, this route should be seen as the default route when products pass through this warehouse.',
+                    'warehouses-hint-tooltip'         => 'When a warehouse is assigned to this route, it will be considered the default route for products moving through that warehouse.',
                     'packaging'                       => 'Packaging',
-                    'packaging-hint-tooltip'          => 'When checked, the route will be selectable on the Packaging.',
+                    'packaging-hint-tooltip'          => 'If selected, this route will be available for selection on the packaging.',
                 ],
             ],
 

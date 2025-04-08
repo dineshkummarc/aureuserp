@@ -13,27 +13,26 @@ return new class extends Migration
     {
         Schema::create('purchases_orders', function (Blueprint $table) {
             $table->id();
-            $table->string('access_token')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->string('priority')->nullable();
+            $table->string('priority')->default(0);
             $table->string('origin')->nullable();
             $table->string('partner_reference')->nullable();
             $table->string('state')->nullable();
-            $table->string('invoice_status')->nullable();
-            $table->decimal('untaxed_amount', 15, 2)->nullable();
-            $table->decimal('tax_amount', 15, 2)->nullable();
-            $table->decimal('total_amount', 15, 2)->nullable();
-            $table->decimal('total_cc_amount', 15, 2)->nullable();
-            $table->decimal('currency_rate', 15, 6)->nullable();
-            $table->integer('invoice_count')->nullable()->default(0);
+            $table->string('invoice_status')->default('no');
+            $table->string('receipt_status')->default('no');
+            $table->decimal('untaxed_amount', 15, 4)->default(0);
+            $table->decimal('tax_amount', 15, 4)->default(0);
+            $table->decimal('total_amount', 15, 4)->default(0);
+            $table->decimal('total_cc_amount', 15, 4)->default(0);
+            $table->decimal('currency_rate', 15, 6)->default(0);
+            $table->integer('invoice_count')->default(0);
             $table->datetime('ordered_at');
             $table->datetime('approved_at')->nullable();
             $table->datetime('planned_at')->nullable();
             $table->datetime('calendar_start_at')->nullable();
             $table->datetime('effective_date')->nullable();
             $table->string('incoterm_location')->nullable();
-            $table->string('receipt_status')->nullable();
             $table->boolean('mail_reminder_confirmed')->nullable()->default(0);
             $table->boolean('mail_reception_confirmed')->nullable()->default(0);
             $table->boolean('mail_reception_declined')->nullable()->default(0);
@@ -53,29 +52,24 @@ return new class extends Migration
                 ->constrained('partners_partners')
                 ->restrictOnDelete();
 
-            $table->foreignId('partner_address_id')
-                ->nullable()
-                ->constrained('partners_addresses')
-                ->nullOnDelete();
-
             $table->foreignId('currency_id')
                 ->constrained('currencies')
                 ->restrictOnDelete();
 
-            // $table->foreignId('fiscal_position_id')
-            //     ->nullable()
-            //     ->constrained('account_fiscal_position')
-            //     ->nullOnDelete();
+            $table->foreignId('fiscal_position_id')
+                ->nullable()
+                ->constrained('accounts_fiscal_positions')
+                ->nullOnDelete();
 
-            // $table->foreignId('payment_term_id')
-            //     ->nullable()
-            //     ->constrained('account_payment_term')
-            //     ->nullOnDelete();
+            $table->foreignId('payment_term_id')
+                ->nullable()
+                ->constrained('accounts_payment_terms')
+                ->nullOnDelete();
 
-            // $table->foreignId('incoterm_id')
-            //     ->nullable()
-            //     ->constrained('account_incoterms')
-            //     ->nullOnDelete();
+            $table->foreignId('incoterm_id')
+                ->nullable()
+                ->constrained('accounts_incoterms')
+                ->nullOnDelete();
 
             $table->foreignId('user_id')
                 ->nullable()

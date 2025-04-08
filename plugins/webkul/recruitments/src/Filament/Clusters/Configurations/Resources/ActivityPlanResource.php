@@ -9,9 +9,12 @@ use Filament\Tables\Table;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\ActivityPlanResource as BaseActivityPlanResource;
 use Webkul\Recruitment\Filament\Clusters\Configurations;
 use Webkul\Recruitment\Filament\Clusters\Configurations\Resources\ActivityPlanResource\Pages;
+use Webkul\Recruitment\Models\ActivityPlan;
 
 class ActivityPlanResource extends BaseActivityPlanResource
 {
+    protected static ?string $model = ActivityPlan::class;
+
     protected static ?string $cluster = Configurations::class;
 
     public static function getNavigationGroup(): string
@@ -27,15 +30,12 @@ class ActivityPlanResource extends BaseActivityPlanResource
                     ->label(__('recruitments::filament/clusters/configurations/resources/activity-plan.table.columns.name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('department.name')
-                    ->numeric()
                     ->label(__('recruitments::filament/clusters/configurations/resources/activity-plan.table.columns.department'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('department.manager.name')
-                    ->numeric()
                     ->label(__('recruitments::filament/clusters/configurations/resources/activity-plan.table.columns.manager'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('company.name')
-                    ->numeric()
                     ->label(__('recruitments::filament/clusters/configurations/resources/activity-plan.table.columns.company'))
                     ->sortable(),
                 Tables\Columns\IconColumn::make('is_active')

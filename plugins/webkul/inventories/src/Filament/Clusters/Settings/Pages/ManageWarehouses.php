@@ -5,6 +5,7 @@ namespace Webkul\Inventory\Filament\Clusters\Settings\Pages;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Pages\SettingsPage;
 use Illuminate\Support\Facades\Route;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\LocationResource;
@@ -19,6 +20,8 @@ class ManageWarehouses extends SettingsPage
     use HasPageShield;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
+
+    protected static ?string $slug = 'inventory/manage-warehouses';
 
     protected static ?string $navigationGroup = 'Inventory';
 
@@ -80,10 +83,27 @@ class ManageWarehouses extends SettingsPage
             ]);
     }
 
+    protected function beforeSave(): void
+    {
+        if (Warehouse::count() > 1) {
+            Notification::make()
+                ->warning()
+                ->title(__('inventories::filament/clusters/settings/pages/manage-warehouses.before-save.notification.warning.title'))
+                ->body(__('inventories::filament/clusters/settings/pages/manage-warehouses.before-save.notification.warning.body'))
+                ->send();
+
+            $this->fillForm();
+
+            $this->halt();
+        }
+    }
+
     protected function afterSave(): void
     {
         foreach (Warehouse::all() as $warehouse) {
-            OperationType::withTrashed()->whereIn('id', [$warehouse->internal_type_id])->update(['deleted_at' => $this->data['enable_locations'] ? null : now()]);
+            OperationType::withTrashed()
+                ->whereIn('id', [$warehouse->internal_type_id])
+                ->update(['deleted_at' => $this->data['enable_locations'] ? null : now()]);
         }
     }
 }

@@ -8,7 +8,6 @@ use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Webkul\Chatter\Mail\MessageMail;
 use Webkul\Support\Services\EmailService;
 
@@ -30,7 +29,7 @@ class MessageAction extends Action
         return $this;
     }
 
-    public function setMessageMailView(string $mailView): self
+    public function setMessageMailView(?string $mailView): self
     {
         $mailView = $this->evaluate($mailView);
 
@@ -60,6 +59,7 @@ class MessageAction extends Action
         $this
             ->color('gray')
             ->outlined()
+            ->visible(false)
             ->form([
                 Forms\Components\Group::make([
                     Forms\Components\Actions::make([
@@ -120,7 +120,7 @@ class MessageAction extends Action
                 try {
                     $data['name'] = $record->name;
 
-                    $message = $record->addMessage($data, Auth::user()->id);
+                    $message = $record->addMessage($data, filament()->auth()->id());
 
                     if (! empty($data['attachments'])) {
                         $record->addAttachments(

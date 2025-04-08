@@ -11,13 +11,17 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Webkul\Product\Enums\AttributeType;
-use Webkul\Product\Filament\Resources\AttributeResource\Pages;
 use Webkul\Product\Models\Attribute;
 
 class AttributeResource extends Resource
 {
     protected static ?string $model = Attribute::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-swatch';
 
     protected static bool $shouldRegisterNavigation = false;
 
@@ -51,13 +55,15 @@ class AttributeResource extends Resource
                                     ->maxLength(255),
                                 Forms\Components\ColorPicker::make('color')
                                     ->label(__('products::filament/resources/attribute.form.sections.options.fields.color'))
+                                    ->hexColor()
                                     ->visible(fn (Forms\Get $get): bool => $get('../../type') === AttributeType::COLOR->value),
                                 Forms\Components\TextInput::make('extra_price')
                                     ->label(__('products::filament/resources/attribute.form.sections.options.fields.extra-price'))
                                     ->required()
                                     ->numeric()
                                     ->default(0.0000)
-                                    ->minValue(0),
+                                    ->minValue(0)
+                                    ->maxValue(99999999999),
                             ])
                             ->columns(3),
                     ]),
@@ -124,11 +130,22 @@ class AttributeResource extends Resource
                             ->body(__('products::filament/resources/attribute.table.actions.delete.notification.body')),
                     ),
                 Tables\Actions\ForceDeleteAction::make()
+                    ->action(function (Attribute $record) {
+                        try {
+                            $record->forceDelete();
+                        } catch (QueryException $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('products::filament/resources/attribute.table.actions.force-delete.notification.error.title'))
+                                ->body(__('products::filament/resources/attribute.table.actions.force-delete.notification.error.body'))
+                                ->send();
+                        }
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('products::filament/resources/attribute.table.actions.force-delete.notification.title'))
-                            ->body(__('products::filament/resources/attribute.table.actions.force-delete.notification.body')),
+                            ->title(__('products::filament/resources/attribute.table.actions.force-delete.notification.success.title'))
+                            ->body(__('products::filament/resources/attribute.table.actions.force-delete.notification.success.body')),
                     ),
             ])
             ->bulkActions([
@@ -148,11 +165,22 @@ class AttributeResource extends Resource
                                 ->body(__('products::filament/resources/attribute.table.bulk-actions.delete.notification.body')),
                         ),
                     Tables\Actions\ForceDeleteBulkAction::make()
+                        ->action(function (Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->forceDelete());
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('products::filament/resources/attribute.table.bulk-actions.force-delete.notification.error.title'))
+                                    ->body(__('products::filament/resources/attribute.table.bulk-actions.force-delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('products::filament/resources/attribute.table.bulk-actions.force-delete.notification.title'))
-                                ->body(__('products::filament/resources/attribute.table.bulk-actions.force-delete.notification.body')),
+                                ->title(__('products::filament/resources/attribute.table.bulk-actions.force-delete.notification.success.title'))
+                                ->body(__('products::filament/resources/attribute.table.bulk-actions.force-delete.notification.success.body')),
                         ),
                 ]),
             ])
@@ -209,15 +237,5 @@ class AttributeResource extends Resource
                     ->columnSpan(['lg' => 1]),
             ])
             ->columns(3);
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index'  => Pages\ListAttributes::route('/'),
-            'create' => Pages\CreateAttribute::route('/create'),
-            'view'   => Pages\ViewAttribute::route('/{record}'),
-            'edit'   => Pages\EditAttribute::route('/{record}/edit'),
-        ];
     }
 }

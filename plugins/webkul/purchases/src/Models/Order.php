@@ -5,13 +5,19 @@ namespace Webkul\Purchase\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Webkul\Account\Models\FiscalPosition;
+use Webkul\Account\Models\Incoterm;
+use Webkul\Account\Models\Partner;
+use Webkul\Account\Models\PaymentTerm;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
-use Webkul\Partner\Models\Address;
-use Webkul\Partner\Models\Partner;
+use Webkul\Inventory\Models\Operation;
+use Webkul\Inventory\Models\OperationType;
 use Webkul\Purchase\Database\Factories\OrderFactory;
+use Webkul\Purchase\Enums;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
@@ -33,13 +39,14 @@ class Order extends Model
      * @var array
      */
     protected $fillable = [
-        'access_token',
         'name',
         'description',
         'priority',
         'origin',
         'partner_reference',
         'state',
+        'invoice_status',
+        'receipt_status',
         'untaxed_amount',
         'tax_amount',
         'total_amount',
@@ -54,20 +61,19 @@ class Order extends Model
         'planned_at',
         'calendar_start_at',
         'incoterm_location',
-        'receipt_status',
         'effective_date',
         'report_grids',
         'requisition_id',
         'purchases_group_id',
         'partner_id',
-        'partner_address_id',
         'currency_id',
-        'fiscal_position_id', // Todo: add relationship
-        'payment_term_id', // Todo: add relationship
-        'incoterm_id', // Todo: add relationship
+        'fiscal_position_id',
+        'payment_term_id',
+        'incoterm_id',
         'user_id',
         'company_id',
         'creator_id',
+        'operation_type_id',
     ];
 
     /**
@@ -76,6 +82,9 @@ class Order extends Model
      * @var string
      */
     protected $casts = [
+        'state'                    => Enums\OrderState::class,
+        'invoice_status'           => Enums\OrderInvoiceStatus::class,
+        'receipt_status'           => Enums\OrderReceiptStatus::class,
         'mail_reminder_confirmed'  => 'boolean',
         'mail_reception_confirmed' => 'boolean',
         'mail_reception_declined'  => 'boolean',
@@ -88,7 +97,40 @@ class Order extends Model
     ];
 
     protected array $logAttributes = [
+        'name',
+        'description',
+        'priority',
+        'origin',
+        'partner_reference',
+        'state',
+        'invoice_status',
+        'receipt_status',
+        'untaxed_amount',
+        'currency_rate',
+        'ordered_at',
+        'approved_at',
+        'planned_at',
+        'calendar_start_at',
+        'incoterm_location',
+        'effective_date',
+        'requisition.name'    => 'Requisition',
+        'partner.name'        => 'Vendor',
+        'currency.name'       => 'Currency',
+        'fiscalPosition'      => 'Fiscal Position',
+        'paymentTerm.name'    => 'Payment Term',
+        'incoterm.name'       => 'Buyer',
+        'user.name'           => 'Buyer',
+        'company.name'        => 'Company',
+        'creator.name'        => 'Creator',
     ];
+
+    /**
+     * Checks if new invoice is allow or not
+     */
+    public function getQtyToInvoiceAttribute()
+    {
+        return $this->lines->sum('qty_to_invoice');
+    }
 
     public function requisition(): BelongsTo
     {
@@ -105,9 +147,19 @@ class Order extends Model
         return $this->belongsTo(Partner::class);
     }
 
-    public function partnerAddress(): BelongsTo
+    public function fiscalPosition(): BelongsTo
     {
-        return $this->belongsTo(Address::class);
+        return $this->belongsTo(FiscalPosition::class);
+    }
+
+    public function paymentTerm(): BelongsTo
+    {
+        return $this->belongsTo(PaymentTerm::class);
+    }
+
+    public function incoterm(): BelongsTo
+    {
+        return $this->belongsTo(Incoterm::class);
     }
 
     public function currency(): BelongsTo
@@ -132,7 +184,44 @@ class Order extends Model
 
     public function lines(): HasMany
     {
-        return $this->hasMany(OrderLine::class);
+        return $this->hasMany(OrderLine::class, 'order_id');
+    }
+
+    public function accountMoves(): BelongsToMany
+    {
+        return $this->belongsToMany(AccountMove::class, 'purchases_order_account_moves', 'order_id', 'move_id');
+    }
+
+    public function operationType(): BelongsTo
+    {
+        return $this->belongsTo(OperationType::class, 'operation_type_id');
+    }
+
+    public function operations(): BelongsToMany
+    {
+        return $this->belongsToMany(Operation::class, 'purchases_order_operations', 'purchase_order_id', 'inventory_operation_id');
+    }
+
+    /**
+     * Add a new message
+     */
+    public function addMessage(array $data): \Webkul\Chatter\Models\Message
+    {
+        $message = new \Webkul\Chatter\Models\Message;
+
+        $user = filament()->auth()->user();
+
+        $message->fill(array_merge([
+            'creator_id'       => $user?->id,
+            'date_deadline'    => $data['date_deadline'] ?? now(),
+            'company_id'       => $data['company_id'] ?? ($user->defaultCompany?->id ?? null),
+            'messageable_type' => Order::class,
+            'messageable_id'   => $this->id,
+        ], $data));
+
+        $message->save();
+
+        return $message;
     }
 
     /**

@@ -5,10 +5,17 @@ namespace Webkul\Purchase\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\EloquentSortable\SortableTrait;
+use Webkul\Account\Models\Tax;
+use Webkul\Inventory\Models\Location;
+use Webkul\Inventory\Models\Move as InventoryMove;
+use Webkul\Inventory\Models\OrderPoint;
 use Webkul\Partner\Models\Partner;
 use Webkul\Product\Models\Packaging;
 use Webkul\Purchase\Database\Factories\OrderLineFactory;
+use Webkul\Purchase\Enums;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
@@ -61,6 +68,8 @@ class OrderLine extends Model
         'currency_id',
         'company_id',
         'creator_id',
+        'final_location_id',
+        'order_point_id',
     ];
 
     /**
@@ -69,9 +78,10 @@ class OrderLine extends Model
      * @var string
      */
     protected $casts = [
-        'planned_at'       => 'datetime',
-        'is_downpayment'   => 'boolean',
-        'propagate_cancel' => 'boolean',
+        'qty_received_method' => Enums\QtyReceivedMethod::class,
+        'planned_at'          => 'datetime',
+        'is_downpayment'      => 'boolean',
+        'propagate_cancel'    => 'boolean',
     ];
 
     public $sortable = [
@@ -104,6 +114,11 @@ class OrderLine extends Model
         return $this->belongsTo(UOM::class);
     }
 
+    public function taxes(): BelongsToMany
+    {
+        return $this->belongsToMany(Tax::class, 'purchases_order_line_taxes', 'order_line_id', 'tax_id');
+    }
+
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
@@ -122,6 +137,26 @@ class OrderLine extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function accountMoveLines(): HasMany
+    {
+        return $this->hasMany(AccountMoveLine::class, 'purchase_order_line_id');
+    }
+
+    public function inventoryMoves(): HasMany
+    {
+        return $this->hasMany(InventoryMove::class, 'purchase_order_line_id');
+    }
+
+    public function finalLocation(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'final_location_id');
+    }
+
+    public function orderPoint(): BelongsTo
+    {
+        return $this->belongsTo(OrderPoint::class, 'order_point_id');
     }
 
     protected static function newFactory(): OrderLineFactory

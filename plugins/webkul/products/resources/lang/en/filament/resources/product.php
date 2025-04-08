@@ -21,8 +21,7 @@ return [
             'inventory' => [
                 'title' => 'Inventory',
 
-                'fields' => [
-                ],
+                'fields' => [],
 
                 'fieldsets' => [
                     'logistics' => [
@@ -66,6 +65,7 @@ return [
     'table' => [
         'columns' => [
             'name'        => 'Name',
+            'variants'    => 'Variants',
             'images'      => 'Images',
             'type'        => 'Type',
             'reference'   => 'Reference',
@@ -124,8 +124,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Product force deleted',
-                    'body'  => 'The product has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Product force deleted',
+                        'body'  => 'The product has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Product could not be deleted',
+                        'body'  => 'The product cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -166,8 +173,15 @@ return [
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Products force deleted',
-                    'body'  => 'The products has been force deleted successfully.',
+                    'success' => [
+                        'title' => 'Products force deleted',
+                        'body'  => 'The products has been force deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Products could not be deleted',
+                        'body'  => 'The products cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -189,8 +203,7 @@ return [
             'images' => [
                 'title' => 'Images',
 
-                'entries' => [
-                ],
+                'entries' => [],
             ],
 
             'settings' => [

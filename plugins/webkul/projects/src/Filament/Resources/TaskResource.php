@@ -107,10 +107,18 @@ class TaskResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->createOptionForm([
-                                        Forms\Components\TextInput::make('name')
-                                            ->label(__('projects::filament/resources/task.form.sections.general.fields.name'))
-                                            ->required()
-                                            ->unique('projects_tags'),
+                                        Forms\Components\Group::make()
+                                            ->schema([
+                                                Forms\Components\TextInput::make('name')
+                                                    ->label(__('projects::filament/resources/task.form.sections.general.fields.name'))
+                                                    ->required()
+                                                    ->maxLength(255)
+                                                    ->unique('projects_tags'),
+                                                Forms\Components\ColorPicker::make('color')
+                                                    ->default('#808080')
+                                                    ->hexColor()
+                                                    ->label(__('projects::filament/resources/task.form.sections.general.fields.color')),
+                                            ])->columns(2),
                                     ]),
                                 Forms\Components\RichEditor::make('description')
                                     ->label(__('projects::filament/resources/task.form.sections.general.fields.description')),
@@ -199,6 +207,7 @@ class TaskResource extends Resource
                                     ->label(__('projects::filament/resources/task.form.sections.settings.fields.allocated-hours'))
                                     ->numeric()
                                     ->minValue(0)
+                                    ->maxValue(99999999999)
                                     ->suffixIcon('heroicon-o-clock')
                                     ->helperText(__('projects::filament/resources/task.form.sections.settings.fields.allocated-hours-helper-text'))
                                     ->dehydrateStateUsing(fn ($state) => $state ?: 0)
@@ -298,7 +307,6 @@ class TaskResource extends Resource
                         Sum::make()
                             ->label(__('projects::filament/resources/task.table.columns.allocated-time'))
                             ->numeric()
-                            ->numeric()
                             ->formatStateUsing(function ($state) {
                                 $hours = floor($state);
                                 $minutes = ($state - $hours) * 60;
@@ -369,7 +377,7 @@ class TaskResource extends Resource
                     ->state(function (Task $record): array {
                         return $record->tags()->get()->map(fn ($tag) => [
                             'label' => $tag->name,
-                            'color' => $tag->color ?? 'primary',
+                            'color' => $tag->color ?? '#808080',
                         ])->toArray();
                     })
                     ->badge()
@@ -640,7 +648,7 @@ class TaskResource extends Resource
                                     ->state(function (Task $record): array {
                                         return $record->tags()->get()->map(fn ($tag) => [
                                             'label' => $tag->name,
-                                            'color' => $tag->color ?? 'primary',
+                                            'color' => $tag->color ?? '#808080',
                                         ])->toArray();
                                     })
                                     ->badge()

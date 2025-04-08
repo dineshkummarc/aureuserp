@@ -2,21 +2,21 @@
 
 namespace Webkul\Sale\Filament\Clusters\Configuration\Resources;
 
-use Webkul\Sale\Filament\Clusters\Configuration;
-use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityPlanResource\Pages;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Tables;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Webkul\Sale\Filament\Clusters\Configuration;
+use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityPlanResource\Pages;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\ActivityPlanResource\RelationManagers;
+use Webkul\Sale\Models\ActivityPlan;
 use Webkul\Security\Filament\Resources\CompanyResource;
-use Webkul\Support\Models\ActivityPlan;
 
 class ActivityPlanResource extends Resource
 {
@@ -36,22 +36,6 @@ class ActivityPlanResource extends Resource
         return __('sales::filament/clusters/configurations/resources/activity-plan.navigation.group');
     }
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'department.name', 'company.name', 'plugin', 'createdBy.name'];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            __('sales::filament/clusters/configurations/resources/activity-plan.global-search.name')         => $record->name ?? '—',
-            __('sales::filament/clusters/configurations/resources/activity-plan.global-search.manager')      => $record->department?->manager?->name ?? '—',
-            __('sales::filament/clusters/configurations/resources/activity-plan.global-search.company')      => $record->company?->name ?? '—',
-            __('sales::filament/clusters/configurations/resources/activity-plan.global-search.plugin')       => $record->plugin ?? '—',
-            __('sales::filament/clusters/configurations/resources/activity-plan.global-search.creator-name') => $record->createdBy?->name ?? '—',
-        ];
-    }
-
     public static function form(Form $form): Form
     {
         return $form
@@ -67,8 +51,8 @@ class ActivityPlanResource extends Resource
                             ->relationship(name: 'company', titleAttribute: 'name')
                             ->searchable()
                             ->preload()
-                            ->createOptionForm(fn(Form $form) => CompanyResource::form($form))
-                            ->editOptionForm(fn(Form $form) => CompanyResource::form($form)),
+                            ->createOptionForm(fn (Form $form) => CompanyResource::form($form))
+                            ->editOptionForm(fn (Form $form) => CompanyResource::form($form)),
                         Forms\Components\Toggle::make('is_active')
                             ->label(__('sales::filament/clusters/configurations/resources/activity-plan.form.sections.general.fields.status'))
                             ->default(true)
@@ -85,15 +69,12 @@ class ActivityPlanResource extends Resource
                     ->label(__('sales::filament/clusters/configurations/resources/activity-plan.table.columns.name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('department.name')
-                    ->numeric()
                     ->label(__('sales::filament/clusters/configurations/resources/activity-plan.table.columns.department'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('department.manager.name')
-                    ->numeric()
                     ->label(__('sales::filament/clusters/configurations/resources/activity-plan.table.columns.manager'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('company.name')
-                    ->numeric()
                     ->label(__('sales::filament/clusters/configurations/resources/activity-plan.table.columns.company'))
                     ->sortable(),
                 Tables\Columns\IconColumn::make('is_active')
@@ -189,9 +170,9 @@ class ActivityPlanResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->hidden(fn($record) => $record->trashed()),
+                    ->hidden(fn ($record) => $record->trashed()),
                 Tables\Actions\EditAction::make()
-                    ->hidden(fn($record) => $record->trashed()),
+                    ->hidden(fn ($record) => $record->trashed()),
                 Tables\Actions\RestoreAction::make()
                     ->successNotification(
                         Notification::make()
@@ -295,8 +276,8 @@ class ActivityPlanResource extends Resource
     {
         return [
             'index'  => Pages\ListActivityPlans::route('/'),
-            'view'  => Pages\ViewActivityPlan::route('/{record}'),
-            'edit'  => Pages\EditActivityPlan::route('/{record}/edit'),
+            'view'   => Pages\ViewActivityPlan::route('/{record}'),
+            'edit'   => Pages\EditActivityPlan::route('/{record}/edit'),
         ];
     }
 }

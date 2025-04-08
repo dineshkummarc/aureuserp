@@ -16,7 +16,6 @@ return new class extends Migration
 
             $table->unsignedBigInteger('company_id')->nullable()->comment('Company');
             $table->unsignedBigInteger('activity_type_id')->nullable()->comment('Activity Type');
-            $table->unsignedBigInteger('creator_id')->nullable()->comment('Created By');
             $table->unsignedBigInteger('assigned_to')->nullable()->comment('Assigned To');
             $table->morphs('messageable');
             $table->string('type')->nullable()->comment('Message Type');
@@ -34,7 +33,6 @@ return new class extends Migration
 
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             $table->foreign('activity_type_id')->references('id')->on('activity_types')->onDelete('cascade');
-            $table->foreign('creator_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('assigned_to')->references('id')->on('users')->onDelete('cascade');
 
             $table->timestamps();

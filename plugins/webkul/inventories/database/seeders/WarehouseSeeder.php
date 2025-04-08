@@ -27,7 +27,6 @@ class WarehouseSeeder extends Seeder
                 'sort'                     => 1,
                 'reception_steps'          => ReceptionStep::ONE_STEP,
                 'delivery_steps'           => DeliveryStep::ONE_STEP,
-                'partner_address_id'       => 1,
                 'company_id'               => $user->default_company_id,
                 'creator_id'               => $user->id,
                 'created_at'               => now(),
@@ -62,7 +61,8 @@ class WarehouseSeeder extends Seeder
             [
                 'warehouse_id' => 1,
                 'route_id'     => 2,
-            ], [
+            ],
+            [
                 'warehouse_id' => 1,
                 'route_id'     => 3,
             ],

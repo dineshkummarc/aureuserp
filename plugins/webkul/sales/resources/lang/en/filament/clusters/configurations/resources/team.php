@@ -7,21 +7,14 @@ return [
         'title' => 'Sales Teams',
     ],
 
-    'global-search' => [
-        'company-name'    => 'Company Name',
-        'user-name'       => 'User Name',
-        'name'            => 'Name',
-        'invoiced-target' => 'Invoiced Target',
-    ],
-
     'form' => [
         'sections' => [
             'fields' => [
-                'name' => 'Sales Team',
-                'status' => 'Status',
+                'name'     => 'Sales Team',
+                'status'   => 'Status',
                 'fieldset' => [
                     'team-details' => [
-                        'title' => 'Team Details',
+                        'title'  => 'Team Details',
                         'fields' => [
                             'team-leader'            => 'Team Leader',
                             'company'                => 'Company',
@@ -29,11 +22,11 @@ return [
                             'invoiced-target-suffix' => '/ Month',
                             'color'                  => 'Color',
                             'members'                => 'Members',
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ],
-        ]
+        ],
     ],
 
     'table' => [
@@ -126,11 +119,11 @@ return [
     'infolist' => [
         'sections' => [
             'entries' => [
-                'name' => 'Sales Team',
-                'status' => 'Status',
+                'name'     => 'Sales Team',
+                'status'   => 'Status',
                 'fieldset' => [
                     'team-details' => [
-                        'title' => 'Team Details',
+                        'title'   => 'Team Details',
                         'entries' => [
                             'team-leader'            => 'Team Leader',
                             'company'                => 'Company',
@@ -138,10 +131,10 @@ return [
                             'invoiced-target-suffix' => '/ Month',
                             'color'                  => 'Color',
                             'members'                => 'Members',
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ],
-        ]
+        ],
     ],
 ];

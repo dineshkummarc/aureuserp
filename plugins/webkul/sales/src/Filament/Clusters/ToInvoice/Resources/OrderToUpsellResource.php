@@ -2,14 +2,15 @@
 
 namespace Webkul\Sale\Filament\Clusters\ToInvoice\Resources;
 
-use Webkul\Sale\Filament\Clusters\ToInvoice;
-use Webkul\Sale\Filament\Clusters\ToInvoice\Resources\OrderToUpsellResource\Pages;
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
+use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
+use Webkul\Sale\Filament\Clusters\ToInvoice;
+use Webkul\Sale\Filament\Clusters\ToInvoice\Resources\OrderToUpsellResource\Pages;
 use Webkul\Sale\Models\Order;
 
 class OrderToUpsellResource extends Resource
@@ -20,14 +21,16 @@ class OrderToUpsellResource extends Resource
 
     protected static ?string $cluster = ToInvoice::class;
 
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
     public static function getModelLabel(): string
     {
-        return __('Orders To Upsell');
+        return __('sales::filament/clusters/to-invoice/resources/order-to-upsell.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Orders To Upsell');
+        return __('sales::filament/clusters/to-invoice/resources/order-to-upsell.navigation.title');
     }
 
     public static function form(Form $form): Form
@@ -44,17 +47,14 @@ class OrderToUpsellResource extends Resource
     {
         return QuotationResource::table($table)
             ->modifyQueryUsing(function ($query) {
-                $query->where('invoice_status', InvoiceStatus::UP_SELLING->value);
+                $query->where('invoice_status', InvoiceStatus::UP_SELLING);
             });
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListOrderToUpsells::route('/'),
-            'create' => Pages\CreateOrderToUpsell::route('/create'),
-            'view' => Pages\ViewOrderToUpsell::route('/{record}'),
-            'edit' => Pages\EditOrderToUpsell::route('/{record}/edit'),
+            'index'  => Pages\ListOrderToUpsells::route('/'),
         ];
     }
 }

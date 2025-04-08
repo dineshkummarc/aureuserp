@@ -11,15 +11,18 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Webkul\Inventory\Enums;
 use Webkul\Inventory\Filament\Clusters\Operations;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\InternalResource\Pages;
-use Webkul\Inventory\Models\Operation;
+use Webkul\Inventory\Models\InternalTransfer;
 use Webkul\Inventory\Settings\WarehouseSettings;
 
 class InternalResource extends Resource
 {
-    protected static ?string $model = Operation::class;
+    protected static ?string $model = InternalTransfer::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrows-right-left';
 
@@ -38,6 +41,11 @@ class InternalResource extends Resource
         }
 
         return app(WarehouseSettings::class)->enable_locations;
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('inventories::filament/clusters/operations/resources/internal.navigation.title');
     }
 
     public static function getNavigationLabel(): string
@@ -63,21 +71,44 @@ class InternalResource extends Resource
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make()
+                        ->hidden(fn (InternalTransfer $record): bool => $record->state == Enums\OperationState::DONE)
+                        ->action(function (InternalTransfer $record) {
+                            try {
+                                $record->delete();
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('inventories::filament/clusters/operations/resources/internal.table.actions.delete.notification.error.title'))
+                                    ->body(__('inventories::filament/clusters/operations/resources/internal.table.actions.delete.notification.error.body'))
+                                    ->send();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
-                                ->title(__('inventories::filament/clusters/operations/resources/internal.table.actions.delete.notification.title'))
-                                ->body(__('inventories::filament/clusters/operations/resources/internal.table.actions.delete.notification.body')),
+                                ->title(__('inventories::filament/clusters/operations/resources/internal.table.actions.delete.notification.success.title'))
+                                ->body(__('inventories::filament/clusters/operations/resources/internal.table.actions.delete.notification.success.body')),
                         ),
                 ]),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()
+                    ->action(function (Collection $records) {
+                        try {
+                            $records->each(fn (Model $record) => $record->delete());
+                        } catch (QueryException $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('inventories::filament/clusters/operations/resources/internal.table.bulk-actions.delete.notification.error.title'))
+                                ->body(__('inventories::filament/clusters/operations/resources/internal.table.bulk-actions.delete.notification.error.body'))
+                                ->send();
+                        }
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title(__('inventories::filament/clusters/operations/resources/internal.table.bulk-actions.delete.notification.title'))
-                            ->body(__('inventories::filament/clusters/operations/resources/internal.table.bulk-actions.delete.notification.body')),
+                            ->title(__('inventories::filament/clusters/operations/resources/internal.table.bulk-actions.delete.notification.success.title'))
+                            ->body(__('inventories::filament/clusters/operations/resources/internal.table.bulk-actions.delete.notification.success.body')),
                     ),
             ])
             ->modifyQueryUsing(function (Builder $query) {
@@ -99,13 +130,6 @@ class InternalResource extends Resource
             Pages\EditInternal::class,
             Pages\ManageMoves::class,
         ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

@@ -70,7 +70,7 @@ class QuantityResource extends Resource
                     ->relationship(
                         name: 'product',
                         titleAttribute: 'name',
-                        modifyQueryUsing: fn (Builder $query) => $query->where('is_storable', true),
+                        modifyQueryUsing: fn (Builder $query) => $query->where('is_storable', true)->whereNull('is_configurable'),
                     )
                     ->searchable()
                     ->preload()
@@ -121,6 +121,7 @@ class QuantityResource extends Resource
                     ->label(__('inventories::filament/clusters/operations/resources/quantity.form.fields.counted-qty'))
                     ->numeric()
                     ->minValue(0)
+                    ->maxValue(99999999999)
                     ->default(0)
                     ->required(),
                 Forms\Components\DatePicker::make('scheduled_at')
@@ -512,13 +513,6 @@ class QuantityResource extends Resource
                     $query->whereIn('type', [Enums\LocationType::INTERNAL, Enums\LocationType::TRANSIT]);
                 });
             });
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

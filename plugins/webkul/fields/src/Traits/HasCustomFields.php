@@ -6,6 +6,10 @@ use Webkul\Field\Models\Field;
 
 trait HasCustomFields
 {
+    protected static mixed $customFillable;
+
+    protected static mixed $customCasts;
+
     /**
      * Boot the trait
      */
@@ -33,11 +37,15 @@ trait HasCustomFields
      */
     protected function loadCustomFields()
     {
-        $customFields = $this->getCustomFields();
+        try {
+            $customFields = $this->getCustomFields();
 
-        $this->mergeFillable($customFields->pluck('code')->toArray());
+            $this->mergeFillable(self::$customFillable ??= $customFields->pluck('code')->toArray());
 
-        $this->mergeCasts($customFields->select('code', 'type', 'is_multiselect')->get());
+            $this->mergeCasts(self::$customCasts ??= $customFields->select('code', 'type', 'is_multiselect')->get());
+        } catch (\Exception $e) {
+            // do nothing
+        }
     }
 
     /**

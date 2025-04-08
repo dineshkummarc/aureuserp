@@ -4,19 +4,24 @@ namespace Webkul\Account\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Webkul\Account\Enums\MoveState;
+use Webkul\Account\Enums\MoveType;
+use Webkul\Account\Enums\PaymentState;
+use Webkul\Chatter\Traits\HasChatter;
+use Webkul\Chatter\Traits\HasLogActivity;
+use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\BankAccount;
 use Webkul\Partner\Models\Partner;
-use Webkul\Support\Models\UTMMedium;
-use Webkul\Support\Models\UTMSource;
-use Webkul\Sale\Models\Team;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UtmCampaign;
+use Webkul\Support\Models\UTMMedium;
+use Webkul\Support\Models\UTMSource;
 
 class Move extends Model
 {
-    use HasFactory;
+    use HasChatter, HasCustomFields, HasFactory, HasLogActivity;
 
     protected $table = 'accounts_account_moves';
 
@@ -84,22 +89,74 @@ class Move extends Model
         'is_move_sent',
         'source_id',
         'medium_id',
-        'team_id',
+    ];
+
+    protected array $logAttributes = [
+        'medium.name'                       => 'Medium',
+        'source.name'                       => 'UTM Source',
+        'partner.name'                      => 'Customer',
+        'commercialPartner.name'            => 'Commercial Partner',
+        'partnerShipping.name'              => 'Shipping Address',
+        'partnerBank.name'                  => 'Bank Account',
+        'fiscalPosition.name'               => 'Fiscal Position',
+        'currency.name'                     => 'Currency',
+        'reversedEntry.name'                => 'Reversed Entry',
+        'invoiceUser.name'                  => 'Invoice User',
+        'invoiceIncoterm.name'              => 'Invoice Incoterm',
+        'invoiceCashRounding.name'          => 'Invoice Cash Rounding',
+        'createdBy.name'                    => 'Created By',
+        'name'                              => 'Invoice Reference',
+        'state'                             => 'Invoice Status',
+        'reference'                         => 'Reference',
+        'invoiceSourceEmail'                => 'Source Email',
+        'invoicePartnerDisplayName'         => 'Partner Display Name',
+        'invoiceOrigin'                     => 'Invoice Origin',
+        'incotermLocation'                  => 'Incoterm Location',
+        'date'                              => 'Invoice Date',
+        'invoice_date'                      => 'Invoice Date',
+        'invoice_date_due'                  => 'Due Date',
+        'delivery_date'                     => 'Delivery Date',
+        'narration'                         => 'Notes',
+        'amount_untaxed'                    => 'Subtotal',
+        'amount_tax'                        => 'Tax',
+        'amount_total'                      => 'Total',
+        'amount_residual'                   => 'Residual',
+        'amount_untaxed_signed'             => 'Subtotal (Signed)',
+        'amount_untaxed_in_currency_signed' => 'Subtotal (In Currency) (Signed)',
+        'amount_tax_signed'                 => 'Tax (Signed)',
+        'amount_total_signed'               => 'Total (Signed)',
+        'amount_total_in_currency_signed'   => 'Total (In Currency) (Signed)',
+        'amount_residual_signed'            => 'Residual (Signed)',
+        'quick_edit_total_amount'           => 'Quick Edit Total Amount',
+        'is_storno'                         => 'Is Storno',
+        'always_tax_exigible'               => 'Always Tax Exigible',
+        'checked'                           => 'Checked',
+        'posted_before'                     => 'Posted Before',
+        'made_sequence_gap'                 => 'Made Sequence Gap',
+        'is_manually_modified'              => 'Is Manually Modified',
+        'is_move_sent'                      => 'Is Move Sent',
+    ];
+
+    protected $casts = [
+        'invoice_date_due' => 'datetime',
+        'state'            => MoveState::class,
+        'payment_state'    => PaymentState::class,
+        'move_type'        => MoveType::class,
     ];
 
     public function campaign()
     {
-        return $this->belongsTo(UtmCampaign::class);
+        return $this->belongsTo(UtmCampaign::class, 'campaign_id');
     }
 
     public function journal()
     {
-        return $this->belongsTo(Journal::class);
+        return $this->belongsTo(Journal::class, 'journal_id');
     }
 
     public function company()
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Company::class, 'company_id');
     }
 
     public function taxCashBasisOriginMove()
@@ -119,37 +176,37 @@ class Move extends Model
 
     public function partner()
     {
-        return $this->belongsTo(Partner::class);
+        return $this->belongsTo(Partner::class, 'partner_id');
     }
 
     public function commercialPartner()
     {
-        return $this->belongsTo(Partner::class);
+        return $this->belongsTo(Partner::class, 'commercial_partner_id');
     }
 
     public function partnerShipping()
     {
-        return $this->belongsTo(Partner::class);
+        return $this->belongsTo(Partner::class, 'partner_shipping_id');
     }
 
     public function partnerBank()
     {
-        return $this->belongsTo(BankAccount::class);
+        return $this->belongsTo(BankAccount::class, 'partner_bank_id');
     }
 
     public function fiscalPosition()
     {
-        return $this->belongsTo(FiscalPosition::class);
+        return $this->belongsTo(FiscalPosition::class, 'fiscal_position_id');
     }
 
     public function currency()
     {
-        return $this->belongsTo(Currency::class);
+        return $this->belongsTo(Currency::class, 'currency_id');
     }
 
     public function reversedEntry()
     {
-        return $this->belongsTo(Move::class, 'reversed_entry_id');
+        return $this->belongsTo(self::class, 'reversed_entry_id');
     }
 
     public function invoiceUser()
@@ -174,17 +231,12 @@ class Move extends Model
 
     public function source()
     {
-        return $this->belongsTo(UTMSource::class);
+        return $this->belongsTo(UTMSource::class, 'source_id');
     }
 
     public function medium()
     {
-        return $this->belongsTo(UTMMedium::class);
-    }
-
-    public function team()
-    {
-        return $this->belongsTo(Team::class);
+        return $this->belongsTo(UTMMedium::class, 'medium_id');
     }
 
     public function paymentMethodLine()
@@ -192,34 +244,80 @@ class Move extends Model
         return $this->belongsTo(PaymentMethodLine::class, 'preferred_payment_method_line_id');
     }
 
-    public function moveLines()
+    public function getTotalDiscountAttribute()
     {
-        return $this->hasMany(MoveLine::class);
+        return $this->lines()
+            ->where('display_type', 'product')
+            ->sum('discount');
     }
 
+    public function lines()
+    {
+        return $this->hasMany(MoveLine::class, 'move_id')
+            ->where('display_type', 'product');
+    }
+
+    public function allLines()
+    {
+        return $this->hasMany(MoveLine::class, 'move_id');
+    }
+
+    public function taxLines()
+    {
+        return $this->hasMany(MoveLine::class, 'move_id')
+            ->where('display_type', 'tax');
+    }
+
+    public function paymentTermLine()
+    {
+        return $this->hasOne(MoveLine::class)
+            ->where('display_type', 'payment_term');
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
     protected static function boot()
     {
         parent::boot();
 
-        static::creating(function ($invoice) {
-            $invoice->name = 'ORD-TMP-' . time();
-        });
+        static::created(function ($model) {
+            $model->updateSequencePrefix();
 
-        static::created(function ($invoice) {
-            $invoice->updateName();
-            $invoice->saveQuietly();
-        });
-
-        static::updating(function ($invoice) {
-            $invoice->updateName();
+            $model->updateQuietly([
+                'name' => $model->sequence_prefix.'/'.$model->id,
+            ]);
         });
     }
 
     /**
-     * Update the name based on the state without trigger any additional events.
+     * Update the full name without triggering additional events
      */
-    public function updateName()
+    public function updateSequencePrefix()
     {
-        $this->name = 'INV-' . $this->id;
+        $suffix = date('Y').'/'.date('m');
+
+        switch ($this->move_type) {
+            case MoveType::OUT_INVOICE:
+                $this->sequence_prefix = 'INV/'.$suffix;
+
+                break;
+            case MoveType::OUT_REFUND:
+                $this->sequence_prefix = 'RINV/'.$suffix;
+
+                break;
+            case MoveType::IN_INVOICE:
+                $this->sequence_prefix = 'BILL/'.$suffix;
+
+                break;
+            case MoveType::IN_REFUND:
+                $this->sequence_prefix = 'RBILL/'.$suffix;
+
+                break;
+            default:
+                $this->sequence_prefix = $suffix;
+
+                break;
+        }
     }
 }

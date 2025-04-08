@@ -32,7 +32,6 @@ return new class extends Migration
             $table->string('payment_tolerance_type')->comment('Payment Tolerance Type')->nullable();
             $table->string('decimal_separator')->comment('Decimal Separator')->nullable();
             $table->string('name')->comment('Name');
-            $table->boolean('is_active')->comment('Status')->default(false);
             $table->boolean('auto_reconcile')->comment('Auto Validate');
             $table->boolean('to_check')->comment('To Check')->default(false);
             $table->boolean('match_text_location_label')->comment('Match Text Location Label')->default(false);
@@ -41,9 +40,9 @@ return new class extends Migration
             $table->boolean('match_same_currency')->comment('Match Same Currency')->default(false);
             $table->boolean('allow_payment_tolerance')->comment('Allow Payment Tolerance')->default(false);
             $table->boolean('match_partner')->comment('Match Partner')->default(false);
-            $table->decimal('match_amount_min', 20, 6)->comment('Amount Min')->nullable();
-            $table->decimal('match_amount_max', 20, 6)->comment('Amount Max')->nullable();
-            $table->decimal('payment_tolerance_parameters', 20, 6)->comment('Payment Tolerance Parameters')->nullable();
+            $table->decimal('match_amount_min', 15, 4)->comment('Amount Min')->nullable();
+            $table->decimal('match_amount_max', 15, 4)->comment('Amount Max')->nullable();
+            $table->decimal('payment_tolerance_parameters', 15, 4)->comment('Payment Tolerance Parameters')->nullable();
 
             $table->timestamps();
         });

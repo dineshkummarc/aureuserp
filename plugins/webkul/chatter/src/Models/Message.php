@@ -4,7 +4,6 @@ namespace Webkul\Chatter\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\ActivityType;
@@ -19,7 +18,6 @@ class Message extends Model
         'activity_type_id',
         'messageable_type',
         'messageable_id',
-        'creator_id',
         'type',
         'name',
         'subject',
@@ -56,11 +54,6 @@ class Message extends Model
         return $this->belongsTo(ActivityType::class, 'activity_type_id');
     }
 
-    public function createdBy()
-    {
-        return $this->belongsTo(User::class, 'creator_id');
-    }
-
     public function causer()
     {
         return $this->morphTo();
@@ -80,17 +73,21 @@ class Message extends Model
     {
         parent::boot();
 
-        static::creating(function ($data) {
-            DB::transaction(function () use ($data) {
-                $data->causer_type = Auth::user()?->getMorphClass();
-                $data->causer_id = Auth::id();
-            });
-        });
+        $user = filament()->auth()->user();
 
-        static::updating(function ($data) {
-            $data->causer_type = Auth::user()?->getMorphClass();
-            $data->causer_id = Auth::id();
-        });
+        if ($user) {
+            static::creating(function ($data) use ($user) {
+                DB::transaction(function () use ($data, $user) {
+                    $data->causer_type = $user->getMorphClass();
+                    $data->causer_id = $user->id;
+                });
+            });
+
+            static::updating(function ($data) use ($user) {
+                $data->causer_type = $user->getMorphClass();
+                $data->causer_id = $user->id;
+            });
+        }
     }
 
     public function attachments()

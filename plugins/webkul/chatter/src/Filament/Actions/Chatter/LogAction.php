@@ -8,7 +8,6 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 
 class LogAction extends Action
 {
@@ -90,11 +89,14 @@ class LogAction extends Action
             )
             ->action(function (array $data, ?Model $record = null) {
                 try {
-                    $data['name'] = $record->name;
-                    $data['causer_type'] = Auth::user()?->getMorphClass();
-                    $data['causer_id'] = Auth::id();
+                    $user = filament()->auth()->user();
 
-                    $message = $record->addMessage($data, Auth::user()->id);
+                    $data['name'] = $record->name;
+                    $data['causer_type'] = $user->getMorphClass();
+                    $data['causer_id'] = $user->id;
+                    $data['is_internal'] = true;
+
+                    $message = $record->addMessage($data, $user->id);
 
                     if (! empty($data['attachments'])) {
                         $record->addAttachments(

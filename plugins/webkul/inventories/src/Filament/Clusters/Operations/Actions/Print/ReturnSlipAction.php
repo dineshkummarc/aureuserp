@@ -5,7 +5,7 @@ namespace Webkul\Inventory\Filament\Clusters\Operations\Actions\Print;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Livewire\Component;
-use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
+use Webkul\Inventory\Facades\Inventory;
 use Webkul\Inventory\Models\Operation;
 
 class ReturnSlipAction extends Action
@@ -33,11 +33,7 @@ class ReturnSlipAction extends Action
                     return;
                 }
 
-                foreach ($record->moves as $move) {
-                    OperationResource::updateOrCreateMoveLines($move);
-                }
-
-                OperationResource::updateOperationState($record);
+                Inventory::computeTransfer($record);
 
                 $livewire->updateForm();
 

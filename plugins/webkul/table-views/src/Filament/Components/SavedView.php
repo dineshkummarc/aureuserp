@@ -3,7 +3,6 @@
 namespace Webkul\TableViews\Filament\Components;
 
 use Webkul\TableViews\Models\TableView;
-use Webkul\TableViews\Models\TableViewFavorite;
 
 class SavedView extends PresetView
 {
@@ -23,8 +22,7 @@ class SavedView extends PresetView
 
     public function isFavorite(string|int|null $id = null): bool
     {
-        $tableViewFavorite = TableViewFavorite::query()
-            ->where('user_id', auth()->id())
+        $tableViewFavorite = $this->getCachedFavoriteTableViews()
             ->where('view_type', 'saved')
             ->where('view_key', $id ?? $this->model->id)
             ->first();
@@ -50,5 +48,10 @@ class SavedView extends PresetView
     public function isDeletable(): bool
     {
         return $this->model->user_id === auth()->id();
+    }
+
+    public function getVisibilityIcon(): string
+    {
+        return $this->isPublic() ? 'heroicon-o-eye' : 'heroicon-o-user';
     }
 }

@@ -16,6 +16,7 @@ use Webkul\Inventory\Filament\Clusters\Products;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\Pages;
 use Webkul\Inventory\Models\Move;
 use Webkul\Inventory\Models\Product;
+use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Filament\Resources\ProductResource as BaseProductResource;
 
@@ -70,7 +71,7 @@ class ProductResource extends BaseProductResource
                             ->selectablePlaceholder(false)
                             ->options(Enums\ProductTracking::class)
                             ->default(Enums\ProductTracking::QTY->value)
-                            ->visible(fn (Forms\Get $get): bool => (bool) $get('is_storable'))
+                            ->visible(fn (Forms\Get $get, TraceabilitySettings $settings): bool => $settings->enable_lots_serial_numbers && (bool) $get('is_storable'))
                             ->live()
                             ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                                 if ($get('tracking') == Enums\ProductTracking::QTY->value) {
@@ -83,9 +84,12 @@ class ProductResource extends BaseProductResource
                     ->schema([
                         Forms\Components\CheckboxList::make('routes')
                             ->label(__('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.operation.fields.routes'))
-                            ->relationship('routes', 'name')
-                            ->searchable()
-                            ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.logistics.fields.routes-hint-tooltip')),
+                            ->relationship(
+                                'routes',
+                                'name',
+                                fn ($query) => $query->where('product_selectable', true)
+                            )
+                            ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.operation.fields.routes-hint-tooltip')),
                     ]),
 
                 Forms\Components\Fieldset::make(__('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.logistics.title'))
@@ -99,15 +103,18 @@ class ProductResource extends BaseProductResource
                         Forms\Components\TextInput::make('weight')
                             ->label(__('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.logistics.fields.weight'))
                             ->numeric()
-                            ->minValue(0),
+                            ->minValue(0)
+                            ->maxValue(99999999999),
                         Forms\Components\TextInput::make('volume')
                             ->label(__('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.logistics.fields.volume'))
                             ->numeric()
-                            ->minValue(0),
+                            ->minValue(0)
+                            ->maxValue(99999999999),
                         Forms\Components\TextInput::make('sale_delay')
                             ->label(__('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.logistics.fields.sale-delay'))
                             ->numeric()
                             ->minValue(0)
+                            ->maxValue(99999999999)
                             ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.logistics.fields.sale-delay-hint-tooltip')),
                     ]),
 
@@ -117,21 +124,25 @@ class ProductResource extends BaseProductResource
                             ->label(__('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.traceability.fields.expiration-date'))
                             ->numeric()
                             ->minValue(0)
+                            ->maxValue(99999999999)
                             ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.traceability.fields.expiration-date-hint-tooltip')),
                         Forms\Components\TextInput::make('use_time')
                             ->label(__('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.traceability.fields.best-before-date'))
                             ->numeric()
                             ->minValue(0)
+                            ->maxValue(99999999999)
                             ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.traceability.fields.best-before-date-hint-tooltip')),
                         Forms\Components\TextInput::make('removal_time')
                             ->label(__('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.traceability.fields.removal-date'))
                             ->numeric()
                             ->minValue(0)
+                            ->maxValue(99999999999)
                             ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.traceability.fields.removal-date-hint-tooltip')),
                         Forms\Components\TextInput::make('alert_time')
                             ->label(__('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.traceability.fields.alert-date'))
                             ->numeric()
                             ->minValue(0)
+                            ->maxValue(99999999999)
                             ->hintIcon('heroicon-m-question-mark-circle', tooltip: __('inventories::filament/clusters/products/resources/product.form.sections.inventory.fieldsets.traceability.fields.alert-date-hint-tooltip')),
                     ])
                     ->visible(fn (Forms\Get $get): bool => (bool) $get('use_expiration_date')),
@@ -260,13 +271,6 @@ class ProductResource extends BaseProductResource
         ]);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
     public static function getPages(): array
     {
         return [
@@ -289,9 +293,9 @@ class ProductResource extends BaseProductResource
             'product_id'              => $record->product_id,
             'source_location_id'      => $sourceLocationId,
             'destination_location_id' => $destinationLocationId,
-            'requested_qty'           => abs($currentQuantity),
-            'requested_uom_qty'       => abs($currentQuantity),
-            'received_qty'            => abs($currentQuantity),
+            'product_qty'             => abs($currentQuantity),
+            'product_uom_qty'         => abs($currentQuantity),
+            'quantity'                => abs($currentQuantity),
             'reference'               => 'Product Quantity Updated',
             'scheduled_at'            => now(),
             'uom_id'                  => $record->product->uom_id,

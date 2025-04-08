@@ -18,7 +18,7 @@ use Webkul\Support\Models\UOM;
 
 class Product extends Model
 {
-    use HasChatter, HasLogActivity, HasFactory, SoftDeletes;
+    use HasChatter, HasFactory, HasLogActivity, SoftDeletes;
 
     /**
      * Table name.
@@ -146,6 +146,11 @@ class Product extends Model
         return $this->hasMany(self::class, 'parent_id');
     }
 
+    public function combinations(): HasMany
+    {
+        return $this->hasMany(ProductCombination::class, 'product_id');
+    }
+
     public function priceRuleItems(): HasMany
     {
         return $this->hasMany(PriceRuleItem::class);
@@ -153,7 +158,12 @@ class Product extends Model
 
     public function supplierInformation(): HasMany
     {
-        return $this->hasMany(ProductSupplier::class);
+        if ($this->is_configurable) {
+            return $this->hasMany(ProductSupplier::class)
+                ->orWhereIn('product_id', $this->variants()->pluck('id'));
+        } else {
+            return $this->hasMany(ProductSupplier::class);
+        }
     }
 
     protected static function newFactory(): ProductFactory

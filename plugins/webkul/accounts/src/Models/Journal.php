@@ -36,7 +36,6 @@ class Journal extends Model
         'bank_statements_source',
         'name',
         'order_override_regex',
-        'is_active',
         'auto_check_on_post',
         'restrict_mode_hash_table',
         'refund_order',
@@ -91,14 +90,14 @@ class Journal extends Model
 
     public function getAvailablePaymentMethodLines(string $paymentType): mixed
     {
-        if (!$this->exists) {
+        if (! $this->exists) {
             return PaymentMethodLine::query()->whereNull('id')->get();
         }
 
         return match ($paymentType) {
-            'inbound' => $this->inboundPaymentMethodLines,
+            'inbound'  => $this->inboundPaymentMethodLines,
             'outbound' => $this->outboundPaymentMethodLines,
-            default => throw new \InvalidArgumentException('Invalid payment type'),
+            default    => throw new \InvalidArgumentException('Invalid payment type'),
         };
     }
 
@@ -114,7 +113,7 @@ class Journal extends Model
 
     public function computeInboundPaymentMethodLines(): void
     {
-        if (!in_array($this->type, ['bank', 'cash', 'credit'])) {
+        if (! in_array($this->type, ['bank', 'cash', 'credit'])) {
             $this->inboundPaymentMethodLines()->delete();
 
             return;
@@ -127,9 +126,9 @@ class Journal extends Model
 
             foreach ($defaultMethods as $method) {
                 $this->inboundPaymentMethodLines()->create([
-                    'name' => $method->name,
+                    'name'              => $method->name,
                     'payment_method_id' => $method->id,
-                    'type' => 'inbound',
+                    'type'              => 'inbound',
                 ]);
             }
         });

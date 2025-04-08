@@ -15,9 +15,9 @@ return [
                     'name'                   => 'Name',
                     'name-placeholder'       => 'e.g. LOT/0001/20121',
                     'product'                => 'Product',
-                    'product-hint-tooltip'   => 'Product this lot/serial number contains. You cannot change it anymore if it has already been moved.',
+                    'product-hint-tooltip'   => 'The product associated with this lot/serial number. It cannot be changed if it has already been moved.',
                     'reference'              => 'Reference',
-                    'reference-hint-tooltip' => 'Internal reference number in case it differs from the manufacturer\'s lot/serial number',
+                    'reference-hint-tooltip' => 'An internal reference number, if different from the manufacturer\'s lot/serial number.',
                     'description'            => 'Description',
                 ],
             ],
@@ -50,8 +50,15 @@ return [
         'actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Lot deleted',
-                    'body'  => 'The lot has been deleted successfully.',
+                    'success' => [
+                        'title' => 'Lot deleted',
+                        'body'  => 'The lot has been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Lot could not be deleted',
+                        'body'  => 'The lot cannot be deleted because it is currently in use.',
+                    ],
                 ],
             ],
         ],
@@ -63,8 +70,15 @@ return [
 
             'delete' => [
                 'notification' => [
-                    'title' => 'Lots deleted',
-                    'body'  => 'The lots has been deleted successfully.',
+                    'success' => [
+                        'title' => 'Lots deleted',
+                        'body'  => 'The lots has been deleted successfully.',
+                    ],
+
+                    'error' => [
+                        'title' => 'Lots could not be deleted',
+                        'body'  => 'The lots cannot be deleted because they are currently in use.',
+                    ],
                 ],
             ],
         ],

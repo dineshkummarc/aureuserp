@@ -31,10 +31,15 @@ class ProductServiceProvider extends PackageServiceProvider
                 '2025_01_05_113357_create_products_price_rules_table',
                 '2025_01_05_113402_create_products_price_rule_items_table',
                 '2025_01_05_123412_create_products_product_suppliers_table',
+                '2025_02_18_112837_create_products_product_price_lists_table',
+                '2025_02_21_053249 _create_products_product_combinations_table',
             ])
+            ->hasSeeder('Webkul\\Product\\Database\Seeders\\DatabaseSeeder')
             ->runsMigrations()
             ->hasInstallCommand(function (InstallCommand $command) {
-                $command->runsMigrations();
+                $command
+                    ->runsMigrations()
+                    ->runsSeeders();
             })
             ->hasUninstallCommand(function (UninstallCommand $command) {});
     }

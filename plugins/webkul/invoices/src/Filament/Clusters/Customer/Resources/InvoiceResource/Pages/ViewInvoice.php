@@ -2,18 +2,16 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource\Pages;
 
+use Filament\Pages\SubNavigationPosition;
+use Webkul\Account\Filament\Resources\InvoiceResource\Pages\ViewInvoice as BaseViewInvoice;
 use Webkul\Invoice\Filament\Clusters\Customer\Resources\InvoiceResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ViewRecord;
 
-class ViewInvoice extends ViewRecord
+class ViewInvoice extends BaseViewInvoice
 {
     protected static string $resource = InvoiceResource::class;
 
-    protected function getHeaderActions(): array
+    public function getSubNavigationPosition(): SubNavigationPosition
     {
-        return [
-            Actions\EditAction::make(),
-        ];
+        return SubNavigationPosition::Top;
     }
 }

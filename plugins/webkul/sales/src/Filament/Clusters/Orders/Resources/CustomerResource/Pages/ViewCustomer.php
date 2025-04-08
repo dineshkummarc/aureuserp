@@ -2,19 +2,16 @@
 
 namespace Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource\Pages;
 
+use Filament\Pages\SubNavigationPosition;
+use Webkul\Contact\Filament\Resources\PartnerResource\Pages\ViewPartner as BaseViewCustomer;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\CustomerResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ViewRecord;
 
-class ViewCustomer extends ViewRecord
+class ViewCustomer extends BaseViewCustomer
 {
     protected static string $resource = CustomerResource::class;
 
-    protected function getHeaderActions(): array
+    public function getSubNavigationPosition(): SubNavigationPosition
     {
-        return [
-            Actions\CreateAction::make(),
-            Actions\DeleteAction::make(),
-        ];
+        return SubNavigationPosition::Top;
     }
 }

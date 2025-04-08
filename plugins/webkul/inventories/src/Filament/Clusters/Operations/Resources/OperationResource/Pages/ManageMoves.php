@@ -11,6 +11,7 @@ use Webkul\Inventory\Filament\Clusters\Operations\Resources\OperationResource;
 use Webkul\Inventory\Settings\OperationSettings;
 use Webkul\Inventory\Settings\TraceabilitySettings;
 use Webkul\Inventory\Settings\WarehouseSettings;
+use Webkul\Inventory\Models\MoveLine;
 
 class ManageMoves extends ManageRelatedRecords
 {
@@ -53,7 +54,7 @@ class ManageMoves extends ManageRelatedRecords
                 Tables\Columns\TextColumn::make('destinationLocation.full_name')
                     ->label(__('inventories::filament/clusters/operations/resources/operation/pages/manage-moves.table.columns.destination-location'))
                     ->visible(fn (WarehouseSettings $settings) => $settings->enable_locations),
-                Tables\Columns\TextColumn::make('qty')
+                Tables\Columns\TextColumn::make('uom_qty')
                     ->label(__('inventories::filament/clusters/operations/resources/operation/pages/manage-moves.table.columns.quantity'))
                     ->sortable()
                     ->color(fn ($record) => $record->destinationLocation->type == Enums\LocationType::INTERNAL ? 'success' : 'danger'),
@@ -68,6 +69,7 @@ class ManageMoves extends ManageRelatedRecords
             ])
             ->actions([
                 Tables\Actions\DeleteAction::make()
+                    ->hidden(fn (MoveLine $record): bool => $record->state == Enums\MoveState::DONE)
                     ->successNotification(
                         Notification::make()
                             ->success()

@@ -5,6 +5,7 @@ namespace Webkul\Product\Filament\Resources\ProductResource\Pages;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Filament\Resources\AttributeResource;
 use Webkul\Product\Filament\Resources\ProductResource;
+use Webkul\Product\Filament\Resources\ProductResource\Actions\GenerateVariantsAction;
 use Webkul\Product\Models\ProductAttribute;
 
 class ManageAttributes extends ManageRelatedRecords
@@ -19,6 +21,11 @@ class ManageAttributes extends ManageRelatedRecords
     protected static string $resource = ProductResource::class;
 
     protected static string $relationship = 'attributes';
+
+    public function getSubNavigationPosition(): SubNavigationPosition
+    {
+        return SubNavigationPosition::Top;
+    }
 
     protected static ?string $navigationIcon = 'heroicon-o-swatch';
 
@@ -37,6 +44,7 @@ class ManageAttributes extends ManageRelatedRecords
                     ->relationship('attribute', 'name')
                     ->searchable()
                     ->preload()
+                    ->editOptionForm(fn (Forms\Form $form): Form => AttributeResource::form($form))
                     ->createOptionForm(fn (Forms\Form $form): Form => AttributeResource::form($form)),
                 Forms\Components\Select::make('options')
                     ->label(__('products::filament/resources/product/pages/manage-attributes.form.values'))
@@ -66,6 +74,7 @@ class ManageAttributes extends ManageRelatedRecords
                     ->badge(),
             ])
             ->headerActions([
+                GenerateVariantsAction::make(),
                 Tables\Actions\CreateAction::make()
                     ->label(__('products::filament/resources/product/pages/manage-attributes.table.header-actions.create.label'))
                     ->icon('heroicon-o-plus-circle')
@@ -74,7 +83,7 @@ class ManageAttributes extends ManageRelatedRecords
 
                         return $data;
                     })
-                    ->after(function ($record) {
+                    ->after(function (ProductAttribute $record) {
                         $this->updateOrCreateVariants($record);
                     })
                     ->successNotification(
@@ -86,7 +95,7 @@ class ManageAttributes extends ManageRelatedRecords
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->after(function ($record) {
+                    ->after(function (ProductAttribute $record) {
                         $this->updateOrCreateVariants($record);
                     })
                     ->successNotification(
@@ -96,6 +105,9 @@ class ManageAttributes extends ManageRelatedRecords
                             ->body(__('products::filament/resources/product/pages/manage-attributes.table.actions.edit.notification.body')),
                     ),
                 Tables\Actions\DeleteAction::make()
+                    ->after(function (ProductAttribute $record) {
+                        $this->updateOrCreateVariants($record);
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
@@ -116,18 +128,6 @@ class ManageAttributes extends ManageRelatedRecords
             ]);
         });
 
-        // foreach ($record->product->attributes as $productAttribute) {
-        //     $record->product->variants()->updateOrCreate([
-        //         'product_id' => $record->product_id,
-        //         'attribute_id' => $productAttribute->attribute_id,
-        //     ], [
-        //         'price' => $record->product->price,
-        //         'sku' => $record->product->sku,
-        //         'weight' => $record->product->weight,
-        //         'status' => $record->product->status,
-        //         'quantity' => $record->product->quantity,
-        //         'attribute_id' => $productAttribute->attribute_id,
-        //     ]);
-        // }
+        $this->replaceMountedTableAction('products.generate.variants');
     }
 }

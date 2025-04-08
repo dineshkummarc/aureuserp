@@ -10,14 +10,14 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Webkul\Employee\Filament\Clusters\Configurations\Resources\JobPositionResource;
-use Webkul\Employee\Models\EmployeeJobPosition;
 use Webkul\Recruitment\Filament\Clusters\Applications;
 use Webkul\Recruitment\Filament\Clusters\Applications\Resources\JobByPositionResource\Pages;
 use Webkul\Recruitment\Models\Applicant;
+use Webkul\Recruitment\Models\JobPosition;
 
 class JobByPositionResource extends Resource
 {
-    protected static ?string $model = EmployeeJobPosition::class;
+    protected static ?string $model = JobPosition::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
