@@ -17,6 +17,8 @@ class BankAccountResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+
     public static function getNavigationGroup(): string
     {
         return __('partners::filament/resources/bank-account.navigation.group');
@@ -48,6 +50,9 @@ class BankAccountResource extends Resource
                     )
                     ->getOptionLabelFromRecordUsing(function ($record): string {
                         return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                    })
+                    ->disableOptionWhen(function ($label) {
+                        return str_contains($label, ' (Deleted)');
                     })
                     ->required()
                     ->searchable()

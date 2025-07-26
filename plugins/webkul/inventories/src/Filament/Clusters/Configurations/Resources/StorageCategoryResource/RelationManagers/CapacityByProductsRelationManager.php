@@ -8,9 +8,10 @@ use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Validation\Rules\Unique;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Unique;
 
 class CapacityByProductsRelationManager extends RelationManager
 {
@@ -27,7 +28,17 @@ class CapacityByProductsRelationManager extends RelationManager
             ->schema([
                 Forms\Components\Select::make('product_id')
                     ->label(__('inventories::filament/clusters/configurations/resources/storage-category/relation-managers/capacity-by-products.form.product'))
-                    ->relationship(name: 'product', titleAttribute: 'name')
+                    ->relationship(
+                        'product',
+                        'name',
+                        modifyQueryUsing: fn (Builder $query) => $query->withTrashed(),
+                    )
+                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                    })
+                    ->disableOptionWhen(function ($label) {
+                        return str_contains($label, ' (Deleted)');
+                    })
                     ->required()
                     ->unique(modifyRuleUsing: function (Unique $rule) {
                         return $rule->where('storage_category_id', $this->getOwnerRecord()->id);

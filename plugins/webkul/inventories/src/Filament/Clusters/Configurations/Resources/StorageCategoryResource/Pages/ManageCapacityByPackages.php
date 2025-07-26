@@ -9,9 +9,9 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Unique;
 use Webkul\Inventory\Filament\Clusters\Configurations\Resources\StorageCategoryResource;
 use Webkul\Inventory\Settings\OperationSettings;
-use Illuminate\Validation\Rules\Unique;
 
 class ManageCapacityByPackages extends ManageRelatedRecords
 {
@@ -46,7 +46,10 @@ class ManageCapacityByPackages extends ManageRelatedRecords
             ->schema([
                 Forms\Components\Select::make('package_type_id')
                     ->label(__('inventories::filament/clusters/configurations/resources/storage-category/pages/manage-capacity-by-packages.form.package-type'))
-                    ->relationship(name: 'packageType', titleAttribute: 'name')
+                    ->relationship(
+                        'packageType',
+                        'name',
+                    )
                     ->required()
                     ->unique(modifyRuleUsing: function (Unique $rule) {
                         return $rule->where('storage_category_id', $this->getOwnerRecord()->id);

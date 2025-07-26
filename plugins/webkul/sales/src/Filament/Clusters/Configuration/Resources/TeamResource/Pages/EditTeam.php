@@ -7,7 +7,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Webkul\Chatter\Filament\Actions as ChatterActions;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource;
-use Webkul\Sale\Models\Team;
 
 class EditTeam extends EditRecord
 {
@@ -40,12 +39,5 @@ class EditTeam extends EditRecord
                         ->body(__('sales::filament/clusters/configurations/resources/team/pages/edit-team.header-actions.delete.notification.body'))
                 ),
         ];
-    }
-
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        $data['sort'] = Team::max('sort') + 1;
-
-        return $data;
     }
 }

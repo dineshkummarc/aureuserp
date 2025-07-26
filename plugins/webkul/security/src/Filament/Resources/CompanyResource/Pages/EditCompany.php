@@ -7,7 +7,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Security\Filament\Resources\CompanyResource;
-use Webkul\Support\Models\Company;
 
 class EditCompany extends EditRecord
 {
@@ -43,7 +42,6 @@ class EditCompany extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         return [
-            'sort'       => $data['sort'] ?? Company::max('sort') + 1,
             'creator_id' => Auth::user()->id,
             ...$data,
         ];

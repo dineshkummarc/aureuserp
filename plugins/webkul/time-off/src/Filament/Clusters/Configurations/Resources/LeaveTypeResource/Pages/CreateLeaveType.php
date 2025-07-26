@@ -6,7 +6,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\TimeOff\Filament\Clusters\Configurations\Resources\LeaveTypeResource;
-use Webkul\TimeOff\Models\LeaveType;
 
 class CreateLeaveType extends CreateRecord
 {
@@ -32,8 +31,6 @@ class CreateLeaveType extends CreateRecord
         $data['company_id'] = $user->default_company_id;
 
         $data['creator_id'] = $user?->id;
-
-        $data['sort'] = LeaveType::max('sort') + 1;
 
         return $data;
     }

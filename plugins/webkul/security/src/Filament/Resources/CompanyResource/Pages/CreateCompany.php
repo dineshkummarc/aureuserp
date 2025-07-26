@@ -6,7 +6,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Security\Filament\Resources\CompanyResource;
-use Webkul\Support\Models\Company;
 
 class CreateCompany extends CreateRecord
 {
@@ -29,7 +28,6 @@ class CreateCompany extends CreateRecord
     {
         return [
             'creator_id'  => Auth::user()->id,
-            'sort'        => $data['sort'] ?? Company::max('sort') + 1,
             ...$data,
         ];
     }

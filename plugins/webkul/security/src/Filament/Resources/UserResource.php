@@ -16,7 +16,6 @@ use Spatie\Permission\Models\Role;
 use Webkul\Security\Enums\PermissionType;
 use Webkul\Security\Filament\Resources\UserResource\Pages;
 use Webkul\Security\Models\User;
-use Webkul\Support\Models\Company;
 
 class UserResource extends Resource
 {
@@ -118,6 +117,7 @@ class UserResource extends Resource
                                         Forms\Components\FileUpload::make('avatar')
                                             ->hiddenLabel()
                                             ->imageResizeMode('cover')
+                                            ->image()
                                             ->imageEditor()
                                             ->directory('users/avatars')
                                             ->visibility('private'),
@@ -155,12 +155,10 @@ class UserResource extends Resource
                                                     ->fillForm(function (array $arguments): array {
                                                         return [
                                                             'user_id' => Auth::id(),
-                                                            'sort'    => Company::max('sort') + 1,
                                                         ];
                                                     })
                                                     ->mutateFormDataUsing(function (array $data) {
                                                         $data['user_id'] = Auth::id();
-                                                        $data['sort'] = Company::max('sort') + 1;
 
                                                         return $data;
                                                     });

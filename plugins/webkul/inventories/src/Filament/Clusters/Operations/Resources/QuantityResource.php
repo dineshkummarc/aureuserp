@@ -172,17 +172,16 @@ class QuantityResource extends Resource
                     ->visible(fn (OperationSettings $settings) => $settings->enable_packages),
                 Tables\Columns\TextColumn::make('available_quantity')
                     ->label(__('inventories::filament/clusters/operations/resources/quantity.table.columns.available-quantity'))
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('quantity')
                     ->label(__('inventories::filament/clusters/operations/resources/quantity.table.columns.on-hand'))
-                    ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextInputColumn::make('counted_quantity')
                     ->label(__('inventories::filament/clusters/operations/resources/quantity.table.columns.counted'))
                     ->sortable()
+                    ->rules(['numeric', 'min:0'])
                     ->beforeStateUpdated(function ($record, $state) {
                         $record->update([
                             'inventory_quantity_set'  => true,
@@ -209,13 +208,11 @@ class QuantityResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label(__('inventories::filament/clusters/operations/resources/quantity.table.columns.user'))
-                    ->searchable()
                     ->sortable()
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('company.name')
                     ->label(__('inventories::filament/clusters/operations/resources/quantity.table.columns.company'))
-                    ->searchable()
                     ->sortable()
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -412,7 +409,7 @@ class QuantityResource extends Resource
 
                         return $data;
                     })
-                    ->before(function (array $data) {
+                    ->before(function (Tables\Actions\CreateAction $action, array $data) {
                         $existingQuantity = ProductQuantity::where('location_id', $data['location_id'] ?? Warehouse::first()->lot_stock_location_id)
                             ->where('product_id', $data['product_id'])
                             ->where('package_id', $data['package_id'] ?? null)
@@ -426,7 +423,7 @@ class QuantityResource extends Resource
                                 ->warning()
                                 ->send();
 
-                            $this->halt();
+                            $action->halt();
                         }
                     })
                     ->successNotification(
@@ -511,6 +508,10 @@ class QuantityResource extends Resource
             ->modifyQueryUsing(function (Builder $query) {
                 $query->whereHas('location', function (Builder $query) {
                     $query->whereIn('type', [Enums\LocationType::INTERNAL, Enums\LocationType::TRANSIT]);
+                });
+
+                $query->whereHas('product', function (Builder $query) {
+                    $query->whereNull('deleted_at');
                 });
             });
     }

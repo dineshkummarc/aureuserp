@@ -6,7 +6,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Sale\Filament\Clusters\Configuration\Resources\TeamResource;
-use Webkul\Sale\Models\Team;
 
 class CreateTeam extends CreateRecord
 {
@@ -30,7 +29,6 @@ class CreateTeam extends CreateRecord
         $user = Auth::user();
 
         $data['creator_id'] = $user->id;
-        $data['sort'] = Team::max('sort') + 1;
 
         return $data;
     }

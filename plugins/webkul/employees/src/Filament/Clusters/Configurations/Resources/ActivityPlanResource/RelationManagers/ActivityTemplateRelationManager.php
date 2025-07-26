@@ -18,7 +18,6 @@ use Webkul\Support\Enums\ActivityDelayInterval;
 use Webkul\Support\Enums\ActivityDelayUnit;
 use Webkul\Support\Enums\ActivityResponsibleType;
 use Webkul\Support\Filament\Resources\ActivityTypeResource;
-use Webkul\Support\Models\ActivityPlanTemplate;
 use Webkul\Support\Models\ActivityType;
 
 class ActivityTemplateRelationManager extends RelationManager
@@ -192,7 +191,6 @@ class ActivityTemplateRelationManager extends RelationManager
                     ->mutateFormDataUsing(function (array $data): array {
                         return [
                             ...$data,
-                            'sort'       => ActivityPlanTemplate::max('sort') + 1,
                             'creator_id' => Auth::user()->id,
                         ];
                     })
@@ -212,7 +210,6 @@ class ActivityTemplateRelationManager extends RelationManager
                         ->mutateFormDataUsing(function (array $data): array {
                             return [
                                 ...$data,
-                                'sort'       => ActivityPlanTemplate::max('sort') + 1,
                                 'creator_id' => Auth::user()->id,
                             ];
                         })

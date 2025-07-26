@@ -33,7 +33,10 @@ class CapacityByPackagesRelationManager extends RelationManager
             ->schema([
                 Forms\Components\Select::make('package_type_id')
                     ->label(__('inventories::filament/clusters/configurations/resources/storage-category/relation-managers/capacity-by-packages.form.package-type'))
-                    ->relationship(name: 'packageType', titleAttribute: 'name')
+                    ->relationship(
+                        'packageType',
+                        'name',
+                    )
                     ->required()
                     ->unique(modifyRuleUsing: function (Unique $rule) {
                         return $rule->where('storage_category_id', $this->getOwnerRecord()->id);

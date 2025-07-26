@@ -1,5 +1,11 @@
 <p align="center">
-<a href="https://aureuserp.com"><img src="https://aureuserp.com/wp-content/uploads/2025/03/logo.png" alt="Total Downloads"></a>
+  <a href="https://aureuserp.com">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/aureuserp/temp-media/master/aureus-logo-dark.png">
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/aureuserp/temp-media/master/aureus-logo-light.png">
+      <img src="https://raw.githubusercontent.com/aureuserp/temp-media/master/aureus-logo-light.png" alt="AureusERP logo">
+    </picture>
+  </a>  
 </p>
 
 <p align="center">
@@ -179,8 +185,8 @@ AureusERP is designed to be highly customizable, allowing you to:
 
 ### License
 
-Aureus CRM is a truly opensource CRM framework which will always be free under the MIT License.
+Aureus ERP is a truly opensource ERP framework which will always be free under the MIT License.
 
 ### Security Vulnerabilities
 
-Please don't disclose security vulnerabilities publicly. If you find any security vulnerability in Aureus CRM then please email us: support@webkul.com.
+Please don't disclose security vulnerabilities publicly. If you find any security vulnerability in Aureus ERP then please email us: support@webkul.com.

@@ -12,7 +12,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Employee\Enums;
-use Webkul\Employee\Models\EmployeeResumeLineType;
 
 trait EmployeeResumeRelation
 {
@@ -41,9 +40,6 @@ trait EmployeeResumeRelation
                                         ->live(onBlur: true),
                                     Forms\Components\Hidden::make('creator_id')
                                         ->default(Auth::user()->id)
-                                        ->required(),
-                                    Forms\Components\Hidden::make('sort')
-                                        ->default(EmployeeResumeLineType::max('sort') + 1)
                                         ->required(),
                                 ])->columns(2),
                         ])

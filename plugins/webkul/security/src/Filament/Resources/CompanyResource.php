@@ -67,8 +67,6 @@ class CompanyResource extends Resource
                             ->schema([
                                 Forms\Components\Section::make(__('security::filament/resources/company.form.sections.company-information.title'))
                                     ->schema([
-                                        Forms\Components\Hidden::make('sort')
-                                            ->default(Company::max('sort') + 1),
                                         Forms\Components\TextInput::make('name')
                                             ->label(__('security::filament/resources/company.form.sections.company-information.fields.name'))
                                             ->required()
@@ -124,6 +122,8 @@ class CompanyResource extends Resource
                                                         titleAttribute: 'name',
                                                         modifyQueryUsing: fn (Forms\Get $get, Builder $query) => $query->where('country_id', $get('country_id')),
                                                     )
+                                                    ->searchable()
+                                                    ->preload()
                                                     ->createOptionForm(function (Form $form, Forms\Get $get, Forms\Set $set) {
                                                         return $form
                                                             ->schema([
@@ -145,9 +145,7 @@ class CompanyResource extends Resource
                                                                         $set('country_id', $get('country_id'));
                                                                     }),
                                                             ]);
-                                                    })
-                                                    ->searchable()
-                                                    ->preload(),
+                                                    }),
                                             ])
                                             ->columns(2),
                                     ]),
@@ -273,12 +271,12 @@ class CompanyResource extends Resource
                     ->label(__('security::filament/resources/company.table.columns.email'))
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('address.city')
+                Tables\Columns\TextColumn::make('city')
                     ->label(__('security::filament/resources/company.table.columns.city'))
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('address.country.name')
+                Tables\Columns\TextColumn::make('country.name')
                     ->label(__('security::filament/resources/company.table.columns.country'))
                     ->sortable()
                     ->searchable()
@@ -487,7 +485,6 @@ class CompanyResource extends Resource
                                 ->schema([
                                     Infolists\Components\ImageEntry::make('partner.avatar')
                                         ->label(__('security::filament/resources/company.infolist.sections.branding.entries.company-logo'))
-                                        ->hiddenLabel()
                                         ->circular()
                                         ->placeholder('—'),
                                     Infolists\Components\ColorEntry::make('color')
