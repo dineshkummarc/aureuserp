@@ -8,6 +8,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
@@ -38,6 +39,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Security\Enums\CompanyStatus;
@@ -391,7 +394,7 @@ class CompanyResource extends Resource
                                 ->body(__('security::filament/resources/company.table.actions.edit.notification.body')),
                         ),
                     DeleteAction::make()
-                        ->hidden(fn ($record) => User::where('default_company_id', $record->id)->exists())
+                        ->hidden(fn ($record) => $record->trashed() || User::where('default_company_id', $record->id)->exists())
                         ->successNotification(
                             Notification::make()
                                 ->success()
@@ -405,6 +408,27 @@ class CompanyResource extends Resource
                                 ->title((__('security::filament/resources/company.table.actions.restore.notification.title')))
                                 ->body(__('security::filament/resources/company.table.actions.restore.notification.body')),
                         ),
+                    ForceDeleteAction::make()
+                        ->hidden(fn ($record) => ! $record->trashed())
+                        ->action(function (ForceDeleteAction $action, Company $record) {
+                            try {
+                                $record->forceDelete();
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('security::filament/resources/company.table.actions.force-delete.notification.error.title'))
+                                    ->body(__('security::filament/resources/company.table.actions.force-delete.notification.error.body'))
+                                    ->send();
+
+                                $action->cancel();
+                            }
+                        })
+                        ->successNotification(
+                            Notification::make()
+                                ->success()
+                                ->title((__('security::filament/resources/company.table.actions.force-delete.notification.success.title')))
+                                ->body(__('security::filament/resources/company.table.actions.force-delete.notification.success.body')),
+                        ),
                 ]),
             ])
             ->toolbarActions([
@@ -417,6 +441,19 @@ class CompanyResource extends Resource
                                 ->body(__('security::filament/resources/company.table.bulk-actions.delete.notification.body')),
                         ),
                     ForceDeleteBulkAction::make()
+                        ->action(function (ForceDeleteBulkAction $action, Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->forceDelete());
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('security::filament/resources/company.table.bulk-actions.force-delete.notification.error.title'))
+                                    ->body(__('security::filament/resources/company.table.bulk-actions.force-delete.notification.error.body'))
+                                    ->send();
+
+                                $action->cancel();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
