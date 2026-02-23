@@ -29,6 +29,7 @@ use Webkul\Security\Filament\Resources\RoleResource\Pages\CreateRole;
 use Webkul\Security\Filament\Resources\RoleResource\Pages\EditRole;
 use Webkul\Security\Filament\Resources\RoleResource\Pages\ListRoles;
 use Webkul\Security\Filament\Resources\RoleResource\Pages\ViewRole;
+use Webkul\Security\Models\Role;
 
 class RoleResource extends RolesRoleResource
 {
@@ -139,12 +140,15 @@ class RoleResource extends RolesRoleResource
                     ->dateTime(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->hidden(fn (Model $record): bool => static::isProtectedRoleRecord($record)),
                 DeleteAction::make()
-                    ->hidden(fn (Model $record) => $record->name == config('filament-shield.panel_user.name')),
+                    ->hidden(fn (Model $record): bool => static::isProtectedRoleRecord($record)),
             ])
             ->toolbarActions([
-                DeleteBulkAction::make(),
+                DeleteBulkAction::make()
+                    ->fetchSelectedRecords(true)
+                    ->authorizeIndividualRecords('delete'),
             ])
             ->defaultSort('created_at', 'asc');
     }
@@ -383,5 +387,10 @@ class RoleResource extends RolesRoleResource
         }
 
         return static::$permissions = $record->permissions()->pluck('name');
+    }
+
+    public static function isProtectedRoleRecord(?Model $record): bool
+    {
+        return $record instanceof Role && $record->isSystemRole();
     }
 }

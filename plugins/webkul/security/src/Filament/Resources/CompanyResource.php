@@ -38,7 +38,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Security\Enums\CompanyStatus;
 use Webkul\Security\Filament\Resources\CompanyResource\Pages\CreateCompany;
@@ -431,11 +430,7 @@ class CompanyResource extends Resource
                                 ->body(__('security::filament/resources/company.table.bulk-actions.restore.notification.body')),
                         ),
                 ]),
-            ])->modifyQueryUsing(function (Builder $query) {
-                $query
-                    ->where('creator_id', Auth::user()->id)
-                    ->whereNull('parent_id');
-            })
+            ])
             ->checkIfRecordIsSelectableUsing(
                 fn (Model $record): bool => ! User::where('default_company_id', $record->id)->exists()
             )
