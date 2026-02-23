@@ -13,6 +13,10 @@ return [
     ],
 
     'form' => [
+        'validation' => [
+            'cannot-remove-last-admin'   => 'Cannot remove the admin role from the last admin user.',
+        ],
+
         'sections' => [
             'general-information' => [
                 'title'  => 'General Information',

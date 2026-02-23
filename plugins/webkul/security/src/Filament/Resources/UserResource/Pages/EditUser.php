@@ -9,6 +9,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rules\Password;
 use Webkul\Security\Filament\Resources\UserResource;
 use Webkul\Security\Models\User;
@@ -85,5 +86,32 @@ class EditUser extends EditRecord
             ...$data,
             ...$partner->toArray(),
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        UserResource::ensureAdminRoleConstraints($this->getRecord(), $data['roles'] ?? []);
+
+        return $data;
+    }
+
+    protected function beforeSave(): void
+    {
+        $rawState = $this->form->getRawState();
+
+        try {
+            UserResource::ensureAdminRoleConstraints(
+                $this->getRecord(),
+                (array) ($rawState['roles'] ?? $this->data['roles'] ?? [])
+            );
+        } catch (ValidationException $exception) {
+            Notification::make()
+                ->danger()
+                ->title(__('security::filament/resources/user.form.sections.permissions.fields.roles'))
+                ->body(implode("\n", $exception->errors()['roles'] ?? []))
+                ->send();
+
+            $this->halt();
+        }
     }
 }
