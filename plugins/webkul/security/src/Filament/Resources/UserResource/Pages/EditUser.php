@@ -8,9 +8,11 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
+use Webkul\Security\Enums\PermissionType;
 use Webkul\Security\Filament\Resources\UserResource;
 use Webkul\Security\Models\User;
 use Webkul\Security\Settings\UserSettings;
@@ -37,7 +39,7 @@ class EditUser extends EditRecord
         return [
             Action::make('changePassword')
                 ->label(__('security::filament/resources/user/pages/edit-user.header-actions.change-password.label'))
-                ->visible(fn (UserSettings $userSettings) => $userSettings->enable_reset_password)
+                ->visible(fn(UserSettings $userSettings) => $userSettings->enable_reset_password)
                 ->action(function (User $record, array $data): void {
                     $record->update([
                         'password' => Hash::make($data['new_password']),
@@ -58,13 +60,13 @@ class EditUser extends EditRecord
                     TextInput::make('new_password_confirmation')
                         ->password()
                         ->label(__('security::filament/resources/user/pages/edit-user.header-actions.change-password.form.confirm-new-password'))
-                        ->rule('required', fn ($get) => (bool) $get('new_password'))
+                        ->rule('required', fn($get) => (bool) $get('new_password'))
                         ->same('new_password'),
                 ])
                 ->icon('heroicon-o-key'),
             ViewAction::make(),
             DeleteAction::make()
-                ->visible(fn (User $record) => self::getResource()::canDeleteUser($record))
+                ->visible(fn(User $record) => self::getResource()::canDeleteUser($record))
                 ->successNotification(
                     Notification::make()
                         ->success()
@@ -90,28 +92,24 @@ class EditUser extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        UserResource::ensureAdminRoleConstraints($this->getRecord(), $data['roles'] ?? []);
+        if (! (Auth::id() === $this->record->id && array_key_exists('resource_permission', $data))) {
+            return $data;
+        }
+
+        $submittedPermission = $data['resource_permission'];
+
+        if ($submittedPermission instanceof PermissionType) {
+            $submittedPermission = $submittedPermission->value;
+        }
+
+        $currentPermission = $this->record->resource_permission?->value;
+
+        if ((string) $submittedPermission !== (string) $currentPermission) {
+            throw ValidationException::withMessages([
+                'resource_permission' => __('security::filament/resources/user.form.sections.permissions.fields.resource-permission-self-change-disabled'),
+            ]);
+        }
 
         return $data;
-    }
-
-    protected function beforeSave(): void
-    {
-        $rawState = $this->form->getRawState();
-
-        try {
-            UserResource::ensureAdminRoleConstraints(
-                $this->getRecord(),
-                (array) ($rawState['roles'] ?? $this->data['roles'] ?? [])
-            );
-        } catch (ValidationException $exception) {
-            Notification::make()
-                ->danger()
-                ->title(__('security::filament/resources/user.form.sections.permissions.fields.roles'))
-                ->body(implode("\n", $exception->errors()['roles'] ?? []))
-                ->send();
-
-            $this->halt();
-        }
     }
 }

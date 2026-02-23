@@ -126,6 +126,7 @@ class UserResource extends Resource
                                             ->label(__('security::filament/resources/user.form.sections.permissions.fields.roles'))
                                             ->relationship('roles', 'name')
                                             ->multiple()
+                                            ->required()
                                             ->preload()
                                             ->rule(function (?User $record) {
                                                 return function (string $attribute, $value, Closure $fail) use ($record): void {
@@ -146,6 +147,11 @@ class UserResource extends Resource
                                             ->live()
                                             ->options(PermissionType::class)
                                             ->required()
+                                            ->disabled(fn (?User $record): bool => filled($record) && Auth::id() === $record->id)
+                                            ->dehydrated(fn (?User $record): bool => ! (filled($record) && Auth::id() === $record->id))
+                                            ->helperText(fn (?User $record): ?string => filled($record) && Auth::id() === $record->id
+                                                ? __('security::filament/resources/user.form.sections.permissions.fields.resource-permission-self-change-disabled')
+                                                : null)
                                             ->preload()
                                             ->default(PermissionType::GLOBAL->value)
                                             ->afterStateUpdated(function (Get $get, Set $set) {
@@ -457,11 +463,10 @@ class UserResource extends Resource
                                             ->formatStateUsing(fn($state) => ucfirst($state))
                                             ->bulleted(),
                                         TextEntry::make('teams.name')
+                                            ->badge()
                                             ->icon('heroicon-o-user-group')
                                             ->placeholder('—')
-                                            ->label(__('security::filament/resources/user.infolist.sections.permissions.entries.teams'))
-                                            ->listWithLineBreaks()
-                                            ->bulleted(),
+                                            ->label(__('security::filament/resources/user.infolist.sections.permissions.entries.teams')),
                                         TextEntry::make('resource_permission')
                                             ->placeholder('-')
                                             ->label(__('security::filament/resources/user.infolist.sections.permissions.entries.resource-permission')),
@@ -482,11 +487,10 @@ class UserResource extends Resource
                             Section::make(__('security::filament/resources/user.infolist.sections.multi-company.title'))
                                 ->schema([
                                     TextEntry::make('allowedCompanies.name')
+                                        ->badge()
                                         ->icon('heroicon-o-building-office')
                                         ->placeholder('—')
-                                        ->label(__('security::filament/resources/user.infolist.sections.multi-company.allowed-companies'))
-                                        ->listWithLineBreaks()
-                                        ->bulleted(),
+                                        ->label(__('security::filament/resources/user.infolist.sections.multi-company.allowed-companies')),
                                     TextEntry::make('defaultCompany.name')
                                         ->icon('heroicon-o-building-office-2')
                                         ->placeholder('—')
@@ -507,7 +511,7 @@ class UserResource extends Resource
 
     public static function canDeleteUser(User $record): bool
     {
-        return ! $record->is_default;
+        return ! $record->is_default && $record->id !== Auth::id();
     }
 
     public static function ensureAdminRoleConstraints(?User $record, array $roleIds): void
