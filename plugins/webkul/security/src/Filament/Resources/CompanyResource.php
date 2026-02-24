@@ -98,6 +98,10 @@ class CompanyResource extends Resource
                                             ->label(__('security::filament/resources/company.form.sections.company-information.fields.name'))
                                             ->required()
                                             ->maxLength(255)
+                                            ->unique(ignoreRecord: true)
+                                            ->validationMessages([
+                                                'unique' => 'Company name already exists. Please use a unique name.',
+                                            ])
                                             ->live(onBlur: true),
                                         TextInput::make('registration_number')
                                             ->label(__('security::filament/resources/company.form.sections.company-information.fields.registration-number'))
