@@ -18,6 +18,56 @@ export class ErpLocators {
     readonly pluginSuccessMessage : Locator;
     readonly pluginErrorMessage : Locator;
 
+    /**
+     * Companies
+     */
+
+    readonly allCompaniesCount: Locator;
+    readonly companiesMenuLink: Locator;
+    readonly companiesTable: Locator;
+    readonly companiesCreateButton: Locator;
+    readonly companiesNameInput: Locator;
+    readonly companiesEmailInput: Locator;
+    readonly companiesPhoneInput: Locator;
+    readonly companiesStatusToggleOn: Locator;
+    readonly companiesStatusToggleOff: Locator;
+    readonly companiesSaveButton: Locator;
+    readonly companiesSearchInput: Locator;
+    readonly companiesRowActionsButton: Locator;
+    readonly companiesEditButton: Locator;
+    readonly companiesDeleteButton: Locator;
+    readonly companiesConfirmDeleteButton: Locator;
+    readonly companiesStatusToggle: Locator;
+    readonly companiesSuccessToast: Locator;
+    readonly companiesErrorToast: Locator;
+    readonly companiesValidationMessage: Locator;
+
+    /**
+     * Users
+     */
+
+    readonly usersMenuLink: Locator;
+    readonly usersTable: Locator;
+    readonly usersCreateButton: Locator;
+    readonly usersNameInput: Locator;
+    readonly usersEmailInput: Locator;
+    readonly usersPasswordInput: Locator;
+    readonly usersPasswordConfirmationInput: Locator;
+    readonly usersRoleSelect: Locator;
+    readonly usersCompanySelect: Locator;
+    readonly usersRoleOption: Locator;
+    readonly usersCompanyOption: Locator;
+    readonly usersSaveButton: Locator;
+    readonly usersSearchInput: Locator;
+    readonly usersRowActionsButton: Locator;
+    readonly usersEditButton: Locator;
+    readonly usersDeleteButton: Locator;
+    readonly usersConfirmDeleteButton: Locator;
+    readonly usersStatusToggle: Locator;
+    readonly usersResetPasswordButton: Locator;
+    readonly usersSuccessToast: Locator;
+    readonly usersErrorToast: Locator;
+    readonly usersValidationMessage: Locator;
 
     constructor(page: Page) {
         this.page = page;
@@ -32,8 +82,59 @@ export class ErpLocators {
         this.pluginInstallButton = page.locator('button.fi-color.fi-color-success.fi-text-color-700');
         this.pluginUninstallButton = page.locator('button.fi-color.fi-color-danger.fi-dropdown-list-item');
         this.pluginConfirmButton = page.locator('span[x-show="! isProcessing"]');
-        this.pluginSearchInput = page.locator('input[placeholder="Search Plugins"]');
+        this.pluginSearchInput = page.locator('.fi-input.fi-input-has-inline-prefix').nth(1);
         this.pluginSuccessMessage = page.locator('h3.fi-no-notification-title');
         this.pluginErrorMessage = page.locator('.fi-toast-message-error');
+
+        /**
+         * Companies
+         */
+
+        this.allCompaniesCount = page.locator('span.fi-badge-label-ctn').nth(0);
+        this.companiesMenuLink = page.getByRole("link", { name: /companies/i });
+        this.companiesTable = page.locator("table");
+        this.companiesCreateButton = page.locator("a,button").filter({ hasText: /new company|create company|add company|create/i }).first();
+        this.companiesNameInput = page.locator('input[id="form.name"]').first();
+        this.companiesEmailInput = page.locator('input[id="form.email"]').first();
+        this.companiesPhoneInput = page.locator('input[id="form.phone"]').first();
+        this.companiesStatusToggleOn = page.locator('button[aria-checked="true"]');
+        this.companiesStatusToggleOff = page.locator('button[aria-checked="false"]');
+        this.companiesSaveButton = page.locator('button[type="submit"]').nth(1);
+        this.companiesSearchInput = page.locator('.fi-input.fi-input-has-inline-prefix').nth(1);
+        this.companiesRowActionsButton = page.locator('button[title="Actions"], button').filter({ hasText: /actions/i });
+        this.companiesEditButton = page.locator("button,a").filter({ hasText: /edit/i });
+        this.companiesDeleteButton = page.locator("button,a").filter({ hasText: /delete/i });
+        this.companiesConfirmDeleteButton = page.locator("button,span").filter({ hasText: /delete|confirm/i }).first();
+        this.companiesStatusToggle = page.locator('button[role="switch"], input[type="checkbox"]').first();
+        this.companiesSuccessToast = page.locator("h3.fi-no-notification-title, .fi-toast-message-success").first();
+        this.companiesErrorToast = page.locator(".fi-toast-message-error, .fi-input-wrp-error").first();
+        this.companiesValidationMessage = page.locator(".fi-fo-field-wrp-error-message, .text-danger, .invalid-feedback");
+
+        /**
+         * Users
+         */
+
+        this.usersMenuLink = page.getByRole("link", { name: /users/i });
+        this.usersTable = page.locator("table");
+        this.usersCreateButton = page.locator("a,button").filter({ hasText: /new user|create user|add user|create/i }).first();
+        this.usersNameInput = page.locator('input[name="name"]').first();
+        this.usersEmailInput = page.locator('input[name="email"]').first();
+        this.usersPasswordInput = page.locator('input[name="password"]').first();
+        this.usersPasswordConfirmationInput = page.locator('input[name="password_confirmation"], input[name="passwordConfirmation"]').first();
+        this.usersRoleSelect = page.locator('select[name*="role"], [data-field-wrapper*="role"] [role="combobox"], [data-field-wrapper*="role"] input').first();
+        this.usersCompanySelect = page.locator('select[name*="company"], [data-field-wrapper*="company"] [role="combobox"], [data-field-wrapper*="company"] input').first();
+        this.usersRoleOption = page.locator('[role="option"], .fi-select-option, li').filter({ hasText: /./ });
+        this.usersCompanyOption = page.locator('[role="option"], .fi-select-option, li').filter({ hasText: /./ });
+        this.usersSaveButton = page.locator("button[type='submit'], button").filter({ hasText: /create|save|submit/i }).first();
+        this.usersSearchInput = page.locator('input[placeholder*="Search"], input[type="search"]').first();
+        this.usersRowActionsButton = page.locator('button[title="Actions"], button').filter({ hasText: /actions/i });
+        this.usersEditButton = page.locator("button,a").filter({ hasText: /edit/i });
+        this.usersDeleteButton = page.locator("button,a").filter({ hasText: /delete/i });
+        this.usersConfirmDeleteButton = page.locator("button,span").filter({ hasText: /delete|confirm/i }).first();
+        this.usersStatusToggle = page.locator('button[role="switch"], input[type="checkbox"]').first();
+        this.usersResetPasswordButton = page.locator("button,a").filter({ hasText: /reset password/i }).first();
+        this.usersSuccessToast = page.locator("h3.fi-no-notification-title, .fi-toast-message-success").first();
+        this.usersErrorToast = page.locator(".fi-toast-message-error, .fi-input-wrp-error").first();
+        this.usersValidationMessage = page.locator(".fi-fo-field-wrp-error-message, .text-danger, .invalid-feedback");
     }
 }
