@@ -36,10 +36,14 @@ export class ErpLocators {
     readonly companiesRowActionsButton: Locator;
     readonly companiesEditButton: Locator;
     readonly companiesDeleteButton: Locator;
+    readonly selectAllCompaniesButton: Locator;
+    readonly bulkActionsButton: Locator;
+    readonly forceDeleteButton: Locator;
     readonly companiesConfirmDeleteButton: Locator;
     readonly companiesStatusToggle: Locator;
     readonly companiesSuccessToast: Locator;
     readonly companiesErrorToast: Locator;
+    readonly companiesFeildValidationMessage: Locator;
     readonly companiesValidationMessage: Locator;
 
     /**
@@ -101,13 +105,17 @@ export class ErpLocators {
         this.companiesStatusToggleOff = page.locator('button[aria-checked="false"]');
         this.companiesSaveButton = page.locator('button[type="submit"]').nth(1);
         this.companiesSearchInput = page.locator('.fi-input.fi-input-has-inline-prefix').nth(1);
-        this.companiesRowActionsButton = page.locator('button[title="Actions"], button').filter({ hasText: /actions/i });
-        this.companiesEditButton = page.locator("button,a").filter({ hasText: /edit/i });
-        this.companiesDeleteButton = page.locator("button,a").filter({ hasText: /delete/i });
-        this.companiesConfirmDeleteButton = page.locator("button,span").filter({ hasText: /delete|confirm/i }).first();
+        this.companiesRowActionsButton = page.locator('div.fi-ta-text-item').nth(0);
+        this.companiesEditButton = page.locator("a.fi-ac-btn-action");
+        this.companiesDeleteButton = page.locator("button.fi-ac-btn-action");
+        this.selectAllCompaniesButton = page.locator('input[aria-label="Select/deselect all items for bulk actions."]');
+        this.bulkActionsButton = page.locator('button.fi-ac-btn-group').nth(1);
+        this.forceDeleteButton = page.locator('span.fi-dropdown-list-item-label').nth(4);
+        this.companiesConfirmDeleteButton = page.locator("button[x-data='filamentFormButton']");
         this.companiesStatusToggle = page.locator('button[role="switch"], input[type="checkbox"]').first();
         this.companiesSuccessToast = page.locator("h3.fi-no-notification-title, .fi-toast-message-success").first();
         this.companiesErrorToast = page.locator(".fi-toast-message-error, .fi-input-wrp-error").first();
+        this.companiesFeildValidationMessage = page.locator(".fi-fo-field-wrp-error-message", { hasText: /Company name already exists. Please use a unique name./ });
         this.companiesValidationMessage = page.locator(".fi-fo-field-wrp-error-message, .text-danger, .invalid-feedback");
 
         /**

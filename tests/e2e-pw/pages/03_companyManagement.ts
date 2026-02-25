@@ -28,12 +28,18 @@ export class CompanyManagementPage {
         await this.page.goto("/admin/companies");
         await expect(this.page).toHaveURL(/.*companies/);
         await expect(this.erpLocators.companiesTable.first()).toBeVisible();
-        
-        // Read count from UI
+
+        await this.refreshCompanyCount();
+    }
+
+    /**
+     * Read and cache company count from UI
+     */
+    async refreshCompanyCount(): Promise<number> {
         const countText = await this.erpLocators.allCompaniesCount.textContent();
-        console.log("Initial Count:", countText);
         this.companyCount = countText ? parseInt(countText.trim()) : 0;
-        // console.log("Current Count:", this.companyCount);
+
+        return this.companyCount;
     }
 
     /**
@@ -60,29 +66,6 @@ export class CompanyManagementPage {
 
         await this.erpLocators.companiesSaveButton.click();
         await this.expectSuccessFeedback();
-        
-        // Increase count by 1 after successful creation
-        this.companyCount += 1;
-        // console.log("Count after creation:", this.companyCount);
-    }
-
-    /**
-     * Submit empty form and validate required messages
-     */
-    async createCompanyWithEmptyRequiredFields() {
-        await this.openCreateCompanyForm();
-        await this.erpLocators.companiesSaveButton.click();
-        await expect(this.erpLocators.companiesValidationMessage.first()).toBeVisible();
-    }
-
-    /**
-     * Attempt duplicate record creation
-     */
-    async createCompanyWithDuplicateData(companyData: CompanyData) {
-        await this.createCompany(companyData);
-        await this.gotoCompaniesPage();
-        await this.createCompany(companyData);
-        await expect(this.erpLocators.companiesErrorToast).toBeVisible();
     }
 
     /**
@@ -113,19 +96,8 @@ export class CompanyManagementPage {
         if (updates.name) await this.erpLocators.companiesNameInput.fill(updates.name);
         if (updates.email) await this.erpLocators.companiesEmailInput.fill(updates.email);
         if (updates.phone) await this.erpLocators.companiesPhoneInput.fill(updates.phone);
-        if (updates.code) await this.erpLocators.companiesCodeInput.fill(updates.code);
-        if (updates.address) await this.erpLocators.companiesAddressInput.fill(updates.address);
 
         await this.erpLocators.companiesSaveButton.click();
-        await this.expectSuccessFeedback();
-    }
-
-    /**
-     * Toggle company status from row action or inline switch
-     */
-    async toggleCompanyStatus(searchKey: string) {
-        await this.searchCompany(searchKey);
-        await this.erpLocators.companiesStatusToggle.first().click();
         await this.expectSuccessFeedback();
     }
 
@@ -139,6 +111,19 @@ export class CompanyManagementPage {
         await this.erpLocators.companiesConfirmDeleteButton.click();
         await this.expectSuccessFeedback();
     }
+
+    /**
+     * Bulk delete companies from list
+     */
+    async bulkDeleteCompanies(companyNames: string[]) {
+        await this.searchCompany(companyNames[0]);
+        await this.erpLocators.selectAllCompaniesButton.click();
+        await this.erpLocators.bulkActionsButton.click();
+        await this.erpLocators.forceDeleteButton.click();
+        await this.erpLocators.companiesConfirmDeleteButton.click();
+        await this.expectSuccessFeedback();
+    }
+
 
     /**
      * Reusable assertion for success toast/notification
