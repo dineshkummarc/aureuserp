@@ -261,7 +261,7 @@ class PurchaseAgreementResource extends Resource
             ->hiddenLabel()
             ->relationship()
             ->compact()
-            ->table(fn ($record) => [
+            ->table(fn (Get $get) => [
                 TableColumn::make('product_id')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.columns.product'))
                     ->width(250)
@@ -272,7 +272,13 @@ class PurchaseAgreementResource extends Resource
                     ->markAsRequired(),
                 TableColumn::make('ordered_qty')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.columns.ordered'))
-                    ->visible(fn (): bool => $record->type === RequisitionType::BLANKET_ORDER)
+                    ->visible(
+                        in_array(
+                            $get('type') ?? $get('../type') ?? $get('../../type'),
+                            [RequisitionType::BLANKET_ORDER, RequisitionType::BLANKET_ORDER->value],
+                            true
+                        )
+                    )
                     ->width(250),
                 TableColumn::make('uom_id')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.columns.uom'))
