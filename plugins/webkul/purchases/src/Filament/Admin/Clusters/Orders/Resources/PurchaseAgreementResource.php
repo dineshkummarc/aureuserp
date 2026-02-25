@@ -57,6 +57,7 @@ use Webkul\Purchase\Filament\Admin\Clusters\Orders;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementResource\Pages\CreatePurchaseAgreement;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementResource\Pages\EditPurchaseAgreement;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementResource\Pages\ListPurchaseAgreements;
+use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementResource\Pages\ManageFrqs;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementResource\Pages\ViewPurchaseAgreement;
 use Webkul\Purchase\Models\Requisition;
 use Webkul\Purchase\Settings\OrderSettings;
@@ -720,6 +721,7 @@ class PurchaseAgreementResource extends Resource
         return $page->generateNavigationItems([
             ViewPurchaseAgreement::class,
             EditPurchaseAgreement::class,
+            ManageFrqs::class,
         ]);
     }
 
@@ -730,6 +732,7 @@ class PurchaseAgreementResource extends Resource
             'create' => CreatePurchaseAgreement::route('/create'),
             'edit'   => EditPurchaseAgreement::route('/{record}/edit'),
             'view'   => ViewPurchaseAgreement::route('/{record}/view'),
+            'frqs'   => ManageFrqs::route('/{record}/frqs'),
         ];
     }
 
