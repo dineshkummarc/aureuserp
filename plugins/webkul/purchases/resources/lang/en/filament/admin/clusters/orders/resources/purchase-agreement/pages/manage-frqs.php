@@ -2,6 +2,6 @@
 
 return [
     'navigation' => [
-        'title' => 'FRQ\'s',
+        'title' => 'RFQ\'s',
     ],
 ];

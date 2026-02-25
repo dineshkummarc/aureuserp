@@ -66,6 +66,18 @@ class EditPurchaseAgreement extends EditRecord
                 ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement/pages/edit-purchase-agreement.header-actions.close.label'))
                 ->color('primary')
                 ->action(function () {
+                    $record = $this->getRecord();
+
+                    if (! PurchaseAgreementResource::canBeClosed($record)) {
+                        Notification::make()
+                            ->danger()
+                            ->title(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement/pages/edit-purchase-agreement.header-actions.close.notification.warning.title'))
+                            ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement/pages/edit-purchase-agreement.header-actions.close.notification.warning.body'))
+                            ->send();
+
+                        return;
+                    }
+
                     $this->getRecord()->update([
                         'state' => RequisitionState::CLOSED,
                     ]);

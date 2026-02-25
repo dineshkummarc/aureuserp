@@ -13,6 +13,7 @@ use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\QuotationResource\P
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\QuotationResource\Pages\ManageReceipts;
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\QuotationResource\Pages\ViewQuotation;
 use Webkul\Purchase\Models\Quotation;
+use Webkul\Purchase\Models\RequisitionLine;
 
 class QuotationResource extends OrderResource
 {
@@ -60,5 +61,10 @@ class QuotationResource extends OrderResource
             'bills'    => ManageBills::route('/{record}/bills'),
             'receipts' => ManageReceipts::route('/{record}/receipts'),
         ];
+    }
+
+    protected static function getAgreementDefaultQuantity(RequisitionLine $line): float|int
+    {
+        return 0;
     }
 }
