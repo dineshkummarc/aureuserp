@@ -11,7 +11,7 @@ use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\PurchaseAgreementRe
 use Webkul\Purchase\Filament\Admin\Clusters\Orders\Resources\QuotationResource;
 use Webkul\Support\Traits\HasRecordNavigationTabs;
 
-class ManageFrqs extends ManageRelatedRecords
+class ManageRfqs extends ManageRelatedRecords
 {
     use HasRecordNavigationTabs;
 
