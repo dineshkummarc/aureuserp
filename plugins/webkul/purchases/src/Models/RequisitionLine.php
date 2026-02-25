@@ -18,6 +18,10 @@ class RequisitionLine extends Model
 
     protected $table = 'purchases_requisition_lines';
 
+    protected $appends = [
+        'ordered_qty',
+    ];
+
     protected $fillable = [
         'qty',
         'price_unit',

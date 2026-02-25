@@ -272,13 +272,8 @@ class PurchaseAgreementResource extends Resource
                     ->markAsRequired(),
                 TableColumn::make('ordered_qty')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.columns.ordered'))
-                    ->visible(
-                        in_array(
-                            $get('type') ?? $get('../type') ?? $get('../../type'),
-                            [RequisitionType::BLANKET_ORDER, RequisitionType::BLANKET_ORDER->value],
-                            true
-                        )
-                    )
+                    ->visible($get('type') === RequisitionType::BLANKET_ORDER)
+
                     ->width(250),
                 TableColumn::make('uom_id')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.columns.uom'))
@@ -751,7 +746,7 @@ class PurchaseAgreementResource extends Resource
             'create' => CreatePurchaseAgreement::route('/create'),
             'edit'   => EditPurchaseAgreement::route('/{record}/edit'),
             'view'   => ViewPurchaseAgreement::route('/{record}/view'),
-            'frqs'   => ManageRfqs::route('/{record}/frqs'),
+            'rfqs'   => ManageRfqs::route('/{record}/rfqs'),
         ];
     }
 
