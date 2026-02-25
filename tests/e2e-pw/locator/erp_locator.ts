@@ -59,6 +59,7 @@ export class ErpLocators {
     readonly usersPasswordConfirmationInput: Locator;
     readonly usersRoleSelect: Locator;
     readonly usersCompanySelect: Locator;
+    readonly usersCompanySearchInput: Locator;
     readonly usersRoleOption: Locator;
     readonly usersCompanyOption: Locator;
     readonly usersSaveButton: Locator;
@@ -71,6 +72,7 @@ export class ErpLocators {
     readonly usersResetPasswordButton: Locator;
     readonly usersSuccessToast: Locator;
     readonly usersErrorToast: Locator;
+    readonly userFeildValidationMessage: Locator;
     readonly usersValidationMessage: Locator;
 
     constructor(page: Page) {
@@ -125,16 +127,21 @@ export class ErpLocators {
         this.usersMenuLink = page.getByRole("link", { name: /users/i });
         this.usersTable = page.locator("table");
         this.usersCreateButton = page.locator("a,button").filter({ hasText: /new user|create user|add user|create/i }).first();
-        this.usersNameInput = page.locator('input[name="name"]').first();
-        this.usersEmailInput = page.locator('input[name="email"]').first();
-        this.usersPasswordInput = page.locator('input[name="password"]').first();
-        this.usersPasswordConfirmationInput = page.locator('input[name="password_confirmation"], input[name="passwordConfirmation"]').first();
-        this.usersRoleSelect = page.locator('select[name*="role"], [data-field-wrapper*="role"] [role="combobox"], [data-field-wrapper*="role"] input').first();
-        this.usersCompanySelect = page.locator('select[name*="company"], [data-field-wrapper*="company"] [role="combobox"], [data-field-wrapper*="company"] input').first();
+        this.usersNameInput = page.locator('input[id="form.name"]');
+        this.usersEmailInput = page.locator('input[id="form.email"]');
+        this.usersPasswordInput = page.locator('input[id="form.password"]');
+        this.usersPasswordConfirmationInput = page.locator('input[id="form.password_confirmation"]');
+        this.usersRoleSelect = page.locator('div.fi-select-input-value-ctn').nth(0);
+        // this.usersRoleSelect = page.locator('select[name*="role"], [data-field-wrapper*="role"] [role="combobox"], [data-field-wrapper*="role"] input').first();
+        // this.usersCompanySelect = page.locator('select[name*="company"], [data-field-wrapper*="company"] [role="combobox"], [data-field-wrapper*="company"] input').first();
+        this.usersCompanySelect = page.locator('div.fi-select-input-value-ctn').nth(5);
+        this.usersCompanySearchInput = page.locator('input[type="search"], input[placeholder*="Search"], input[placeholder*="search"]');
         this.usersRoleOption = page.locator('[role="option"], .fi-select-option, li').filter({ hasText: /./ });
         this.usersCompanyOption = page.locator('[role="option"], .fi-select-option, li').filter({ hasText: /./ });
-        this.usersSaveButton = page.locator("button[type='submit'], button").filter({ hasText: /create|save|submit/i }).first();
-        this.usersSearchInput = page.locator('input[placeholder*="Search"], input[type="search"]').first();
+        // this.usersSaveButton = page.locator("button[type='submit'], button").filter({ hasText: /create|save|submit/i }).first();
+        this.usersSaveButton = page.locator('button[x-data="filamentFormButton"]');
+        this.usersSearchInput = page.locator('.fi-input.fi-input-has-inline-prefix').nth(1);
+        // this.usersSearchInput = page.locator('input[placeholder*="Search"], input[type="search"]').first();
         this.usersRowActionsButton = page.locator('button[title="Actions"], button').filter({ hasText: /actions/i });
         this.usersEditButton = page.locator("button,a").filter({ hasText: /edit/i });
         this.usersDeleteButton = page.locator("button,a").filter({ hasText: /delete/i });
@@ -143,6 +150,7 @@ export class ErpLocators {
         this.usersResetPasswordButton = page.locator("button,a").filter({ hasText: /reset password/i }).first();
         this.usersSuccessToast = page.locator("h3.fi-no-notification-title, .fi-toast-message-success").first();
         this.usersErrorToast = page.locator(".fi-toast-message-error, .fi-input-wrp-error").first();
+        this.userFeildValidationMessage = page.locator(".fi-fo-field-wrp-error-message", { hasText: /The email has already been taken./ });
         this.usersValidationMessage = page.locator(".fi-fo-field-wrp-error-message, .text-danger, .invalid-feedback");
     }
 }

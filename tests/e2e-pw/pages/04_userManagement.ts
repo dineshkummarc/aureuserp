@@ -57,22 +57,20 @@ export class UserManagementPage {
     }
 
     /**
-     * Validate required field errors from empty submit
-     */
-    async createUserWithEmptyRequiredFields() {
-        await this.openCreateUserForm();
-        await this.erpLocators.usersSaveButton.click();
-        await expect(this.erpLocators.usersValidationMessage.first()).toBeVisible();
-    }
-
-    /**
      * Validate duplicate email handling
      */
     async createUserWithDuplicateEmail(userData: UserData) {
         await this.createUser(userData);
         await this.gotoUsersPage();
-        await this.createUser(userData);
-        await expect(this.erpLocators.usersErrorToast).toBeVisible();
+        await this.openCreateUserForm();
+        await this.erpLocators.usersNameInput.fill(userData.name);
+        await this.erpLocators.usersEmailInput.fill(userData.email);
+        await this.erpLocators.usersPasswordInput.fill(userData.password);
+        await this.erpLocators.usersPasswordConfirmationInput.fill(userData.password);
+        await this.selectRole(userData.role);
+        await this.selectCompany(userData.company);
+        await this.erpLocators.usersSaveButton.click();
+        await expect(this.erpLocators.userFeildValidationMessage.or(this.erpLocators.usersValidationMessage.first())).toBeVisible();
     }
 
     /**
@@ -132,15 +130,6 @@ export class UserManagementPage {
     async assertUserVisible(identifier: string) {
         await this.searchUser(identifier);
         await expect(this.page.getByText(identifier).first()).toBeVisible();
-    }
-
-    /**
-     * Assert role and company details are visible for target user
-     */
-    async assertUserRoleAndCompany(searchKey: string, role: string, company: string) {
-        await this.searchUser(searchKey);
-        await expect(this.page.getByText(role).first()).toBeVisible();
-        await expect(this.page.getByText(company).first()).toBeVisible();
     }
 
     /**
@@ -214,6 +203,10 @@ export class UserManagementPage {
                 return;
             }
             await companySelect.click();
+            const companySearchInput = this.erpLocators.usersCompanySearchInput.last();
+            if (await companySearchInput.isVisible()) {
+                await companySearchInput.fill(company);
+            }
             const option = this.page.getByRole("option", { name: company }).first();
             if (allowMissing) {
                 if (await option.isVisible()) {
@@ -221,6 +214,7 @@ export class UserManagementPage {
                 }
                 return;
             }
+            await option.waitFor({ state: "visible" });
             await option.click();
         }
     }

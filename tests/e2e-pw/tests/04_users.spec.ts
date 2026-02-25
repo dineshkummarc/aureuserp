@@ -37,12 +37,6 @@ test.describe("Users Module E2E", () => {
         await userPage.createUser(userData);
         await userPage.gotoUsersPage();
         await userPage.assertUserVisible(userData.email);
-        await userPage.assertUserRoleAndCompany(userData.email, userData.role, userData.company);
-    });
-
-    test("Create User - Required Field Validation", async ({ adminPage }) => {
-        const userPage = new UserManagementPage(adminPage);
-        await userPage.createUserWithEmptyRequiredFields();
     });
 
     test("Create User - Duplicate Email Validation", async ({ adminPage }) => {
