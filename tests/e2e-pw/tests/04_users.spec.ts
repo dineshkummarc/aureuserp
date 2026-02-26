@@ -1,4 +1,4 @@
-import { test } from "../setup";
+import { test , expect } from "../setup";
 import { CompanyManagementPage } from "../pages/03_companyManagement";
 import { UserManagementPage, type UserData } from "../pages/04_userManagement";
 
@@ -149,6 +149,32 @@ test.describe("Users Module E2E", () => {
 
         await userPage.gotoUsersPage();
         await userPage.toggleUserStatus(email);
+    });
+
+    test("Inactive User - Cannot Login To Admin Panel", async ({ adminPage }) => {
+        const companyPage = new CompanyManagementPage(adminPage);
+        const userPage = new UserManagementPage(adminPage);
+        const key = Date.now();
+        const companyName = `E2E Inactive User Company ${key}`;
+        const email = `inactive.user+${key}@example.com`;
+        const password = "Test@12345";
+
+        await companyPage.gotoCompaniesPage();
+        await companyPage.createCompany({ name: companyName, email: `inactive-user-company+${key}@example.com` });
+
+        await userPage.gotoUsersPage();
+        await userPage.createUser({
+            name: `E2E Inactive User ${key}`,
+            email,
+            password,
+            role: defaultRole,
+            company: companyName,
+            Status: "Inactive",
+        });
+
+        await userPage.logout();
+        await userPage.attemptLogin(email, password);
+        await expect(userPage.page).toHaveURL(/.*\/admin\/login/);
     });
 
     test("Reset User Password - Success", async ({ adminPage }) => {

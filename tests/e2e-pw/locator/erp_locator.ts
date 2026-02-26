@@ -69,7 +69,10 @@ export class ErpLocators {
     readonly usersDeleteButton: Locator;
     readonly usersConfirmDeleteButton: Locator;
     readonly usersStatusToggle: Locator;
+    readonly usersCreateStatusToggle: Locator;
     readonly usersResetPasswordButton: Locator;
+    readonly userMenuButton: Locator;
+    readonly logoutButton: Locator;
     readonly usersSuccessToast: Locator;
     readonly usersErrorToast: Locator;
     readonly userFeildValidationMessage: Locator;
@@ -147,7 +150,10 @@ export class ErpLocators {
         this.usersDeleteButton = page.locator("button,a").filter({ hasText: /delete/i });
         this.usersConfirmDeleteButton = page.locator("button,span").filter({ hasText: /delete|confirm/i }).first();
         this.usersStatusToggle = page.locator('button[role="switch"], input[type="checkbox"]').first();
+        this.usersCreateStatusToggle = page.locator('button.fi-fo-toggle');
         this.usersResetPasswordButton = page.locator("button,a").filter({ hasText: /reset password/i }).first();
+        this.userMenuButton = page.locator('button[aria-label="User menu"]');
+        this.logoutButton = page.locator('span.fi-dropdown-list-item-label').nth(2);
         this.usersSuccessToast = page.locator("h3.fi-no-notification-title, .fi-toast-message-success").first();
         this.usersErrorToast = page.locator(".fi-toast-message-error, .fi-input-wrp-error").first();
         this.userFeildValidationMessage = page.locator(".fi-fo-field-wrp-error-message", { hasText: /The email has already been taken./ });

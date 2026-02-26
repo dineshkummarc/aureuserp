@@ -1,5 +1,6 @@
 import { Page, expect } from "@playwright/test";
 import { ErpLocators } from "../locator/erp_locator";
+import { ADMIN_AUTH_STATE_PATH } from "../playwright.config";
 
 export type UserData = {
     name: string;
@@ -7,6 +8,7 @@ export type UserData = {
     password: string;
     role: string;
     company: string;
+    Status?: "Active" | "Inactive";
 };
 
 export class UserManagementPage {
@@ -51,6 +53,7 @@ export class UserManagementPage {
 
         await this.selectRole(userData.role);
         await this.selectCompany(userData.company);
+        await this.setCreateFormStatus(userData.Status);
 
         await this.erpLocators.usersSaveButton.click();
         await this.expectSuccessFeedback();
@@ -178,6 +181,27 @@ export class UserManagementPage {
     }
 
     /**
+     * Logout user by opening user menu and clicking logout
+     */
+    async logout() {
+        await this.page.waitForLoadState("networkidle");
+        await this.erpLocators.userMenuButton.click();
+        await this.erpLocators.logoutButton.click();
+        await expect(this.page).toHaveURL(/.*\/admin\/login/);
+    }
+
+    /**
+     * Attempt login with given credentials (used for negative testing of inactive users)
+     */
+    async attemptLogin(email: string, password: string) {
+        await this.page.goto("/admin/login");
+        await this.page.fill('input[type="email"]', email);
+        await this.page.fill('input[type="password"]', password);
+        await this.page.press('input[type="password"]', "Enter");
+        await this.page.waitForLoadState("networkidle");
+    }
+
+    /**
      * Role selection helper (supports native select and custom dropdown)
      */
     private async selectRole(role: string) {
@@ -216,6 +240,28 @@ export class UserManagementPage {
             }
             await option.waitFor({ state: "visible" });
             await option.click();
+        }
+    }
+
+    /**
+     * Create-form status toggle helper only
+     */
+    private async setCreateFormStatus(status?: "Active" | "Inactive") {
+        if (!status) {
+            return;
+        }
+
+        const statusToggle = this.erpLocators.usersCreateStatusToggle;
+        if (!await statusToggle.count()) {
+            return;
+        }
+
+        const toggleState = await statusToggle.first().getAttribute("aria-checked");
+        const isActive = toggleState !== "false";
+        const shouldBeActive = status === "Active";
+
+        if (isActive !== shouldBeActive) {
+            await statusToggle.first().click();
         }
     }
 
