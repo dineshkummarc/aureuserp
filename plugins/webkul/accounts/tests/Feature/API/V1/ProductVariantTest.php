@@ -26,7 +26,7 @@ beforeEach(function () {
 
 afterEach(fn () => SecurityHelper::restoreUserEvents());
 
-function actingAsProductVariantApiUser(array $permissions = []): User
+function actingWithProductVariantPermissions(array $permissions): User
 {
     $user = SecurityHelper::authenticateWithPermissions($permissions);
 
@@ -78,8 +78,17 @@ it('requires authentication to sync product variants', function () {
 
 // ── Index ──────────────────────────────────────────────────────────────────────
 
-it('lists product variants for authenticated users', function () {
-    actingAsProductVariantApiUser();
+it('forbids listing product variants without permission', function () {
+    actingWithProductVariantPermissions([]);
+
+    $parent = createVariantParent();
+
+    $this->getJson(productVariantRoute('index', $parent))
+        ->assertForbidden();
+});
+
+it('lists product variants for authorized users', function () {
+    actingWithProductVariantPermissions(['view_any_account_product']);
 
     $parent = createVariantParent();
     createVariant($parent);
@@ -91,7 +100,7 @@ it('lists product variants for authenticated users', function () {
 });
 
 it('only returns variants belonging to the given parent product', function () {
-    actingAsProductVariantApiUser();
+    actingWithProductVariantPermissions(['view_any_account_product']);
 
     $parent = createVariantParent();
     $otherParent = createVariantParent();
@@ -110,8 +119,17 @@ it('only returns variants belonging to the given parent product', function () {
 
 // ── Store (Sync Variants) ──────────────────────────────────────────────────────
 
-it('syncs product variants for authenticated users', function () {
-    actingAsProductVariantApiUser();
+it('forbids syncing product variants without permission', function () {
+    actingWithProductVariantPermissions([]);
+
+    $parent = createVariantParent();
+
+    $this->postJson(productVariantRoute('store', $parent))
+        ->assertForbidden();
+});
+
+it('syncs product variants for authorized users', function () {
+    actingWithProductVariantPermissions(['update_account_product']);
 
     $parent = createVariantParent();
 
@@ -122,8 +140,18 @@ it('syncs product variants for authenticated users', function () {
 
 // ── Show ───────────────────────────────────────────────────────────────────────
 
-it('shows a product variant for authenticated users', function () {
-    actingAsProductVariantApiUser();
+it('forbids showing a product variant without permission', function () {
+    actingWithProductVariantPermissions([]);
+
+    $parent = createVariantParent();
+    $variant = createVariant($parent);
+
+    $this->getJson(productVariantRoute('show', $parent, $variant))
+        ->assertForbidden();
+});
+
+it('shows a product variant for authorized users', function () {
+    actingWithProductVariantPermissions(['view_account_product']);
 
     $parent = createVariantParent();
     $variant = createVariant($parent);
@@ -136,7 +164,7 @@ it('shows a product variant for authenticated users', function () {
 });
 
 it('returns 404 for a variant not belonging to the given parent', function () {
-    actingAsProductVariantApiUser();
+    actingWithProductVariantPermissions(['view_account_product']);
 
     $parent = createVariantParent();
     $otherParent = createVariantParent();
@@ -147,7 +175,7 @@ it('returns 404 for a variant not belonging to the given parent', function () {
 });
 
 it('shows account-specific fields on a product variant', function () {
-    actingAsProductVariantApiUser();
+    actingWithProductVariantPermissions(['view_account_product']);
 
     $parent = createVariantParent();
     $income = Account::factory()->create();
@@ -173,8 +201,18 @@ it('shows account-specific fields on a product variant', function () {
 
 // ── Update ─────────────────────────────────────────────────────────────────────
 
+it('forbids updating a product variant without permission', function () {
+    actingWithProductVariantPermissions([]);
+
+    $parent = createVariantParent();
+    $variant = createVariant($parent);
+
+    $this->patchJson(productVariantRoute('update', $parent, $variant), ['name' => 'Updated Variant'])
+        ->assertForbidden();
+});
+
 it('updates a product variant name', function () {
-    actingAsProductVariantApiUser();
+    actingWithProductVariantPermissions(['update_account_product']);
 
     $parent = createVariantParent();
     $variant = createVariant($parent);
@@ -191,7 +229,7 @@ it('updates a product variant name', function () {
 });
 
 it('validates update payload for a product variant', function () {
-    actingAsProductVariantApiUser();
+    actingWithProductVariantPermissions(['update_account_product']);
 
     $parent = createVariantParent();
     $variant = createVariant($parent);
@@ -204,7 +242,7 @@ it('validates update payload for a product variant', function () {
 });
 
 it('updates account-specific fields on a product variant', function () {
-    actingAsProductVariantApiUser();
+    actingWithProductVariantPermissions(['update_account_product']);
 
     $parent = createVariantParent();
     $variant = createVariant($parent);
@@ -237,8 +275,18 @@ it('updates account-specific fields on a product variant', function () {
 
 // ── Destroy ────────────────────────────────────────────────────────────────────
 
+it('forbids deleting a product variant without permission', function () {
+    actingWithProductVariantPermissions([]);
+
+    $parent = createVariantParent();
+    $variant = createVariant($parent);
+
+    $this->deleteJson(productVariantRoute('destroy', $parent, $variant))
+        ->assertForbidden();
+});
+
 it('soft deletes a product variant', function () {
-    actingAsProductVariantApiUser();
+    actingWithProductVariantPermissions(['delete_account_product']);
 
     $parent = createVariantParent();
     $variant = createVariant($parent);
@@ -252,8 +300,19 @@ it('soft deletes a product variant', function () {
 
 // ── Restore ────────────────────────────────────────────────────────────────────
 
+it('forbids restoring a product variant without permission', function () {
+    actingWithProductVariantPermissions([]);
+
+    $parent = createVariantParent();
+    $variant = createVariant($parent);
+    $variant->delete();
+
+    $this->postJson(productVariantRoute('restore', $parent, $variant))
+        ->assertForbidden();
+});
+
 it('restores a soft-deleted product variant', function () {
-    actingAsProductVariantApiUser();
+    actingWithProductVariantPermissions(['restore_account_product']);
 
     $parent = createVariantParent();
     $variant = createVariant($parent);
@@ -271,8 +330,19 @@ it('restores a soft-deleted product variant', function () {
 
 // ── Force Delete ───────────────────────────────────────────────────────────────
 
+it('forbids permanently deleting a product variant without permission', function () {
+    actingWithProductVariantPermissions([]);
+
+    $parent = createVariantParent();
+    $variant = createVariant($parent);
+    $variant->delete();
+
+    $this->deleteJson(productVariantRoute('force-destroy', $parent, $variant))
+        ->assertForbidden();
+});
+
 it('permanently deletes a product variant', function () {
-    actingAsProductVariantApiUser();
+    actingWithProductVariantPermissions(['force_delete_account_product']);
 
     $parent = createVariantParent();
     $variant = createVariant($parent);

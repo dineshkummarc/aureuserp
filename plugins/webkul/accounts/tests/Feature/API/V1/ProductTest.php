@@ -36,7 +36,7 @@ beforeEach(function () {
 
 afterEach(fn () => SecurityHelper::restoreUserEvents());
 
-function actingAsProductApiUser(array $permissions = []): User
+function actingWithProductPermissions(array $permissions): User
 {
     $user = SecurityHelper::authenticateWithPermissions($permissions);
 
@@ -83,8 +83,15 @@ it('requires authentication to create a product', function () {
 
 // ── Index ──────────────────────────────────────────────────────────────────────
 
-it('lists products for authenticated users', function () {
-    actingAsProductApiUser();
+it('forbids listing products without permission', function () {
+    actingWithProductPermissions([]);
+
+    $this->getJson(productRoute('index'))
+        ->assertForbidden();
+});
+
+it('lists products for authorized users', function () {
+    actingWithProductPermissions(['view_any_account_product']);
 
     Product::factory()->count(3)->create();
 
@@ -94,7 +101,7 @@ it('lists products for authenticated users', function () {
 });
 
 it('filters products by type', function () {
-    actingAsProductApiUser();
+    actingWithProductPermissions(['view_any_account_product']);
 
     $product = Product::factory()->create(['type' => 'goods']);
     Product::factory()->count(2)->create(['type' => 'service']);
@@ -111,8 +118,15 @@ it('filters products by type', function () {
 
 // ── Store ──────────────────────────────────────────────────────────────────────
 
+it('forbids creating a product without permission', function () {
+    actingWithProductPermissions([]);
+
+    $this->postJson(productRoute('store'), productPayload())
+        ->assertForbidden();
+});
+
 it('creates a product', function () {
-    actingAsProductApiUser();
+    actingWithProductPermissions(['create_account_product']);
 
     $payload = productPayload();
 
@@ -130,7 +144,7 @@ it('creates a product', function () {
 });
 
 it('creates a product with account-specific income and expense accounts', function () {
-    actingAsProductApiUser();
+    actingWithProductPermissions(['create_account_product']);
 
     $incomeAccount  = Account::factory()->create();
     $expenseAccount = Account::factory()->create();
@@ -162,7 +176,7 @@ it('creates a product with account-specific income and expense accounts', functi
 });
 
 it('validates required fields when creating a product', function (string $field) {
-    actingAsProductApiUser();
+    actingWithProductPermissions(['create_account_product']);
 
     $payload = productPayload();
     unset($payload[$field]);
@@ -173,7 +187,7 @@ it('validates required fields when creating a product', function (string $field)
 })->with(PRODUCT_REQUIRED_FIELDS);
 
 it('validates invoice_policy accepts only allowed values', function () {
-    actingAsProductApiUser();
+    actingWithProductPermissions(['create_account_product']);
 
     $this->postJson(productRoute('store'), productPayload(['invoice_policy' => 'invalid']))
         ->assertUnprocessable()
@@ -182,8 +196,17 @@ it('validates invoice_policy accepts only allowed values', function () {
 
 // ── Show ───────────────────────────────────────────────────────────────────────
 
-it('shows a product for authenticated users', function () {
-    actingAsProductApiUser();
+it('forbids showing a product without permission', function () {
+    actingWithProductPermissions([]);
+
+    $product = Product::factory()->create();
+
+    $this->getJson(productRoute('show', $product))
+        ->assertForbidden();
+});
+
+it('shows a product for authorized users', function () {
+    actingWithProductPermissions(['view_account_product']);
 
     $product = Product::factory()->create();
 
@@ -194,14 +217,14 @@ it('shows a product for authenticated users', function () {
 });
 
 it('returns 404 for a non-existent product', function () {
-    actingAsProductApiUser();
+    actingWithProductPermissions(['view_account_product']);
 
     $this->getJson(productRoute('show', 999999))
         ->assertNotFound();
 });
 
 it('shows account-specific fields on a product', function () {
-    actingAsProductApiUser();
+    actingWithProductPermissions(['view_account_product']);
 
     $incomeAccount  = Account::factory()->create();
     $expenseAccount = Account::factory()->create();
@@ -225,8 +248,17 @@ it('shows account-specific fields on a product', function () {
 
 // ── Update ─────────────────────────────────────────────────────────────────────
 
+it('forbids updating a product without permission', function () {
+    actingWithProductPermissions([]);
+
+    $product = Product::factory()->create();
+
+    $this->patchJson(productRoute('update', $product), ['name' => 'Updated Product Name'])
+        ->assertForbidden();
+});
+
 it('updates a product name', function () {
-    actingAsProductApiUser();
+    actingWithProductPermissions(['update_account_product']);
 
     $product = Product::factory()->create();
 
@@ -241,7 +273,7 @@ it('updates a product name', function () {
 });
 
 it('updates account-specific fields on a product', function () {
-    actingAsProductApiUser();
+    actingWithProductPermissions(['update_account_product']);
 
     $product        = Product::factory()->create();
     $incomeAccount  = Account::factory()->create();
@@ -273,8 +305,17 @@ it('updates account-specific fields on a product', function () {
 
 // ── Destroy ────────────────────────────────────────────────────────────────────
 
+it('forbids deleting a product without permission', function () {
+    actingWithProductPermissions([]);
+
+    $product = Product::factory()->create();
+
+    $this->deleteJson(productRoute('destroy', $product))
+        ->assertForbidden();
+});
+
 it('soft deletes a product', function () {
-    actingAsProductApiUser();
+    actingWithProductPermissions(['delete_account_product']);
 
     $product = Product::factory()->create();
 
@@ -287,8 +328,18 @@ it('soft deletes a product', function () {
 
 // ── Restore ────────────────────────────────────────────────────────────────────
 
+it('forbids restoring a product without permission', function () {
+    actingWithProductPermissions([]);
+
+    $product = Product::factory()->create();
+    $product->delete();
+
+    $this->postJson(productRoute('restore', $product))
+        ->assertForbidden();
+});
+
 it('restores a soft-deleted product', function () {
-    actingAsProductApiUser();
+    actingWithProductPermissions(['restore_account_product']);
 
     $product = Product::factory()->create();
     $product->delete();
@@ -305,8 +356,18 @@ it('restores a soft-deleted product', function () {
 
 // ── Force Delete ───────────────────────────────────────────────────────────────
 
+it('forbids permanently deleting a product without permission', function () {
+    actingWithProductPermissions([]);
+
+    $product = Product::factory()->create();
+    $product->delete();
+
+    $this->deleteJson(productRoute('force-destroy', $product))
+        ->assertForbidden();
+});
+
 it('permanently deletes a product', function () {
-    actingAsProductApiUser();
+    actingWithProductPermissions(['force_delete_account_product']);
 
     $product = Product::factory()->create();
     $product->delete();
