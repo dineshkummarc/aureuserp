@@ -403,15 +403,6 @@ class CompanyResource extends Resource
                                 ->title((__('security::filament/resources/company.table.actions.delete.notification.title')))
                                 ->body(__('security::filament/resources/company.table.actions.delete.notification.body')),
                         ),
-                    ForceDeleteAction::make()
-                        ->visible(fn ($record, $livewire = null) => $record->trashed() && static::isArchivedTab($livewire))
-                        ->before(fn ($record, $action) => static::cancelIfDefaultCompany($record->id, $action))
-                        ->successNotification(
-                            Notification::make()
-                                ->success()
-                                ->title((__('security::filament/resources/company.table.actions.force-delete.notification.title')))
-                                ->body(__('security::filament/resources/company.table.actions.force-delete.notification.body')),
-                        ),
                     RestoreAction::make()
                         ->visible(fn ($record, $livewire = null) => $record->trashed() && static::isArchivedTab($livewire))
                         ->successNotification(
@@ -421,7 +412,8 @@ class CompanyResource extends Resource
                                 ->body(__('security::filament/resources/company.table.actions.restore.notification.body')),
                         ),
                     ForceDeleteAction::make()
-                        ->hidden(fn ($record) => ! $record->trashed())
+                        ->visible(fn ($record, $livewire = null) => $record->trashed() && static::isArchivedTab($livewire))
+                        ->before(fn ($record, $action) => static::cancelIfDefaultCompany($record->id, $action))
                         ->action(function (ForceDeleteAction $action, Company $record) {
                             try {
                                 $record->forceDelete();
