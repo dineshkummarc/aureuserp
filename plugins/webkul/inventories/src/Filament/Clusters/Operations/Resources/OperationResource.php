@@ -632,7 +632,7 @@ class OperationResource extends Resource
             ->columns(1);
     }
 
-    public static function getUrl(?string $name = 'index', array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?Model $tenant = null, bool $shouldGuessMissingParameters = false): string
+    public static function getUrl(?string $name = 'index', array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?Model $tenant = null, bool $shouldGuessMissingParameters = false, ?string $configuration = null): string
     {
         return match ($parameters['record']?->operationType->type) {
             Enums\OperationType::INCOMING => ReceiptResource::getUrl('view', $parameters, $isAbsolute, $panel, $tenant),
