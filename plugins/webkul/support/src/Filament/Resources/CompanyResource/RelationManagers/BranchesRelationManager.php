@@ -63,6 +63,10 @@ class BranchesRelationManager extends RelationManager
                                             ->label(__('support::filament/resources/company/relation-managers/manage-branch.form.tabs.general-information.sections.branch-information.fields.company-name'))
                                             ->required()
                                             ->maxLength(255)
+                                            ->unique(ignoreRecord: true)
+                                            ->validationMessages([
+                                                'unique' => 'Company name already exists. Please use a unique name.',
+                                            ])
                                             ->live(onBlur: true),
                                         TextInput::make('registration_number')
                                             ->label(__('support::filament/resources/company/relation-managers/manage-branch.form.tabs.general-information.sections.branch-information.fields.registration-number')),
