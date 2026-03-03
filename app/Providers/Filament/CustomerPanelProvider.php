@@ -37,27 +37,11 @@ class CustomerPanelProvider extends PanelProvider
             ->topNavigation()
             ->renderHook(
                 PanelsRenderHook::USER_MENU_BEFORE,
-                fn() => view('filament.components.language-switcher'),
+                fn () => view('filament.components.language-switcher'),
             )
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
-                fn() => view('filament.components.language-switcher'),
-            )
-            ->renderHook(
-                PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
-                fn() => view('filament.components.auth-language-switcher'),
-            )
-            ->renderHook(
-                PanelsRenderHook::AUTH_REGISTER_FORM_BEFORE,
-                fn() => view('filament.components.auth-language-switcher'),
-            )
-            ->renderHook(
-                PanelsRenderHook::AUTH_PASSWORD_RESET_REQUEST_FORM_BEFORE,
-                fn() => view('filament.components.auth-language-switcher'),
-            )
-            ->renderHook(
-                PanelsRenderHook::AUTH_PASSWORD_RESET_RESET_FORM_BEFORE,
-                fn() => view('filament.components.auth-language-switcher'),
+                fn () => view('filament.components.language-switcher'),
             )
             ->middleware([
                 EncryptCookies::class,
