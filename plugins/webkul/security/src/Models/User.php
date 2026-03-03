@@ -49,6 +49,7 @@ class User extends BaseUser implements FilamentUser, HasAppAuthentication, HasAp
         $this->mergeCasts([
             'default_company_id'  => 'integer',
             'resource_permission' => PermissionType::class,
+            'is_active'           => 'boolean',
         ]);
 
         parent::__construct($attributes);
@@ -63,7 +64,7 @@ class User extends BaseUser implements FilamentUser, HasAppAuthentication, HasAp
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return $this->is_active;
     }
 
     public function creator(): BelongsTo
@@ -134,7 +135,7 @@ class User extends BaseUser implements FilamentUser, HasAppAuthentication, HasAp
             'creator_id' => Auth::user()->id ?? $user->id,
             'user_id'    => $user->id,
             'sub_type'   => 'partner',
-            ...Arr::except($user->toArray(), ['id', 'partner_id']),
+            ...Arr::except($user->toArray(), ['id', 'partner_id', 'email_verified_at']),
         ]);
 
         $user->partner_id = $partner->id;
@@ -149,7 +150,7 @@ class User extends BaseUser implements FilamentUser, HasAppAuthentication, HasAp
                 'creator_id' => Auth::user()->id ?? $user->id,
                 'user_id'    => $user->id,
                 'sub_type'   => 'partner',
-                ...Arr::except($user->toArray(), ['id', 'partner_id']),
+                ...Arr::except($user->toArray(), ['id', 'partner_id', 'email_verified_at']),
             ]
         );
 
