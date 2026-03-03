@@ -155,7 +155,7 @@ class BranchesRelationManager extends RelationManager
                                         Select::make('currency_id')
                                             ->relationship(
                                                 name: 'currency',
-                                                titleAttribute: 'full_name',
+                                                titleAttribute: 'name',
                                                 modifyQueryUsing: fn (Builder $query) => $query->active(),
                                             )
                                             ->label(__('support::filament/resources/company/relation-managers/manage-branch.form.tabs.address-information.sections.additional-information.fields.default-currency'))

@@ -187,7 +187,7 @@ class CompanyResource extends Resource
                                         Select::make('currency_id')
                                             ->relationship(
                                                 name: 'currency',
-                                                titleAttribute: 'full_name',
+                                                titleAttribute: 'name',
                                                 modifyQueryUsing: fn (Builder $query) => $query->active(),
                                             )
                                             ->label(__('security::filament/resources/company.form.sections.additional-information.fields.default-currency'))
