@@ -206,7 +206,7 @@ endpoints:
         name: commitment_date
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:31'
+        example: '2026-03-03T04:25:46'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -473,7 +473,7 @@ endpoints:
       payment_term_id: 1
       date_order: '2026-02-18'
       validity_date: '2026-02-28'
-      commitment_date: '2026-02-26T07:08:31'
+      commitment_date: '2026-03-03T04:25:46'
       client_order_ref: b
       origin: 'n'
       note: 'Delivery within 7 business days.'
@@ -689,7 +689,7 @@ endpoints:
         name: commitment_date
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:31'
+        example: '2026-03-03T04:25:46'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -956,7 +956,7 @@ endpoints:
       payment_term_id: 1
       date_order: '2026-02-18'
       validity_date: '2026-02-28'
-      commitment_date: '2026-02-26T07:08:31'
+      commitment_date: '2026-03-03T04:25:46'
       client_order_ref: b
       origin: 'n'
       note: 'Delivery within 7 business days.'

@@ -3570,7 +3570,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":[{"id":null,"company_id":1255,"country_id":356,"country_group_id":null,"creator_id":1,"name":"alias optio","zip_from":null,"zip_to":null,"foreign_vat":null,"notes":null,"auto_reply":false,"vat_required":false,"sort":0,"created_at":null,"updated_at":null},{"id":null,"company_id":1256,"country_id":357,"country_group_id":null,"creator_id":1,"name":"nisi labore","zip_from":null,"zip_to":null,"foreign_vat":null,"notes":null,"auto_reply":false,"vat_required":false,"sort":0,"created_at":null,"updated_at":null}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"\/?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}],"path":"\/","per_page":10,"to":2,"total":2}}'
+        content: '{"data":[{"id":null,"company_id":1359,"country_id":366,"country_group_id":null,"creator_id":1,"name":"odio molestiae","zip_from":null,"zip_to":null,"foreign_vat":null,"notes":null,"auto_reply":false,"vat_required":false,"sort":0,"created_at":null,"updated_at":null},{"id":null,"company_id":1360,"country_id":367,"country_group_id":null,"creator_id":1,"name":"reiciendis dolorem","zip_from":null,"zip_to":null,"foreign_vat":null,"notes":null,"auto_reply":false,"vat_required":false,"sort":0,"created_at":null,"updated_at":null}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"\/?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}],"path":"\/","per_page":10,"to":2,"total":2}}'
         headers: []
         description: ''
       -
@@ -3837,7 +3837,7 @@ endpoints:
       -
         custom: []
         status: 201
-        content: '{"data":{"id":null,"company_id":1257,"country_id":358,"country_group_id":null,"creator_id":1,"name":"eius et","zip_from":null,"zip_to":null,"foreign_vat":null,"notes":null,"auto_reply":false,"vat_required":false,"sort":0,"created_at":null,"updated_at":null},"message":"Fiscal position created successfully."}'
+        content: '{"data":{"id":null,"company_id":1361,"country_id":368,"country_group_id":null,"creator_id":1,"name":"eius et","zip_from":null,"zip_to":null,"foreign_vat":null,"notes":null,"auto_reply":false,"vat_required":false,"sort":0,"created_at":null,"updated_at":null},"message":"Fiscal position created successfully."}'
         headers: []
         description: ''
       -
@@ -3914,7 +3914,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":null,"company_id":1258,"country_id":359,"country_group_id":null,"creator_id":1,"name":"aut adipisci","zip_from":null,"zip_to":null,"foreign_vat":null,"notes":null,"auto_reply":false,"vat_required":false,"sort":0,"created_at":null,"updated_at":null}}'
+        content: '{"data":{"id":null,"company_id":1362,"country_id":369,"country_group_id":null,"creator_id":1,"name":"aut adipisci","zip_from":null,"zip_to":null,"foreign_vat":null,"notes":null,"auto_reply":false,"vat_required":false,"sort":0,"created_at":null,"updated_at":null}}'
         headers: []
         description: ''
       -
@@ -4200,7 +4200,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":null,"company_id":1259,"country_id":360,"country_group_id":null,"creator_id":1,"name":"eius et","zip_from":null,"zip_to":null,"foreign_vat":null,"notes":null,"auto_reply":false,"vat_required":false,"sort":0,"created_at":null,"updated_at":null},"message":"Fiscal position updated successfully."}'
+        content: '{"data":{"id":null,"company_id":1363,"country_id":370,"country_group_id":null,"creator_id":1,"name":"eius et","zip_from":null,"zip_to":null,"foreign_vat":null,"notes":null,"auto_reply":false,"vat_required":false,"sort":0,"created_at":null,"updated_at":null},"message":"Fiscal position updated successfully."}'
         headers: []
         description: ''
       -
@@ -4409,7 +4409,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":[{"id":null,"name":"aut adipisci","strategy":"biggest_tax","rounding_method":"HALF-UP","rounding":0.05,"profit_account_id":262,"loss_account_id":263,"creator_id":1,"created_at":null,"updated_at":null},{"id":null,"name":"enim non","strategy":"biggest_tax","rounding_method":"HALF-UP","rounding":0.05,"profit_account_id":264,"loss_account_id":265,"creator_id":1,"created_at":null,"updated_at":null}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"\/?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}],"path":"\/","per_page":10,"to":2,"total":2}}'
+        content: '{"data":[{"id":null,"name":"aut adipisci","strategy":"biggest_tax","rounding_method":"HALF-UP","rounding":0.05,"profit_account_id":282,"loss_account_id":283,"creator_id":1,"created_at":null,"updated_at":null},{"id":null,"name":"enim non","strategy":"biggest_tax","rounding_method":"HALF-UP","rounding":0.05,"profit_account_id":284,"loss_account_id":285,"creator_id":1,"created_at":null,"updated_at":null}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"\/?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}],"path":"\/","per_page":10,"to":2,"total":2}}'
         headers: []
         description: ''
       -
@@ -4533,7 +4533,7 @@ endpoints:
       -
         custom: []
         status: 201
-        content: '{"data":{"id":null,"name":"architecto eius","strategy":"biggest_tax","rounding_method":"HALF-UP","rounding":0.05,"profit_account_id":266,"loss_account_id":267,"creator_id":1,"created_at":null,"updated_at":null},"message":"Cash rounding created successfully."}'
+        content: '{"data":{"id":null,"name":"architecto eius","strategy":"biggest_tax","rounding_method":"HALF-UP","rounding":0.05,"profit_account_id":286,"loss_account_id":287,"creator_id":1,"created_at":null,"updated_at":null},"message":"Cash rounding created successfully."}'
         headers: []
         description: ''
       -
@@ -4610,7 +4610,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":null,"name":"aut adipisci","strategy":"biggest_tax","rounding_method":"HALF-UP","rounding":0.05,"profit_account_id":268,"loss_account_id":269,"creator_id":1,"created_at":null,"updated_at":null}}'
+        content: '{"data":{"id":null,"name":"aut adipisci","strategy":"biggest_tax","rounding_method":"HALF-UP","rounding":0.05,"profit_account_id":288,"loss_account_id":289,"creator_id":1,"created_at":null,"updated_at":null}}'
         headers: []
         description: ''
       -
@@ -4753,7 +4753,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":null,"name":"architecto eius","strategy":"biggest_tax","rounding_method":"HALF-UP","rounding":0.05,"profit_account_id":270,"loss_account_id":271,"creator_id":1,"created_at":null,"updated_at":null},"message":"Cash rounding updated successfully."}'
+        content: '{"data":{"id":null,"name":"architecto eius","strategy":"biggest_tax","rounding_method":"HALF-UP","rounding":0.05,"profit_account_id":290,"loss_account_id":291,"creator_id":1,"created_at":null,"updated_at":null},"message":"Cash rounding updated successfully."}'
         headers: []
         description: ''
       -
@@ -13814,7 +13814,7 @@ endpoints:
         name: date
         description: 'Must be a valid date.'
         required: true
-        example: '2026-02-26T07:08:25'
+        example: '2026-03-03T04:25:40'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -13823,7 +13823,7 @@ endpoints:
     cleanBodyParameters:
       reason: b
       journal_id: 16
-      date: '2026-02-26T07:08:25'
+      date: '2026-03-03T04:25:40'
     fileParameters: []
     responses:
       -
@@ -16925,7 +16925,7 @@ endpoints:
         name: date
         description: 'Must be a valid date.'
         required: true
-        example: '2026-02-26T07:08:26'
+        example: '2026-03-03T04:25:41'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -16934,7 +16934,7 @@ endpoints:
     cleanBodyParameters:
       reason: b
       journal_id: 16
-      date: '2026-02-26T07:08:26'
+      date: '2026-03-03T04:25:41'
     fileParameters: []
     responses:
       -
