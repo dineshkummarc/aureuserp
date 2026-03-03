@@ -23,6 +23,7 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 use Webkul\Security\Filament\Resources\RoleResource\Pages\CreateRole;
@@ -148,7 +149,20 @@ class RoleResource extends RolesRoleResource
             ->toolbarActions([
                 DeleteBulkAction::make()
                     ->fetchSelectedRecords(true)
-                    ->authorizeIndividualRecords('delete'),
+                    ->authorizeIndividualRecords('delete')
+                    ->action(function (DeleteBulkAction $action, Collection $records): void {
+                        $deletableRecords = $records->reject(
+                            fn (Model $record): bool => static::isProtectedRoleRecord($record)
+                        );
+
+                        if ($deletableRecords->isEmpty()) {
+                            $action->cancel();
+
+                            return;
+                        }
+
+                        $deletableRecords->each(fn (Model $record): ?bool => $record->delete());
+                    }),
             ])
             ->defaultSort('created_at', 'asc');
     }
