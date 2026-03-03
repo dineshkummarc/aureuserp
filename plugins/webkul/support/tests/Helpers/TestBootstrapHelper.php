@@ -31,6 +31,21 @@ class TestBootstrapHelper
         }
 
         Artisan::call("{$pluginName}:install", ['--no-interaction' => true]);
+
+        // Re-register the plugin's routes into the already-booted application.
+        // On CI, the app boots before beforeEach installs the plugin, so routes
+        // are skipped in PackageServiceProvider::boot(). Loading them here ensures
+        // the first test in each file can resolve named routes correctly.
+        static::loadPluginRoutes($pluginName);
+    }
+
+    private static function loadPluginRoutes(string $pluginName): void
+    {
+        $routeFile = base_path("plugins/webkul/{$pluginName}/routes/api.php");
+
+        if (file_exists($routeFile) && ! app()->routesAreCached()) {
+            require $routeFile;
+        }
     }
 
     public static function ensureERPInstalled(): void
