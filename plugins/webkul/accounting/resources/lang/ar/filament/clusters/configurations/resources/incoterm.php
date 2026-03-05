@@ -2,8 +2,8 @@
 
 return [
     'model-label' => 'شروط التسليم',
-    'navigation' => [
+    'navigation'  => [
         'title' => 'شروط التسليم',
-        'group' => 'المحاسبة',
+        'group' => 'الفوترة',
     ],
 ];
