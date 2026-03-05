@@ -15,6 +15,7 @@ return [
     'form' => [
         'validation' => [
             'cannot-remove-last-admin'   => 'Cannot remove the admin role from the last admin user.',
+            'first-user-must-be-admin'   => 'The first user in the system must be assigned an admin role.',
         ],
 
         'sections' => [

@@ -529,11 +529,23 @@ class UserResource extends Resource
             ->whereHas('roles', fn(Builder $query) => $query->whereKey($adminRoleIds))
             ->count();
 
-        if ($adminUsersCount !== 1) {
-            return;
+        $firstUserId = User::min('id');
+        $isFirstUser = $record && $record->id === $firstUserId;
+
+        if (
+            $isFirstUser 
+            && ! $willBeAdmin
+        ) {
+            throw ValidationException::withMessages([
+                'roles' => __('security::filament/resources/user.form.validation.first-user-must-be-admin'),
+            ]);
         }
 
-        if ($isAdminCurrently && (! $willBeAdmin)) {
+        if (
+            $adminUsersCount === 1 
+            && $isAdminCurrently 
+            && ! $willBeAdmin
+        ) {
             throw ValidationException::withMessages([
                 'roles' => __('security::filament/resources/user.form.validation.cannot-remove-last-admin'),
             ]);
