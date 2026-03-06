@@ -155,7 +155,7 @@ export class UserManagementPage {
     async editUserName(searchKey: string, newName: string) {
         await this.searchUser(searchKey);
         await this.erpLocators.usersRowActionsButton.first().click();
-        await this.erpLocators.usersEditButton.first().click();
+        await this.erpLocators.usersEditButton.click();
         await this.erpLocators.usersNameInput.fill(newName);
         await this.erpLocators.usersSaveButton.click();
         await this.expectSuccessFeedback();
