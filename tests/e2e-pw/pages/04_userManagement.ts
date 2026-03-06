@@ -1,4 +1,5 @@
 import { Page, expect } from "@playwright/test";
+import fs from "fs";
 import { ErpLocators } from "../locator/erp_locator";
 import { ADMIN_AUTH_STATE_PATH } from "../playwright.config";
 
@@ -17,6 +18,7 @@ export class UserManagementPage {
      */
     readonly page: Page;
     readonly erpLocators: ErpLocators;
+    userCount: number = 0;
 
     constructor(page: Page) {
         this.page = page;
@@ -30,6 +32,18 @@ export class UserManagementPage {
         await this.page.goto("/admin/users");
         await expect(this.page).toHaveURL(/.*users/);
         await expect(this.erpLocators.usersTable.first()).toBeVisible();
+
+        await this.refreshUserCount();
+    }
+
+    /**
+     * Read and cache user count from UI
+     */
+    async refreshUserCount(): Promise<number> {
+        const countText = await this.erpLocators.allUsersCount.textContent();
+        this.userCount = countText ? parseInt(countText.trim()) : 0;
+
+        return this.userCount;
     }
 
     /**
@@ -148,24 +162,16 @@ export class UserManagementPage {
     }
 
     /**
-     * Toggle status for first matched user row
-     */
-    async toggleUserStatus(searchKey: string) {
-        await this.searchUser(searchKey);
-        await this.erpLocators.usersStatusToggle.first().click();
-        await this.expectSuccessFeedback();
-    }
-
-    /**
      * Reset password from user action
      */
     async resetUserPassword(searchKey: string, newPassword: string) {
         await this.searchUser(searchKey);
-        await this.erpLocators.usersRowActionsButton.first().click();
+        await this.erpLocators.usersRowActionsButton.click();
+        await this.erpLocators.usersEditButton.click();
         await this.erpLocators.usersResetPasswordButton.click();
-        await this.erpLocators.usersPasswordInput.fill(newPassword);
-        await this.erpLocators.usersPasswordConfirmationInput.fill(newPassword);
-        await this.erpLocators.usersSaveButton.click();
+        await this.erpLocators.usersChangePasswordInput.fill(newPassword);
+        await this.erpLocators.usersChangePasswordConfirmationInput.fill(newPassword);
+        await this.erpLocators.usersChangePasswordSaveButton.click();
         await this.expectSuccessFeedback();
     }
 
@@ -175,9 +181,110 @@ export class UserManagementPage {
     async deleteUser(searchKey: string) {
         await this.searchUser(searchKey);
         await this.erpLocators.usersRowActionsButton.first().click();
-        await this.erpLocators.usersDeleteButton.first().click();
+        await this.erpLocators.usersDeleteButton.click();
         await this.erpLocators.usersConfirmDeleteButton.click();
         await this.expectSuccessFeedback();
+    }
+
+    /**
+     * Bulk delete users from listing
+     */
+    async bulkDeleteUsers(searchKey: string) {
+        await this.searchUser(searchKey);
+        await this.erpLocators.selectAllUsersButton.click();
+        await this.erpLocators.usersBulkActionsButton.click();
+        await this.erpLocators.usersForceDeleteButton.click();
+        await this.erpLocators.usersConfirmDeleteButton.click();
+        await this.expectSuccessFeedback();
+    }
+
+    /**
+     * Navigate to Manage Users settings page
+     */
+    async gotoManageUsersSettingsPage() {
+        await this.page.goto("/admin/settings/manage-users");
+        await expect(this.page).toHaveURL(/.*\/admin\/settings\/manage-users/);
+        await expect(this.erpLocators.manageUsersEnableResetCard).toBeVisible();
+    }
+
+    /**
+     * Enable or disable password reset config for users
+     */
+    async setEnableResetConfiguration(enabled: boolean) {
+        const toggle = this.erpLocators.manageUsersEnableResetToggle;
+        await expect(toggle).toBeVisible();
+
+        const tag = await toggle.evaluate((el) => el.tagName.toLowerCase());
+        const isEnabled = tag === "input"
+            ? await toggle.isChecked()
+            : (await toggle.getAttribute("aria-checked")) !== "false";
+
+        if (isEnabled !== enabled) {
+            await toggle.click();
+        }
+
+        if (await this.erpLocators.settingsSaveButton.isVisible()) {
+            await this.erpLocators.settingsSaveButton.click();
+            await this.page.waitForLoadState("networkidle");
+        }
+    }
+
+    /**
+     * Enable or disable user invitation config
+     */
+    async setEnableUserInvitationConfiguration(enabled: boolean) {
+        const toggle = this.erpLocators.manageUsersEnableInvitationToggle;
+        await expect(toggle).toBeVisible();
+
+        const tag = await toggle.evaluate((el) => el.tagName.toLowerCase());
+        const isEnabled = tag === "input"
+            ? await toggle.isChecked()
+            : (await toggle.getAttribute("aria-checked")) !== "false";
+
+        if (isEnabled !== enabled) {
+            await toggle.click();
+        }
+
+        if (await this.erpLocators.settingsSaveButton.isVisible()) {
+            await this.erpLocators.settingsSaveButton.click();
+            await this.page.waitForLoadState("networkidle");
+        }
+    }
+
+    /**
+     * Assert reset password action is not available in row actions
+     */
+    async assertResetPasswordActionDisabled(searchKey: string) {
+        await this.searchUser(searchKey);
+        await this.erpLocators.usersRowActionsButton.first().click();
+        await this.erpLocators.usersEditButton.click();
+        await expect(this.erpLocators.usersResetPasswordButton).not.toBeVisible();
+        const resetAction = this.page.locator("button,a").filter({ hasText: /Change Password|Reset Password/i });
+        if (await resetAction.count()) {
+            await expect(resetAction.first()).not.toBeVisible();
+            return;
+        }
+
+        await expect(resetAction).toHaveCount(0);
+    }
+
+    /**
+     * Assert user invitation action is available on users page
+     */
+    async assertUserInvitationVisible() {
+        await expect(this.erpLocators.usersInviteButton).toBeVisible();
+    }
+
+    /**
+     * Assert user invitation action is hidden on users page
+     */
+    async assertUserInvitationHidden() {
+        if (await this.erpLocators.usersInviteButton.count()) {
+            await expect(this.erpLocators.usersInviteButton.first()).not.toBeVisible();
+            return;
+        }
+
+        await expect(this.erpLocators.usersInviteButton).toHaveCount(0);
     }
 
     /**
@@ -188,6 +295,11 @@ export class UserManagementPage {
         await this.erpLocators.userMenuButton.click();
         await this.erpLocators.logoutButton.click();
         await expect(this.page).toHaveURL(/.*\/admin\/login/);
+
+        if (fs.existsSync(ADMIN_AUTH_STATE_PATH)) {
+            fs.unlinkSync(ADMIN_AUTH_STATE_PATH);
+            console.log("[logout] Deleted stale auth state file.");
+        }
     }
 
     /**

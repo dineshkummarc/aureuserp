@@ -51,8 +51,10 @@ export class ErpLocators {
      */
 
     readonly usersMenuLink: Locator;
+    readonly allUsersCount: Locator;
     readonly usersTable: Locator;
     readonly usersCreateButton: Locator;
+    readonly usersInviteButton: Locator;
     readonly usersNameInput: Locator;
     readonly usersEmailInput: Locator;
     readonly usersPasswordInput: Locator;
@@ -68,15 +70,25 @@ export class ErpLocators {
     readonly usersEditButton: Locator;
     readonly usersDeleteButton: Locator;
     readonly usersConfirmDeleteButton: Locator;
+    readonly selectAllUsersButton: Locator;
+    readonly usersBulkActionsButton: Locator;
+    readonly usersForceDeleteButton: Locator;
     readonly usersStatusToggle: Locator;
     readonly usersCreateStatusToggle: Locator;
     readonly usersResetPasswordButton: Locator;
+    readonly usersChangePasswordInput: Locator;
+    readonly usersChangePasswordConfirmationInput: Locator;
+    readonly usersChangePasswordSaveButton: Locator;
     readonly userMenuButton: Locator;
     readonly logoutButton: Locator;
     readonly usersSuccessToast: Locator;
     readonly usersErrorToast: Locator;
     readonly userFeildValidationMessage: Locator;
     readonly usersValidationMessage: Locator;
+    readonly manageUsersEnableResetCard: Locator;
+    readonly manageUsersEnableResetToggle: Locator;
+    readonly manageUsersEnableInvitationToggle: Locator;
+    readonly settingsSaveButton: Locator;
 
     constructor(page: Page) {
         this.page = page;
@@ -128,8 +140,10 @@ export class ErpLocators {
          */
 
         this.usersMenuLink = page.getByRole("link", { name: /users/i });
+        this.allUsersCount = page.locator('span.fi-badge-label-ctn').nth(0);
         this.usersTable = page.locator("table");
         this.usersCreateButton = page.locator("a,button").filter({ hasText: /new user|create user|add user|create/i }).first();
+        this.usersInviteButton = page.locator("a,button").filter({ hasText: /invite user|user invitation|invite/i }).first();
         this.usersNameInput = page.locator('input[id="form.name"]');
         this.usersEmailInput = page.locator('input[id="form.email"]');
         this.usersPasswordInput = page.locator('input[id="form.password"]');
@@ -145,18 +159,31 @@ export class ErpLocators {
         this.usersSaveButton = page.locator('button[x-data="filamentFormButton"]');
         this.usersSearchInput = page.locator('.fi-input.fi-input-has-inline-prefix').nth(1);
         // this.usersSearchInput = page.locator('input[placeholder*="Search"], input[type="search"]').first();
-        this.usersRowActionsButton = page.locator('button[title="Actions"], button').filter({ hasText: /actions/i });
+        this.usersRowActionsButton = page.locator('div.fi-ta-text-item').nth(0);
         this.usersEditButton = page.locator("button,a").filter({ hasText: /edit/i });
-        this.usersDeleteButton = page.locator("button,a").filter({ hasText: /delete/i });
-        this.usersConfirmDeleteButton = page.locator("button,span").filter({ hasText: /delete|confirm/i }).first();
+        this.usersDeleteButton = page.locator("button.fi-ac-btn-action");
+        this.usersConfirmDeleteButton = page.getByRole('dialog').getByRole('button', { name: 'Delete' });
+        this.selectAllUsersButton = page.locator('input[aria-label="Select/deselect all items for bulk actions."]');
+        this.usersBulkActionsButton = page.locator('button.fi-ac-btn-group').nth(1);
+        this.usersForceDeleteButton = page.locator('span.fi-dropdown-list-item-label').nth(3);
         this.usersStatusToggle = page.locator('button[role="switch"], input[type="checkbox"]').first();
         this.usersCreateStatusToggle = page.locator('button.fi-fo-toggle');
-        this.usersResetPasswordButton = page.locator("button,a").filter({ hasText: /reset password/i }).first();
+        this.usersResetPasswordButton = page.locator("button,a").filter({ hasText: /Change Password/i }).first();
+        this.usersChangePasswordInput = page.getByRole('textbox', { name: 'New Password*' });
+        this.usersChangePasswordConfirmationInput = page.getByRole('textbox', { name: 'Confirm New Password' });
+        this.usersChangePasswordSaveButton = page.getByRole('button', { name: 'Submit' });
         this.userMenuButton = page.locator('button[aria-label="User menu"]');
-        this.logoutButton = page.locator('span.fi-dropdown-list-item-label').nth(2);
+        this.logoutButton = page.getByRole('textbox', { name: 'Confirm New Password' });
         this.usersSuccessToast = page.locator("h3.fi-no-notification-title, .fi-toast-message-success").first();
         this.usersErrorToast = page.locator(".fi-toast-message-error, .fi-input-wrp-error").first();
         this.userFeildValidationMessage = page.locator(".fi-fo-field-wrp-error-message", { hasText: /The email has already been taken./ });
         this.usersValidationMessage = page.locator(".fi-fo-field-wrp-error-message, .text-danger, .invalid-feedback");
+        this.manageUsersEnableResetCard = page
+            .locator("div,section,li,fieldset")
+            .filter({ hasText: /Enable Reset Password|Allow users to reset their password/i })
+            .first();
+        this.manageUsersEnableResetToggle = page.getByRole("switch", { name: /Enable Reset Password/i });
+        this.manageUsersEnableInvitationToggle = page.getByRole("switch", { name: /Enable User Invitation/i });
+        this.settingsSaveButton = page.getByRole("button", { name: /Save changes|save|update|submit/i }).first();
     }
 }

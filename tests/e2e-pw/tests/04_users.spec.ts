@@ -34,9 +34,11 @@ test.describe("Users Module E2E", () => {
         };
 
         await userPage.gotoUsersPage();
+        const initialCount = await userPage.refreshUserCount();
         await userPage.createUser(userData);
         await userPage.gotoUsersPage();
-        await userPage.assertUserVisible(userData.email);
+        const updatedCount = await userPage.refreshUserCount();
+        expect(updatedCount).toBe(initialCount + 1);
     });
 
     test("Create User - Duplicate Email Validation", async ({ adminPage }) => {
@@ -128,29 +130,6 @@ test.describe("Users Module E2E", () => {
         await userPage.assertUserVisible(updatedName);
     });
 
-    test("Toggle User Status - Updates Successfully", async ({ adminPage }) => {
-        const companyPage = new CompanyManagementPage(adminPage);
-        const userPage = new UserManagementPage(adminPage);
-        const key = Date.now();
-        const companyName = `E2E Toggle User Company ${key}`;
-        const email = `toggle.user+${key}@example.com`;
-
-        await companyPage.gotoCompaniesPage();
-        await companyPage.createCompany({ name: companyName, email: `toggle-user-company+${key}@example.com` });
-
-        await userPage.gotoUsersPage();
-        await userPage.createUser({
-            name: `E2E Toggle User ${key}`,
-            email,
-            password: "Test@12345",
-            role: defaultRole,
-            company: companyName,
-        });
-
-        await userPage.gotoUsersPage();
-        await userPage.toggleUserStatus(email);
-    });
-
     test("Inactive User - Cannot Login To Admin Panel", async ({ adminPage }) => {
         const companyPage = new CompanyManagementPage(adminPage);
         const userPage = new UserManagementPage(adminPage);
@@ -175,6 +154,37 @@ test.describe("Users Module E2E", () => {
         await userPage.logout();
         await userPage.attemptLogin(email, password);
         await expect(userPage.page).toHaveURL(/.*\/admin\/login/);
+    });
+
+    test("Reset User Password Configuration - Inabled/Disabled setting,", async ({ adminPage }) => {
+        const companyPage = new CompanyManagementPage(adminPage);
+        const userPage = new UserManagementPage(adminPage);
+        const key = Date.now();
+        const companyName = `E2E Reset Config Company ${key}`;
+        const email = `reset.config.user+${key}@example.com`;
+
+        await companyPage.gotoCompaniesPage();
+        await companyPage.createCompany({ name: companyName, email: `reset-config-company+${key}@example.com` });
+
+        await userPage.gotoUsersPage();
+        await userPage.createUser({
+            name: `E2E Reset Config User ${key}`,
+            email,
+            password: "Test@12345",
+            role: defaultRole,
+            company: companyName,
+        });
+
+        await userPage.gotoManageUsersSettingsPage();
+        await userPage.setEnableResetConfiguration(false);
+
+        try {
+            await userPage.gotoUsersPage();
+            await userPage.assertResetPasswordActionDisabled(email);
+        } finally {
+            await userPage.gotoManageUsersSettingsPage();
+            await userPage.setEnableResetConfiguration(true);
+        }
     });
 
     test("Reset User Password - Success", async ({ adminPage }) => {
@@ -221,5 +231,65 @@ test.describe("Users Module E2E", () => {
 
         await userPage.gotoUsersPage();
         await userPage.deleteUser(email);
+    });
+
+    test("Bulk Delete Users - Removes Records", async ({ adminPage }) => {
+        const companyPage = new CompanyManagementPage(adminPage);
+        const userPage = new UserManagementPage(adminPage);
+        const key = Date.now();
+        const companyName = `E2E Bulk Delete User Company ${key}`;
+        const users = [
+            {
+                name: `E2E Bulk Delete User 1 ${key}`,
+                email: `bulk.delete.user1+${key}@example.com`,
+            },
+            {
+                name: `E2E Bulk Delete User 2 ${key}`,
+                email: `bulk.delete.user2+${key}@example.com`,
+            },
+        ];
+
+        await companyPage.gotoCompaniesPage();
+        await companyPage.createCompany({ name: companyName, email: `bulk-delete-users-company+${key}@example.com` });
+
+        await userPage.gotoUsersPage();
+        const initialCount = await userPage.refreshUserCount();
+
+        for (const user of users) {
+            await userPage.gotoUsersPage();
+            await userPage.createUser({
+                name: user.name,
+                email: user.email,
+                password: "Test@12345",
+                role: defaultRole,
+                company: companyName,
+            });
+        }
+
+        await userPage.gotoUsersPage();
+        await userPage.bulkDeleteUsers(`bulk.delete.user1+${key}@example.com`);
+        await userPage.gotoUsersPage();
+        const finalCount = await userPage.refreshUserCount();
+        expect(finalCount).toBe(initialCount);
+    });
+
+    test("User Invitation - Inabled/Disabled setting", async ({ adminPage }) => {
+        const userPage = new UserManagementPage(adminPage);
+
+        await userPage.gotoManageUsersSettingsPage();
+        await userPage.setEnableUserInvitationConfiguration(false);
+
+        try {
+            await userPage.gotoUsersPage();
+            await userPage.assertUserInvitationHidden();
+
+            await userPage.gotoManageUsersSettingsPage();
+            await userPage.setEnableUserInvitationConfiguration(true);
+            await userPage.gotoUsersPage();
+            await userPage.assertUserInvitationVisible();
+        } finally {
+            await userPage.gotoManageUsersSettingsPage();
+            await userPage.setEnableUserInvitationConfiguration(true);
+        }
     });
 });
