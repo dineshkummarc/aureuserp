@@ -4069,7 +4069,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":[{"id":null,"name":"eius","sort":0,"allow_new_products":"mixed","parent_path":null,"max_weight":0,"created_at":null,"updated_at":null},{"id":null,"name":"adipisci","sort":0,"allow_new_products":"mixed","parent_path":null,"max_weight":0,"created_at":null,"updated_at":null}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"\/?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}],"path":"\/","per_page":10,"to":2,"total":2}}'
+        content: '{"data":[{"id":null,"name":"eius et","sort":0,"allow_new_products":"mixed","parent_path":null,"max_weight":0,"created_at":null,"updated_at":null},{"id":null,"name":"odit quia","sort":0,"allow_new_products":"mixed","parent_path":null,"max_weight":0,"created_at":null,"updated_at":null}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"\/?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}],"path":"\/","per_page":10,"to":2,"total":2}}'
         headers: []
         description: ''
       -
@@ -4167,7 +4167,7 @@ endpoints:
       -
         custom: []
         status: 201
-        content: '{"data":{"id":null,"name":"architecto","sort":0,"allow_new_products":"mixed","parent_path":null,"max_weight":0,"created_at":null,"updated_at":null},"message":"Storage category created successfully."}'
+        content: '{"data":{"id":null,"name":"architecto eius","sort":0,"allow_new_products":"mixed","parent_path":null,"max_weight":0,"created_at":null,"updated_at":null},"message":"Storage category created successfully."}'
         headers: []
         description: ''
       -
@@ -4244,7 +4244,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":null,"name":"aut","sort":0,"allow_new_products":"mixed","parent_path":null,"max_weight":0,"created_at":null,"updated_at":null}}'
+        content: '{"data":{"id":null,"name":"aut adipisci","sort":0,"allow_new_products":"mixed","parent_path":null,"max_weight":0,"created_at":null,"updated_at":null}}'
         headers: []
         description: ''
       -
@@ -4361,7 +4361,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":null,"name":"architecto","sort":0,"allow_new_products":"mixed","parent_path":null,"max_weight":0,"created_at":null,"updated_at":null},"message":"Storage category updated successfully."}'
+        content: '{"data":{"id":null,"name":"architecto eius","sort":0,"allow_new_products":"mixed","parent_path":null,"max_weight":0,"created_at":null,"updated_at":null},"message":"Storage category updated successfully."}'
         headers: []
         description: ''
       -
@@ -5123,7 +5123,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":[{"id":null,"name":"eius","color":null,"sort":0,"created_at":null,"updated_at":null,"deleted_at":null},{"id":null,"name":"et","color":null,"sort":0,"created_at":null,"updated_at":null,"deleted_at":null}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"\/?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}],"path":"\/","per_page":10,"to":2,"total":2}}'
+        content: '{"data":[{"id":null,"name":"eius et","color":null,"sort":0,"created_at":null,"updated_at":null,"deleted_at":null},{"id":null,"name":"animi quos","color":null,"sort":0,"created_at":null,"updated_at":null,"deleted_at":null}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"\/?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}],"path":"\/","per_page":10,"to":2,"total":2}}'
         headers: []
         description: ''
       -
@@ -5194,7 +5194,7 @@ endpoints:
       -
         custom: []
         status: 201
-        content: '{"data":{"id":null,"name":"architecto","color":null,"sort":0,"created_at":null,"updated_at":null,"deleted_at":null},"message":"Tag created successfully."}'
+        content: '{"data":{"id":null,"name":"architecto eius","color":null,"sort":0,"created_at":null,"updated_at":null,"deleted_at":null},"message":"Tag created successfully."}'
         headers: []
         description: ''
       -
@@ -5271,7 +5271,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":null,"name":"aut","color":null,"sort":0,"created_at":null,"updated_at":null,"deleted_at":null}}'
+        content: '{"data":{"id":null,"name":"aut adipisci","color":null,"sort":0,"created_at":null,"updated_at":null,"deleted_at":null}}'
         headers: []
         description: ''
       -
@@ -5361,7 +5361,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":null,"name":"architecto","color":null,"sort":0,"created_at":null,"updated_at":null,"deleted_at":null},"message":"Tag updated successfully."}'
+        content: '{"data":{"id":null,"name":"architecto eius","color":null,"sort":0,"created_at":null,"updated_at":null,"deleted_at":null},"message":"Tag updated successfully."}'
         headers: []
         description: ''
       -
@@ -5497,7 +5497,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":null,"name":"aut","color":null,"sort":0,"created_at":null,"updated_at":null,"deleted_at":null},"message":"Tag restored successfully."}'
+        content: '{"data":{"id":null,"name":"aut adipisci","color":null,"sort":0,"created_at":null,"updated_at":null,"deleted_at":null},"message":"Tag restored successfully."}'
         headers: []
         description: ''
       -
@@ -7053,7 +7053,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":[{"id":null,"name":"PKG-449171","package_use":"reusable","pack_date":"2026-02-26T00:00:00.000000Z","created_at":null,"updated_at":null},{"id":null,"name":"PKG-236472","package_use":"reusable","pack_date":"2026-02-26T00:00:00.000000Z","created_at":null,"updated_at":null}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"\/?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}],"path":"\/","per_page":10,"to":2,"total":2}}'
+        content: '{"data":[{"id":null,"name":"PKG-449171","package_use":"reusable","pack_date":"2026-03-03T00:00:00.000000Z","created_at":null,"updated_at":null},{"id":null,"name":"PKG-465347","package_use":"reusable","pack_date":"2026-03-03T00:00:00.000000Z","created_at":null,"updated_at":null}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"\/?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}],"path":"\/","per_page":10,"to":2,"total":2}}'
         headers: []
         description: ''
       -
@@ -7148,7 +7148,7 @@ endpoints:
       -
         custom: []
         status: 201
-        content: '{"data":{"id":null,"name":"PKG-569775","package_use":"reusable","pack_date":"2026-02-26T00:00:00.000000Z","created_at":null,"updated_at":null},"message":"Package created successfully."}'
+        content: '{"data":{"id":null,"name":"PKG-569775","package_use":"reusable","pack_date":"2026-03-03T00:00:00.000000Z","created_at":null,"updated_at":null},"message":"Package created successfully."}'
         headers: []
         description: ''
       -
@@ -7225,7 +7225,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":null,"name":"PKG-757680","package_use":"reusable","pack_date":"2026-02-26T00:00:00.000000Z","created_at":null,"updated_at":null}}'
+        content: '{"data":{"id":null,"name":"PKG-757680","package_use":"reusable","pack_date":"2026-03-03T00:00:00.000000Z","created_at":null,"updated_at":null}}'
         headers: []
         description: ''
       -
@@ -7339,7 +7339,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":null,"name":"PKG-936806","package_use":"reusable","pack_date":"2026-02-26T00:00:00.000000Z","created_at":null,"updated_at":null},"message":"Package updated successfully."}'
+        content: '{"data":{"id":null,"name":"PKG-936806","package_use":"reusable","pack_date":"2026-03-03T00:00:00.000000Z","created_at":null,"updated_at":null},"message":"Package updated successfully."}'
         headers: []
         description: ''
       -
@@ -8331,7 +8331,7 @@ endpoints:
         name: 'moves[].scheduled_at'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:27'
+        example: '2026-03-03T04:25:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -8342,7 +8342,7 @@ endpoints:
         name: 'moves[].deadline'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:27'
+        example: '2026-03-03T04:25:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -8375,7 +8375,7 @@ endpoints:
         name: 'moves[].is_picked'
         description: ''
         required: false
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -8397,7 +8397,7 @@ endpoints:
           product_uom_qty: 5
           uom_id: 1
           quantity: 22
-          is_picked: true
+          is_picked: false
     fileParameters: []
     responses:
       -
@@ -8729,7 +8729,7 @@ endpoints:
         name: 'moves[].scheduled_at'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:27'
+        example: '2026-03-03T04:25:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -8740,7 +8740,7 @@ endpoints:
         name: 'moves[].deadline'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:27'
+        example: '2026-03-03T04:25:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -8773,7 +8773,7 @@ endpoints:
         name: 'moves[].is_picked'
         description: ''
         required: false
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -8795,7 +8795,7 @@ endpoints:
           product_uom_qty: 5
           uom_id: 1
           quantity: 22
-          is_picked: true
+          is_picked: false
     fileParameters: []
     responses:
       -
@@ -9642,7 +9642,7 @@ endpoints:
         name: 'moves[].scheduled_at'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:27'
+        example: '2026-03-03T04:25:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -9653,7 +9653,7 @@ endpoints:
         name: 'moves[].deadline'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:27'
+        example: '2026-03-03T04:25:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -10040,7 +10040,7 @@ endpoints:
         name: 'moves[].scheduled_at'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:28'
+        example: '2026-03-03T04:25:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -10051,7 +10051,7 @@ endpoints:
         name: 'moves[].deadline'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:28'
+        example: '2026-03-03T04:25:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -10953,7 +10953,7 @@ endpoints:
         name: 'moves[].scheduled_at'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:28'
+        example: '2026-03-03T04:25:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -10964,7 +10964,7 @@ endpoints:
         name: 'moves[].deadline'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:28'
+        example: '2026-03-03T04:25:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -11351,7 +11351,7 @@ endpoints:
         name: 'moves[].scheduled_at'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:28'
+        example: '2026-03-03T04:25:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -11362,7 +11362,7 @@ endpoints:
         name: 'moves[].deadline'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:28'
+        example: '2026-03-03T04:25:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -11395,7 +11395,7 @@ endpoints:
         name: 'moves[].is_picked'
         description: ''
         required: false
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -11417,7 +11417,7 @@ endpoints:
           product_uom_qty: 5
           uom_id: 1
           quantity: 22
-          is_picked: true
+          is_picked: false
     fileParameters: []
     responses:
       -
@@ -12264,7 +12264,7 @@ endpoints:
         name: 'moves[].scheduled_at'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:28'
+        example: '2026-03-03T04:25:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -12275,7 +12275,7 @@ endpoints:
         name: 'moves[].deadline'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:28'
+        example: '2026-03-03T04:25:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -12662,7 +12662,7 @@ endpoints:
         name: 'moves[].scheduled_at'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:28'
+        example: '2026-03-03T04:25:43'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -12673,7 +12673,7 @@ endpoints:
         name: 'moves[].deadline'
         description: 'Must be a valid date.'
         required: false
-        example: '2026-02-26T07:08:28'
+        example: '2026-03-03T04:25:43'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -12706,7 +12706,7 @@ endpoints:
         name: 'moves[].is_picked'
         description: ''
         required: false
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -12728,7 +12728,7 @@ endpoints:
           product_uom_qty: 5
           uom_id: 1
           quantity: 22
-          is_picked: false
+          is_picked: true
     fileParameters: []
     responses:
       -
