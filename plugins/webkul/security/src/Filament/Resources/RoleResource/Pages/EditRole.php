@@ -15,6 +15,11 @@ class EditRole extends EditRecord
 
     public Collection $permissions;
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     protected function getActions(): array
     {
         return [
@@ -23,13 +28,28 @@ class EditRole extends EditRecord
         ];
     }
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $allPermissions = RoleResource::getAllFormPermissions();
+
+        $rolePermissions = $this->record->permissions()->pluck('name');
+
+        $data['select_all'] = $allPermissions->diff($rolePermissions)->isEmpty();
+
+        return $data;
+    }
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $this->permissions = collect($data)
-            ->filter(fn ($permission, $key) => ! in_array($key, ['name', 'guard_name', 'select_all']))
-            ->values()
-            ->flatten()
-            ->unique();
+        if ($data['select_all'] ?? false) {
+            $this->permissions = RoleResource::getAllFormPermissions();
+        } else {
+            $this->permissions = collect($data)
+                ->filter(fn ($permission, $key) => ! in_array($key, ['name', 'guard_name', 'select_all']))
+                ->values()
+                ->flatten()
+                ->unique();
+        }
 
         return [
             'name'       => $data['name'],

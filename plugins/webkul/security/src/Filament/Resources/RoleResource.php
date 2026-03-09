@@ -10,8 +10,10 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
@@ -23,6 +25,7 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 use Webkul\Security\Filament\Resources\RoleResource\Pages\CreateRole;
@@ -76,6 +79,16 @@ class RoleResource extends RolesRoleResource
                 Grid::make()
                     ->schema([
                         Section::make()
+                            ->extraAlpineAttributes([
+                                // _setAll(true):  only updates DOM visually. Server uses getAllFormPermissions()
+                                //   when select_all=true — it never reads the individual checkbox values.
+                                //   So we send zero checkbox data → tiny payload.
+                                // _setAll(false): sets each wire:model group to [] via $wire.$set(path,[],false).
+                                //   Empty arrays are excluded by dehydrated() → server gets no permission data
+                                //   → mutateFormDataBeforeSave produces empty collection → permissions cleared.
+                                //   ~267 empty-array updates → still tiny payload.
+                                'x-init' => "let _t=null;function _setAll(v){if(v){document.querySelectorAll('.fi-fo-checkbox-list-option input[type=checkbox]').forEach(function(cb){if(!cb.disabled)cb.checked=true;});}else{var groups={};document.querySelectorAll('.fi-fo-checkbox-list-option input[type=checkbox]').forEach(function(cb){var m=cb.getAttribute('wire:model')||cb.getAttribute('wire:model.defer')||cb.getAttribute('wire:model.live');if(m)groups[m]=true;cb.checked=false;});Object.keys(groups).forEach(function(m){\$wire.\$set(m,[],false);});}window.dispatchEvent(new CustomEvent('shield-set-state',{detail:v}));}function _chk(){clearTimeout(_t);_t=setTimeout(function(){var all=Array.from(document.querySelectorAll('.fi-fo-checkbox-list-option input[type=checkbox]:not([disabled])'));var c=all.length>0&&all.every(function(b){return b.checked;});window.dispatchEvent(new CustomEvent('shield-set-state',{detail:c}));},60);}setTimeout(function(){var btn=\$el.querySelector('.fi-fo-toggle[role=switch]');if(!btn)return;var v=btn.getAttribute('aria-checked')==='true';if(v)_setAll(v);},200);document.addEventListener('change',function(e){if(e.target.type!=='checkbox'||!e.target.closest('.fi-fo-checkbox-list-option'))return;_chk();});document.addEventListener('click',function(e){var btn=e.target.closest('.fi-fo-toggle[role=switch]');if(btn){setTimeout(function(){var v=btn.getAttribute('aria-checked')==='true';_setAll(v);},0);return;}if(e.target.closest('.fi-fo-checkbox-list-actions'))_chk();});",
+                            ])
                             ->schema([
                                 TextInput::make('name')
                                     ->label(__('filament-shield::filament-shield.field.name'))
@@ -91,7 +104,7 @@ class RoleResource extends RolesRoleResource
                                     ->native(false)
                                     ->selectablePlaceholder(false)
                                     ->options([
-                                        'web' => __('security::filament/resources/role.form.fields.web'),
+                                        'web'     => __('security::filament/resources/role.form.fields.web'),
                                         'sanctum' => __('security::filament/resources/role.form.fields.sanctum'),
                                     ])
                                     ->default(Utils::getFilamentAuthGuard()),
@@ -194,13 +207,29 @@ class RoleResource extends RolesRoleResource
             ->schema(static::getPluginWidgetEntitiesSchema());
     }
 
+    /**
+     * Returns the full set of permission names that the form checkboxes represent.
+     * Uses the same data sources as the form so "Select All" saves exactly what is shown.
+     */
+    public static function getAllFormPermissions(): \Illuminate\Support\Collection
+    {
+        $resourcePermissions = collect(static::getResources())
+            ->flatMap(fn (array $entity): array => array_keys(static::getResourcePermissionOptions($entity)));
+
+        return $resourcePermissions
+            ->merge(array_keys(static::getPageOptions()))
+            ->merge(array_keys(static::getWidgetOptions()))
+            ->unique()
+            ->values();
+    }
+
     public static function getPluginResources(): ?array
     {
-        return collect(static::getResources())
+        return once(fn (): array => collect(static::getResources())
             ->groupBy(function ($value, $key) {
                 return explode('\\', $key)[1] ?? 'Unknown';
             })
-            ->toArray();
+            ->toArray());
     }
 
     public static function getResources(): ?array
@@ -255,9 +284,7 @@ class RoleResource extends RolesRoleResource
             ->sortKeys()
             ->map(function ($plugin, $key) {
                 $hasAnyOptions = collect($plugin)->contains(function ($entity) {
-                    $checkbox = static::getCheckBoxListComponentForResource($entity);
-
-                    return ! empty($checkbox->getOptions());
+                    return ! empty(static::getResourcePermissionOptions($entity));
                 });
 
                 if (! $hasAnyOptions) {
@@ -266,15 +293,16 @@ class RoleResource extends RolesRoleResource
 
                 return Section::make($key)
                     ->collapsible()
+                    ->collapsed()
                     ->persistCollapsed()
                     ->schema([
                         Grid::make()
                             ->schema(function () use ($plugin) {
                                 return collect($plugin)
                                     ->flatMap(function ($entity) {
-                                        $checkbox = static::getCheckBoxListComponentForResource($entity);
+                                        $options = static::getResourcePermissionOptions($entity);
 
-                                        if (empty($checkbox->getOptions())) {
+                                        if (empty($options)) {
                                             return [];
                                         }
 
@@ -287,7 +315,7 @@ class RoleResource extends RolesRoleResource
                                         return [
                                             Fieldset::make($fieldsetLabel)
                                                 ->schema([
-                                                    $checkbox->hiddenLabel(),
+                                                    static::getCheckBoxListComponentForResource($entity)->hiddenLabel(),
                                                 ])
                                                 ->columnSpan(static::shield()->getSectionColumnSpan()),
                                         ];
@@ -307,6 +335,7 @@ class RoleResource extends RolesRoleResource
             ->map(function ($plugin, $key) {
                 return Section::make($key)
                     ->collapsible()
+                    ->collapsed()
                     ->persistCollapsed()
                     ->schema([
                         Grid::make()
@@ -335,6 +364,7 @@ class RoleResource extends RolesRoleResource
             ->map(function ($plugin, $key) {
                 return Section::make($key)
                     ->collapsible()
+                    ->collapsed()
                     ->persistCollapsed()
                     ->schema([
                         Grid::make()
@@ -354,6 +384,51 @@ class RoleResource extends RolesRoleResource
             })
             ->values()
             ->toArray();
+    }
+
+    public static function getSelectAllFormComponent(): Component
+    {
+        // The Toggle uses $wire.$entangle('data.select_all') internally.
+        // We intentionally do NOT call tog.click() or use $watch('$wire.data.select_all')
+        // anywhere — those were the cause of the stuck-loader loop after save.
+        //
+        // Instead, _chk() dispatches window event 'shield-set-state' which the Toggle
+        // catches via x-on:shield-set-state.window and sets its own `state` directly.
+        // Since the binding is deferred (not live), this queues the value for the next
+        // form submit without firing an immediate Livewire network request.
+        return Toggle::make('select_all')
+            ->onIcon('heroicon-s-shield-check')
+            ->offIcon('heroicon-s-shield-exclamation')
+            ->label(__('filament-shield::filament-shield.field.select_all.name'))
+            ->helperText(fn (): HtmlString => new HtmlString(__('filament-shield::filament-shield.field.select_all.message')))
+            ->dehydrated(fn (bool $state): bool => $state)
+            ->extraAlpineAttributes(['x-on:shield-set-state.window' => 'state = $event.detail']);
+    }
+
+    public static function getCheckboxListFormComponent(
+        string $name,
+        array $options,
+        bool $searchable = true,
+        array|int|string|null $columns = null,
+        array|int|string|null $columnSpan = null
+    ): Component {
+        return CheckboxList::make($name)
+            ->hiddenLabel()
+            ->options(fn (): array => $options)
+            ->searchable($searchable)
+            ->afterStateHydrated(function (Component $component, string $operation, ?Model $record) use ($options): void {
+                static::setPermissionStateForRecordPermissions(
+                    component: $component,
+                    operation: $operation,
+                    permissions: $options,
+                    record: $record
+                );
+            })
+            ->dehydrated(fn ($state): bool => ! blank($state))
+            ->bulkToggleable()
+            ->gridDirection('row')
+            ->columns($columns ?? static::shield()->getCheckboxListColumns())
+            ->columnSpan($columnSpan ?? static::shield()->getCheckboxListColumnSpan());
     }
 
     public static function setPermissionStateForRecordPermissions(Component $component, string $operation, array $permissions, ?Model $record): void

@@ -115,7 +115,5 @@ class Role extends BaseRole
         }
 
         $this->forgetCachedPermissions();
-        
-        $this->refresh();
     }
 }
