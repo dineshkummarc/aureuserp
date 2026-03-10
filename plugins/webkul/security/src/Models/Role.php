@@ -11,7 +11,7 @@ use Spatie\Permission\PermissionRegistrar;
 
 class Role extends BaseRole
 {
-    public function getNameAttribute($value)
+    public function getNameAttribute(string $value): string
     {
         return Str::ucfirst($value);
     }
@@ -99,12 +99,30 @@ class Role extends BaseRole
 
         $permissionColumn = $permissionRegistrar->pivotPermission;
 
-        DB::table($tableName)->where($roleColumn, $this->id)->delete();
+        $existingPermissionIds = DB::table($tableName)
+            ->where($roleColumn, $this->id)
+            ->pluck($permissionColumn)
+            ->map(fn ($permissionId) => (int) $permissionId);
 
-        if ($permissionIds->isNotEmpty()) {
+        $permissionIds = $permissionIds
+            ->map(fn ($permissionId) => (int) $permissionId)
+            ->unique()
+            ->values();
+
+        $permissionIdsToDelete = $existingPermissionIds->diff($permissionIds)->values();
+        $permissionIdsToInsert = $permissionIds->diff($existingPermissionIds)->values();
+
+        if ($permissionIdsToDelete->isNotEmpty()) {
+            DB::table($tableName)
+                ->where($roleColumn, $this->id)
+                ->whereIn($permissionColumn, $permissionIdsToDelete)
+                ->delete();
+        }
+
+        if ($permissionIdsToInsert->isNotEmpty()) {
             $chunkSize = 1000;
 
-            $permissionIds->chunk($chunkSize)->each(function ($chunk) use ($tableName, $roleColumn, $permissionColumn) {
+            $permissionIdsToInsert->chunk($chunkSize)->each(function ($chunk) use ($tableName, $roleColumn, $permissionColumn) {
                 $insertData = $chunk->map(fn ($permissionId) => [
                     $roleColumn       => $this->id,
                     $permissionColumn => $permissionId,

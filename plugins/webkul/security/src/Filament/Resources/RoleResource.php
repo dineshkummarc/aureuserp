@@ -11,6 +11,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -25,6 +26,7 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
@@ -44,6 +46,8 @@ class RoleResource extends RolesRoleResource
     protected static $permissionsCollection;
 
     public static $permissions = null;
+
+    protected static ?Collection $allFormPermissions = null;
 
     public static function canGloballySearch(): bool
     {
@@ -80,14 +84,134 @@ class RoleResource extends RolesRoleResource
                     ->schema([
                         Section::make()
                             ->extraAlpineAttributes([
-                                // _setAll(true):  only updates DOM visually. Server uses getAllFormPermissions()
-                                //   when select_all=true — it never reads the individual checkbox values.
-                                //   So we send zero checkbox data → tiny payload.
-                                // _setAll(false): sets each wire:model group to [] via $wire.$set(path,[],false).
-                                //   Empty arrays are excluded by dehydrated() → server gets no permission data
-                                //   → mutateFormDataBeforeSave produces empty collection → permissions cleared.
-                                //   ~267 empty-array updates → still tiny payload.
-                                'x-init' => "let _t=null;function _setAll(v){if(v){document.querySelectorAll('.fi-fo-checkbox-list-option input[type=checkbox]').forEach(function(cb){if(!cb.disabled)cb.checked=true;});}else{var groups={};document.querySelectorAll('.fi-fo-checkbox-list-option input[type=checkbox]').forEach(function(cb){var m=cb.getAttribute('wire:model')||cb.getAttribute('wire:model.defer')||cb.getAttribute('wire:model.live');if(m)groups[m]=true;cb.checked=false;});Object.keys(groups).forEach(function(m){\$wire.\$set(m,[],false);});}window.dispatchEvent(new CustomEvent('shield-set-state',{detail:v}));}function _chk(){clearTimeout(_t);_t=setTimeout(function(){var all=Array.from(document.querySelectorAll('.fi-fo-checkbox-list-option input[type=checkbox]:not([disabled])'));var c=all.length>0&&all.every(function(b){return b.checked;});window.dispatchEvent(new CustomEvent('shield-set-state',{detail:c}));},60);}setTimeout(function(){var btn=\$el.querySelector('.fi-fo-toggle[role=switch]');if(!btn)return;var v=btn.getAttribute('aria-checked')==='true';if(v)_setAll(v);},200);document.addEventListener('change',function(e){if(e.target.type!=='checkbox'||!e.target.closest('.fi-fo-checkbox-list-option'))return;_chk();});document.addEventListener('click',function(e){var btn=e.target.closest('.fi-fo-toggle[role=switch]');if(btn){setTimeout(function(){var v=btn.getAttribute('aria-checked')==='true';_setAll(v);},0);return;}if(e.target.closest('.fi-fo-checkbox-list-actions'))_chk();});",
+                                // Bulk mode keeps "all" and "none" cheap by avoiding mass Livewire state writes.
+                                // If the user switches back to manual edits after "all", we materialize state once.
+                                'x-init' => <<<'JS'
+let bulkMode = 'manual';
+let updateToggleTimer = null;
+const checkboxSelector = '.fi-fo-checkbox-list-option input[type=checkbox]';
+
+const getCheckboxes = () => Array.from(document.querySelectorAll(checkboxSelector));
+const setBulkMode = (mode) => {
+    bulkMode = mode;
+    $wire.$set('data.permissions_sync_mode', mode, false);
+};
+const getCheckboxModels = () => Array.from(new Set(
+    getCheckboxes()
+        .map((checkbox) => checkbox.getAttribute('wire:model')
+            || checkbox.getAttribute('wire:model.defer')
+            || checkbox.getAttribute('wire:model.live'))
+        .filter(Boolean)
+));
+
+const getCheckboxGroups = () => {
+    const groups = {};
+
+    getCheckboxes().forEach((checkbox) => {
+        const model = checkbox.getAttribute('wire:model')
+            || checkbox.getAttribute('wire:model.defer')
+            || checkbox.getAttribute('wire:model.live');
+
+        if (! model || checkbox.disabled) {
+            return;
+        }
+
+        groups[model] ??= [];
+
+        if (checkbox.checked) {
+            groups[model].push(checkbox.value);
+        }
+    });
+
+    return groups;
+};
+
+const syncManualStateFromDom = () => {
+    Object.entries(getCheckboxGroups()).forEach(([model, values]) => {
+        $wire.$set(model, values, false);
+    });
+};
+
+const updateToggleState = () => {
+    clearTimeout(updateToggleTimer);
+
+    updateToggleTimer = setTimeout(() => {
+        const checkboxes = getCheckboxes().filter((checkbox) => ! checkbox.disabled);
+        const areAllChecked = checkboxes.length > 0 && checkboxes.every((checkbox) => checkbox.checked);
+
+        $wire.$set('data.select_all', areAllChecked, false);
+        window.dispatchEvent(new CustomEvent('shield-set-state', { detail: areAllChecked }));
+    }, 40);
+};
+
+const setAllCheckboxes = (checked) => {
+    getCheckboxes().forEach((checkbox) => {
+        if (! checkbox.disabled) {
+            checkbox.checked = checked;
+        }
+    });
+
+    setBulkMode(checked ? 'all' : 'none');
+    window.dispatchEvent(new CustomEvent('shield-set-state', { detail: checked }));
+};
+
+const compactPermissionStateForSubmit = () => {
+    if (bulkMode === 'manual') {
+        return;
+    }
+
+    getCheckboxModels().forEach((model) => {
+        $wire.$set(model, [], false);
+    });
+};
+
+setTimeout(() => {
+    const toggle = $el.querySelector('.fi-fo-toggle[role=switch]');
+    const form = $el.closest('form');
+
+    if (toggle && toggle.getAttribute('aria-checked') === 'true') {
+        setAllCheckboxes(true);
+    }
+
+    if (form) {
+        form.addEventListener('submit', () => {
+            compactPermissionStateForSubmit();
+        });
+    }
+}, 200);
+
+document.addEventListener('change', (event) => {
+    const checkbox = event.target.closest(checkboxSelector);
+
+    if (! checkbox) {
+        return;
+    }
+
+    if (bulkMode === 'all') {
+        syncManualStateFromDom();
+    }
+
+    setBulkMode('manual');
+    updateToggleState();
+});
+
+document.addEventListener('click', (event) => {
+    const toggle = event.target.closest('.fi-fo-toggle[role=switch]');
+
+    if (toggle) {
+        setTimeout(() => {
+            setAllCheckboxes(toggle.getAttribute('aria-checked') === 'true');
+        }, 0);
+
+        return;
+    }
+
+    if (event.target.closest('.fi-fo-checkbox-list-actions')) {
+        setBulkMode('manual');
+        updateToggleState();
+    }
+});
+JS,
                             ])
                             ->schema([
                                 TextInput::make('name')
@@ -116,6 +240,8 @@ class RoleResource extends RolesRoleResource
                                     ->options(fn (): Arrayable => Utils::getTenantModel() ? Utils::getTenantModel()::pluck('name', 'id') : collect())
                                     ->hidden(fn (): bool => ! (static::shield()->isCentralApp() && Utils::isTenancyEnabled()))
                                     ->dehydrated(fn (): bool => ! (static::shield()->isCentralApp() && Utils::isTenancyEnabled())),
+                                Hidden::make('permissions_sync_mode')
+                                    ->default('manual'),
                                 static::getSelectAllFormComponent(),
                             ])
                             ->columns([
@@ -213,10 +339,14 @@ class RoleResource extends RolesRoleResource
      */
     public static function getAllFormPermissions(): \Illuminate\Support\Collection
     {
+        if (static::$allFormPermissions instanceof Collection) {
+            return static::$allFormPermissions;
+        }
+
         $resourcePermissions = collect(static::getResources())
             ->flatMap(fn (array $entity): array => array_keys(static::getResourcePermissionOptions($entity)));
 
-        return $resourcePermissions
+        return static::$allFormPermissions = $resourcePermissions
             ->merge(array_keys(static::getPageOptions()))
             ->merge(array_keys(static::getWidgetOptions()))
             ->unique()
@@ -425,7 +555,6 @@ class RoleResource extends RolesRoleResource
                 );
             })
             ->dehydrated(fn ($state): bool => ! blank($state))
-            ->bulkToggleable()
             ->gridDirection('row')
             ->columns($columns ?? static::shield()->getCheckboxListColumns())
             ->columnSpan($columnSpan ?? static::shield()->getCheckboxListColumnSpan());
