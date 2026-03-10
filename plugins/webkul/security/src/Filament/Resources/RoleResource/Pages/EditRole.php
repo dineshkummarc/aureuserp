@@ -4,6 +4,7 @@ namespace Webkul\Security\Filament\Resources\RoleResource\Pages;
 
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Actions\DeleteAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -26,7 +27,7 @@ class EditRole extends EditRecord
     {
         return [
             DeleteAction::make()
-                ->hidden(fn (Model $record) => $record->name == config('filament-shield.panel_user.name')),
+                ->hidden(fn (Model $record): bool => RoleResource::isProtectedRoleRecord($record)),
         ];
     }
 
@@ -84,5 +85,13 @@ class EditRole extends EditRecord
                 $teamKey,
             ]))
             ->all();
+    }
+
+    protected function getSavedNotification(): Notification
+    {
+        return Notification::make()
+            ->success()
+            ->title(__('security::filament/resources/role/pages/edit-role.notification.title'))
+            ->body(__('security::filament/resources/role/pages/edit-role.notification.body'));
     }
 }
