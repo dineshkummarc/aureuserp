@@ -1497,7 +1497,7 @@ class OrderResource extends Resource
 
         $set('products', $products);
 
-        $set('currency_id', $requisition->currency_id);
+        $set('currency_id', $requisition?->currency_id);
 
         foreach (array_keys($products) as $key) {
             self::calculateLineTotals($set, $get, "products.$key.");
