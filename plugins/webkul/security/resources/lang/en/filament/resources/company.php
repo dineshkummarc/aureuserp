@@ -145,6 +145,19 @@ return [
                     'body'  => 'The company has been restored successfully.',
                 ],
             ],
+
+            'force-delete' => [
+                'notification' => [
+                    'success' => [
+                        'title' => 'Company force deleted',
+                        'body'  => 'The company has been force deleted successfully.',
+                    ],
+                    'error' => [
+                        'title' => 'Unable to force delete company',
+                        'body'  => 'This company is associated with existing records and cannot be deleted.',
+                    ],
+                ],
+            ],
         ],
 
         'bulk-actions' => [
@@ -166,6 +179,10 @@ return [
                 'notification' => [
                     'title' => 'Companies force deleted',
                     'body'  => 'The companies has been force deleted successfully.',
+                    'error' => [
+                        'title' => 'Unable to force delete companies',
+                        'body'  => 'One or more companies are associated with existing records and cannot be deleted.',
+                    ],
                 ],
             ],
         ],

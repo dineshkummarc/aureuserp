@@ -162,9 +162,9 @@ class PurchaseAgreementResource extends Resource
                                 Select::make('currency_id')
                                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.sections.general.fields.currency'))
                                     ->relationship(
-                                        'currency',
-                                        'name',
-                                        modifyQueryUsing: fn (Builder $query) => $query->where('active', 1),
+                                        name: 'currency',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn (Builder $query) => $query->active(),
                                     )
                                     ->required()
                                     ->searchable()

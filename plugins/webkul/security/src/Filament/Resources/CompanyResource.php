@@ -39,6 +39,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Field\Filament\Traits\HasCustomFields;
 use Webkul\Security\Enums\CompanyStatus;
@@ -98,6 +100,10 @@ class CompanyResource extends Resource
                                             ->label(__('security::filament/resources/company.form.sections.company-information.fields.name'))
                                             ->required()
                                             ->maxLength(255)
+                                            ->unique(ignoreRecord: true)
+                                            ->validationMessages([
+                                                'unique' => 'Company name already exists. Please use a unique name.',
+                                            ])
                                             ->live(onBlur: true),
                                         TextInput::make('registration_number')
                                             ->label(__('security::filament/resources/company.form.sections.company-information.fields.registration-number'))
@@ -180,16 +186,16 @@ class CompanyResource extends Resource
                                     ->schema([
                                         Select::make('currency_id')
                                             ->relationship(
-                                                'currency',
-                                                'full_name',
-                                                modifyQueryUsing: fn (Builder $query) => $query->where('active', 1),
+                                                name: 'currency',
+                                                titleAttribute: 'name',
+                                                modifyQueryUsing: fn (Builder $query) => $query->active(),
                                             )
                                             ->label(__('security::filament/resources/company.form.sections.additional-information.fields.default-currency'))
                                             ->searchable()
                                             ->required()
                                             ->live()
                                             ->preload()
-                                            ->default(Currency::first()?->id)
+                                            ->default(Currency::active()->first()?->id)
                                             ->createOptionForm([
                                                 Section::make()
                                                     ->schema([
@@ -401,15 +407,6 @@ class CompanyResource extends Resource
                                 ->title((__('security::filament/resources/company.table.actions.delete.notification.title')))
                                 ->body(__('security::filament/resources/company.table.actions.delete.notification.body')),
                         ),
-                    ForceDeleteAction::make()
-                        ->visible(fn ($record, $livewire = null) => $record->trashed() && static::isArchivedTab($livewire))
-                        ->before(fn ($record, $action) => static::cancelIfDefaultCompany($record->id, $action))
-                        ->successNotification(
-                            Notification::make()
-                                ->success()
-                                ->title((__('security::filament/resources/company.table.actions.force-delete.notification.title')))
-                                ->body(__('security::filament/resources/company.table.actions.force-delete.notification.body')),
-                        ),
                     RestoreAction::make()
                         ->visible(fn ($record, $livewire = null) => $record->trashed() && static::isArchivedTab($livewire))
                         ->successNotification(
@@ -417,6 +414,28 @@ class CompanyResource extends Resource
                                 ->success()
                                 ->title((__('security::filament/resources/company.table.actions.restore.notification.title')))
                                 ->body(__('security::filament/resources/company.table.actions.restore.notification.body')),
+                        ),
+                    ForceDeleteAction::make()
+                        ->visible(fn ($record, $livewire = null) => $record->trashed() && static::isArchivedTab($livewire))
+                        ->before(fn ($record, $action) => static::cancelIfDefaultCompany($record->id, $action))
+                        ->action(function (ForceDeleteAction $action, Company $record) {
+                            try {
+                                $record->forceDelete();
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('security::filament/resources/company.table.actions.force-delete.notification.error.title'))
+                                    ->body(__('security::filament/resources/company.table.actions.force-delete.notification.error.body'))
+                                    ->send();
+
+                                $action->cancel();
+                            }
+                        })
+                        ->successNotification(
+                            Notification::make()
+                                ->success()
+                                ->title((__('security::filament/resources/company.table.actions.force-delete.notification.success.title')))
+                                ->body(__('security::filament/resources/company.table.actions.force-delete.notification.success.body')),
                         ),
                 ]),
             ])
@@ -432,7 +451,19 @@ class CompanyResource extends Resource
                                 ->body(__('security::filament/resources/company.table.bulk-actions.delete.notification.body')),
                         ),
                     ForceDeleteBulkAction::make()
-                        ->before(fn ($records, $action) => static::cancelIfDefaultCompany($records->pluck('id')->all(), $action))
+                        ->action(function (ForceDeleteBulkAction $action, Collection $records) {
+                            try {
+                                $records->each(fn (Model $record) => $record->forceDelete());
+                            } catch (QueryException $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('security::filament/resources/company.table.bulk-actions.force-delete.notification.error.title'))
+                                    ->body(__('security::filament/resources/company.table.bulk-actions.force-delete.notification.error.body'))
+                                    ->send();
+
+                                $action->cancel();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
@@ -448,11 +479,7 @@ class CompanyResource extends Resource
                                 ->body(__('security::filament/resources/company.table.bulk-actions.restore.notification.body')),
                         ),
                 ]),
-            ])->modifyQueryUsing(function (Builder $query) {
-                $query
-                    ->where('creator_id', Auth::user()->id)
-                    ->whereNull('parent_id');
-            })
+            ])
             ->checkIfRecordIsSelectableUsing(
                 fn (Model $record): bool => true
             )
