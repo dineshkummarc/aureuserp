@@ -1476,20 +1476,12 @@ class OrderResource extends Resource
     private static function handleRequisitionChange($state, Set $set, Get $get): void
     {
         if (! $state) {
-            $set('products', []);
-
-            $set('currency_id', null);
-
             return;
         }
 
         $requisition = Requisition::find($state);
 
         if (! $requisition) {
-            $set('products', []);
-
-            $set('currency_id', null);
-
             return;
         }
 
