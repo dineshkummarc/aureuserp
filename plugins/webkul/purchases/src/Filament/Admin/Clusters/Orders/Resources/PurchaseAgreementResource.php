@@ -528,15 +528,32 @@ class PurchaseAgreementResource extends Resource
                                 ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.actions.delete.notification.body')),
                         ),
                     ForceDeleteAction::make()
-                        ->action(function (Requisition $record) {
+                        ->action(function (Requisition $record, ForceDeleteAction $action) {
+                            if (! in_array($record->state, [
+                                RequisitionState::DRAFT,
+                                RequisitionState::CANCELED,
+                            ])) {
+                                Notification::make()
+                                    ->warning()
+                                    ->title(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.actions.force-delete.notification.warning.title'))
+                                    ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.actions.force-delete.notification.warning.body'))
+                                    ->send();
+
+                                $action->cancel();
+
+                                return;
+                            }
+
                             try {
                                 $record->forceDelete();
                             } catch (QueryException $e) {
                                 Notification::make()
                                     ->danger()
-                                    ->title(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.actions.force-delete.notification.error.title'))
-                                    ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.actions.force-delete.notification.error.body'))
+                                    ->title(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.actions.force-delete.notification.warning.title'))
+                                    ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.actions.force-delete.notification.warning.body'))
                                     ->send();
+
+                                $action->cancel();
                             }
                         })
                         ->successNotification(
@@ -566,7 +583,21 @@ class PurchaseAgreementResource extends Resource
                     ForceDeleteBulkAction::make()
                         ->action(function (Collection $records) {
                             try {
-                                $records->each(fn (Model $record) => $record->forceDelete());
+                                $records->each(function (Model $record) {
+                                    if (
+                                        $record->state === RequisitionState::DRAFT
+                                        || $record->state === RequisitionState::CANCELED
+                                    ) {
+                                        $record->forceDelete();
+                                    }
+
+                                    Notification::make()
+                                        ->danger()
+                                        ->title(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.bulk-actions.force-delete.notification.warning.title'))
+                                        ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.bulk-actions.force-delete.notification.warning.body'))
+                                        ->send();
+
+                                });
                             } catch (QueryException $e) {
                                 Notification::make()
                                     ->danger()
