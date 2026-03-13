@@ -12,6 +12,6 @@ trait HasResourcePermissionQuery
 
         static::getModel()::applyPermissionScope($query);
 
-        return $query;
+        return $query->applyPermissionScope($query);
     }
 }
