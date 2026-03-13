@@ -50,21 +50,31 @@ class CreatePurchaseAgreement extends CreateRecord
             ->label(__('filament-panels::resources/pages/create-record.form.actions.create.label'))
             ->action(fn () => $this->create())
             ->keyBindings(['mod+s'])
-            ->requiresConfirmation(fn (): bool => $this->hasAnotherConfirmedAgreementForSelectedVendor())
-            ->modalHeading(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement/pages/create-purchase-agreement.confirmation.heading'))
-            ->modalDescription(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement/pages/create-purchase-agreement.confirmation.description'));
+            ->requiresConfirmation(fn () => $this->hasAnotherConfirmedAgreementForSelectedVendor())
+            ->modalHeading(fn () => $this->hasAnotherConfirmedAgreementForSelectedVendor()
+                ? __('purchases::filament/admin/clusters/orders/resources/purchase-agreement/pages/create-purchase-agreement.confirmation.heading')
+                : null
+            )
+            ->modalDescription(fn () => $this->hasAnotherConfirmedAgreementForSelectedVendor()
+                ? __('purchases::filament/admin/clusters/orders/resources/purchase-agreement/pages/create-purchase-agreement.confirmation.description')
+                : null
+            );
     }
 
     protected function hasAnotherConfirmedAgreementForSelectedVendor(): bool
     {
         $partnerId = data_get($this->form->getRawState(), 'partner_id', $this->data['partner_id'] ?? null);
+        $companyId = data_get($this->form->getRawState(), 'company_id', $this->data['company_id'] ?? null);
+        $requisitionType = data_get($this->form->getRawState(), 'type', $this->data['type'] ?? null);
 
-        if (! filled($partnerId)) {
+        if (! filled($partnerId) || ! filled($companyId) || ! filled($requisitionType)) {
             return false;
         }
 
         return Requisition::query()
             ->where('partner_id', $partnerId)
+            ->where('company_id', $companyId)
+            ->where('type', $requisitionType)
             ->where('state', RequisitionState::CONFIRMED)
             ->exists();
     }

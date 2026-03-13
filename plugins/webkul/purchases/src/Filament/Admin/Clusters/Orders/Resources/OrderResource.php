@@ -57,6 +57,7 @@ use Webkul\Product\Models\Packaging;
 use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Enums\QtyReceivedMethod;
 use Webkul\Purchase\Enums\RequisitionState;
+use Webkul\Purchase\Enums\RequisitionType;
 use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource;
 use Webkul\Purchase\Livewire\OrderSummary;
 use Webkul\Purchase\Models\Order;
@@ -166,6 +167,10 @@ class OrderResource extends Resource
                                                     ->orWhere('starts_at', '<=', now());
                                             })
                                     )
+                                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                    })
+                                    ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                                     ->searchable()
                                     ->preload()
                                     ->visible(static::getOrderSettings()->enable_purchase_agreements)
@@ -1535,7 +1540,9 @@ class OrderResource extends Resource
             $products[] = [
                 'product_id'  => $product?->id,
                 'uom_id'      => $uom?->id,
-                'product_qty' => $line->qty,
+                'product_qty' => $requisition->type === RequisitionType::BLANKET_ORDER
+                    ? 0
+                    : $line->qty,
                 'price_unit'  => $line->price_unit,
                 'planned_at'  => now(),
                 'taxes'       => $product?->productTaxes->pluck('id')->toArray() ?? [],
