@@ -8,6 +8,7 @@ use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Dashboard as BaseDashboard;
+use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 use Filament\Schemas\Schema;
 use Filament\View\LegacyComponents\Widget;
 use Webkul\Website\Filament\Admin\Widgets\BlogAuthorsChart;
@@ -20,8 +21,7 @@ use Webkul\Website\Filament\Admin\Widgets\TopCategoriesTable;
 
 class WebsiteDashboard extends BaseDashboard
 {
-    use BaseDashboard\Concerns\HasFiltersForm;
-    use HasPageShield;
+    use HasFiltersForm, HasPageShield;
 
     protected static string $routePath = 'website';
 
@@ -68,7 +68,7 @@ class WebsiteDashboard extends BaseDashboard
     }
 
     /**
-     * @return array<class-string<Widget> | WidgetConfiguration>
+     * @return array<class-string<Widget>
      */
     public function getWidgets(): array
     {

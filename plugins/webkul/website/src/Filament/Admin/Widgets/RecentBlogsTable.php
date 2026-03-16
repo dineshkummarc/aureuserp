@@ -45,25 +45,26 @@ class RecentBlogsTable extends TableWidget
     {
         return [
             Tables\Columns\TextColumn::make('title')
-                ->label('Title')
+                ->label(__('website::filament/admin/widgets/blog-chart.title'))
                 ->searchable()
                 ->wrap(),
 
             Tables\Columns\TextColumn::make('author.name')
-                ->label('Author')
+                ->label(__('website::filament/admin/widgets/blog-chart.author'))
                 ->default('Unknown')
                 ->sortable(),
 
-            Tables\Columns\BadgeColumn::make('is_published')
-                ->label('Status')
-                ->formatStateUsing(fn ($state) => $state ? 'Published' : 'Draft')
+            Tables\Columns\TextColumn::make('is_published')
+                ->label(__('website::filament/admin/widgets/blog-chart.status'))
+                ->badge()
+                ->formatStateUsing(fn ($state) => $state ? __('website::filament/admin/widgets/blog-chart.published') : __('website::filament/admin/widgets/blog-chart.draft'))
                 ->colors([
                     'success' => fn ($state) => $state === true,
                     'danger'  => fn ($state) => $state === false,
                 ]),
 
             Tables\Columns\TextColumn::make('created_at')
-                ->label('Created At')
+                ->label(__('website::filament/admin/widgets/blog-chart.created-at'))
                 ->dateTime('M d, Y H:i')
                 ->sortable(),
         ];

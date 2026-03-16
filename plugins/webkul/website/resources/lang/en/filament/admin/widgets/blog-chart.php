@@ -13,4 +13,21 @@ return [
 
     'top-5-categories-with-most-blogs' => 'Top 5 Categories with Most Blogs',
 
+    'published' => 'Published',
+
+    'draft' => 'Draft',
+
+    'title' => 'Title',
+
+    'author' => 'Author',
+
+    'status' => 'Status',
+
+    'created-at' => 'Created At',
+
+    'category' => 'Category',
+
+    'number-of-blogs' => 'Number of Blogs',
+
+    'no-data-available' => 'No data available',
 ];

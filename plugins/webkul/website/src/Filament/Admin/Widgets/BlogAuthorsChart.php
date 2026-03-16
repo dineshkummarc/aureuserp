@@ -32,7 +32,6 @@ class BlogAuthorsChart extends ChartWidget
             ->whereNotNull('author_id')
             ->with('author:id,name');
 
-        // Apply filters
         if (! empty($filters['from_date'])) {
             $query->whereDate('created_at', '>=', $filters['from_date']);
         }
@@ -45,15 +44,31 @@ class BlogAuthorsChart extends ChartWidget
             $query->where('author_id', $filters['author_id']);
         }
 
-        // Group by author & get top 10
         $authors = $query
             ->groupBy('author_id')
             ->orderByDesc('total_blogs')
             ->limit(10)
             ->get();
 
-        $labels = $authors->map(fn ($post) => $post->author?->name ?? 'Unknown')->toArray();
+        $labels = $authors->map(fn ($post) => $post->author?->name ?? __('website::filament/admin/widgets/blog-chart.no-data-available'))->toArray();
+
         $data = $authors->pluck('total_blogs')->toArray();
+
+        if (empty($labels)) {
+            return [
+                'datasets' => [
+                    [
+                        'label'           => 'Number of Blogs',
+                        'data'            => [0],
+                        'backgroundColor' => [
+                            '#4CAF50',
+                        ],
+                        'borderColor' => '#2196F3',
+                    ],
+                ],
+                'labels' => [__('website::filament/admin/widgets/blog-chart.no-data-available')],
+            ];
+        }
 
         return [
             'datasets' => [
@@ -81,6 +96,6 @@ class BlogAuthorsChart extends ChartWidget
 
     protected function getType(): string
     {
-        return 'pie'; // Pie chart
+        return 'pie';
     }
 }

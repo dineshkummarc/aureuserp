@@ -47,12 +47,12 @@ class TopCategoriesTable extends TableWidget
     {
         return [
             Tables\Columns\TextColumn::make('name')
-                ->label('Category')
+                ->label(__('website::filament/admin/widgets/blog-chart.category'))
                 ->searchable()
                 ->sortable(),
 
             Tables\Columns\TextColumn::make('filtered_posts_count')
-                ->label('Number of Blogs')
+                ->label(__('website::filament/admin/widgets/blog-chart.number-of-blogs'))
                 ->sortable(),
         ];
     }

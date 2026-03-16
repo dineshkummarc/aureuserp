@@ -48,7 +48,24 @@ class CategoriesPieChart extends ChartWidget
             ->get();
 
         $labels = $categories->pluck('name')->toArray();
+
         $data = $categories->pluck('filtered_posts_count')->toArray();
+
+        if (empty($labels)) {
+            return [
+                'datasets' => [
+                    [
+                        'label'           => 'Blogs by Category',
+                        'data'            => [0],
+                        'backgroundColor' => [
+                            '#4CAF50',
+                        ],
+                    ],
+                ],
+
+                'labels' => [__('website::filament/admin/widgets/blog-chart.no-data-available')],
+            ];
+        }
 
         return [
             'datasets' => [
@@ -61,6 +78,7 @@ class CategoriesPieChart extends ChartWidget
                     ],
                 ],
             ],
+
             'labels' => $labels,
         ];
     }

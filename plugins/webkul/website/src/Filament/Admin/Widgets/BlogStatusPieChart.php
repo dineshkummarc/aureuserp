@@ -30,7 +30,6 @@ class BlogStatusPieChart extends ChartWidget
 
         $query = Post::query();
 
-        // 🔍 Apply filters
         if (! empty($filters['from_date'])) {
             $query->whereDate('created_at', '>=', $filters['from_date']);
         }
@@ -43,9 +42,25 @@ class BlogStatusPieChart extends ChartWidget
             $query->where('author_id', $filters['author_id']);
         }
 
-        // Clone queries for counts
         $publishedCount = (clone $query)->where('is_published', true)->count();
+
         $draftCount = (clone $query)->where('is_published', false)->count();
+
+        if ($publishedCount === 0 && $draftCount === 0) {
+            return [
+                'datasets' => [
+                    [
+                        'label'           => 'Blogs',
+                        'data'            => [0],
+                        'backgroundColor' => [
+                            '#4CAF50',
+                        ],
+                    ],
+                ],
+
+                'labels' => [__('website::filament/admin/widgets/blog-chart.no-data-available')],
+            ];
+        }
 
         return [
             'datasets' => [
@@ -53,12 +68,16 @@ class BlogStatusPieChart extends ChartWidget
                     'label'           => 'Blogs',
                     'data'            => [$publishedCount, $draftCount],
                     'backgroundColor' => [
-                        '#4CAF50', // Green for Published
-                        '#F44336', // Red for Draft
+                        '#4CAF50',
+                        '#F44336',
                     ],
                 ],
             ],
-            'labels' => ['Published', 'Draft'],
+
+            'labels' => [
+                __('website::filament/admin/widgets/blog-chart.published'),
+                __('website::filament/admin/widgets/blog-chart.draft'),
+            ],
         ];
     }
 }

@@ -10,5 +10,4 @@ return [
     'author' => 'Author',
 
     'all-author' => 'All Author',
-
 ];

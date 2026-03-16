@@ -18,7 +18,7 @@ class StatsOverview extends BaseWidget
 
     public function getHeading(): ?string
     {
-        return __('website::filament/admin/pages/dashboard.stats-overview');
+        return __('website::filament/admin/widgets/stats-overview.stats-overview');
     }
 
     protected function getData(): array
@@ -26,9 +26,9 @@ class StatsOverview extends BaseWidget
         $filters = $this->filters;
 
         $pageQuery = Page::query();
+
         $blogQuery = Post::query();
 
-        // 🔍 Apply filters to blog query
         if (! empty($filters['from_date'])) {
             $blogQuery->whereDate('created_at', '>=', $filters['from_date']);
         }

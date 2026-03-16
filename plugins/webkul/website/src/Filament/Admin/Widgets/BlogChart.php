@@ -56,7 +56,6 @@ class BlogChart extends ChartWidget
         $labels = [];
 
         foreach ($months as $monthKey) {
-
             $labels[] = Carbon::createFromFormat('Y-m', $monthKey)->format('M Y');
 
             $publishedCount = $posts
@@ -70,24 +69,48 @@ class BlogChart extends ChartWidget
                 ->sum('count');
 
             $publishedData[] = $publishedCount;
+
             $draftData[] = $draftCount;
+        }
+
+        // Return empty data message if no data available
+        if (empty($labels)) {
+            return [
+                'datasets' => [
+                    [
+                        'label'           => __('website::filament/admin/widgets/blog-chart.published'),
+                        'data'            => [0],
+                        'backgroundColor' => 'rgba(76, 175, 80, 0.6)',
+                        'borderColor'     => '#4CAF50',
+                    ],
+                    [
+                        'label'           => __('website::filament/admin/widgets/blog-chart.draft'),
+                        'data'            => [0],
+                        'backgroundColor' => 'rgba(244, 67, 54, 0.6)',
+                        'borderColor'     => '#F44336',
+                    ],
+                ],
+
+                'labels' => [__('website::filament/admin/widgets/blog-chart.no-data-available')],
+            ];
         }
 
         return [
             'datasets' => [
                 [
-                    'label'           => 'Published',
+                    'label'           => __('website::filament/admin/widgets/blog-chart.published'),
                     'data'            => $publishedData,
                     'backgroundColor' => 'rgba(76, 175, 80, 0.6)',
                     'borderColor'     => '#4CAF50',
                 ],
                 [
-                    'label'           => 'Draft',
+                    'label'           => __('website::filament/admin/widgets/blog-chart.draft'),
                     'data'            => $draftData,
                     'backgroundColor' => 'rgba(244, 67, 54, 0.6)',
                     'borderColor'     => '#F44336',
                 ],
             ],
+
             'labels' => $labels,
         ];
     }
