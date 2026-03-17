@@ -186,6 +186,10 @@ class JournalResource extends Resource
                                                                             }
                                                                         }
                                                                     )
+                                                                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                                                                        return $record->account_number.($record->trashed() ? ' (Deleted)' : '');
+                                                                    })
+                                                                    ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                                                                     ->hiddenLabel(),
                                                             ]),
                                                     ]),
