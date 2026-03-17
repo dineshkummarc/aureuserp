@@ -520,7 +520,7 @@ class PurchaseAgreementResource extends Resource
                                 ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.actions.restore.notification.body')),
                         ),
                     DeleteAction::make()
-                        ->hidden(fn (Model $record) => $record->state == RequisitionState::CLOSED)
+                        ->hidden(fn (Model $record) => in_array($record->state, [RequisitionState::CONFIRMED, RequisitionState::CLOSED]))
                         ->successNotification(
                             Notification::make()
                                 ->success()
@@ -529,20 +529,6 @@ class PurchaseAgreementResource extends Resource
                         ),
                     ForceDeleteAction::make()
                         ->action(function (Requisition $record, ForceDeleteAction $action) {
-                            if (! in_array($record->state, [
-                                RequisitionState::DRAFT,
-                                RequisitionState::CANCELED,
-                            ])) {
-                                Notification::make()
-                                    ->warning()
-                                    ->title(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.actions.force-delete.notification.warning.title'))
-                                    ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.actions.force-delete.notification.warning.body'))
-                                    ->send();
-
-                                $action->cancel();
-
-                                return;
-                            }
 
                             try {
                                 $record->forceDelete();
@@ -581,29 +567,16 @@ class PurchaseAgreementResource extends Resource
                                 ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.bulk-actions.delete.notification.body')),
                         ),
                     ForceDeleteBulkAction::make()
-                        ->action(function (Collection $records) {
+                        ->action(function (ForceDeleteBulkAction $action, Collection $records) {
                             try {
-                                $records->each(function (Model $record) {
-                                    if (
-                                        $record->state === RequisitionState::DRAFT
-                                        || $record->state === RequisitionState::CANCELED
-                                    ) {
-                                        $record->forceDelete();
-                                    }
-
-                                    Notification::make()
-                                        ->danger()
-                                        ->title(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.bulk-actions.force-delete.notification.warning.title'))
-                                        ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.bulk-actions.force-delete.notification.warning.body'))
-                                        ->send();
-
-                                });
+                                $records->each(fn (Model $record) => $record->forceDelete());
                             } catch (QueryException $e) {
                                 Notification::make()
                                     ->danger()
                                     ->title(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.bulk-actions.force-delete.notification.error.title'))
                                     ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.bulk-actions.force-delete.notification.error.body'))
                                     ->send();
+                                $action->cancel();
                             }
                         })
                         ->successNotification(
@@ -615,7 +588,7 @@ class PurchaseAgreementResource extends Resource
                 ]),
             ])
             ->checkIfRecordIsSelectableUsing(
-                fn (Model $record): bool => static::can('delete', $record) && $record->state !== RequisitionState::CLOSED,
+                fn (Model $record): bool => static::can('delete', $record) && in_array($record->state, [RequisitionState::CANCELED, RequisitionState::DRAFT]),
             );
     }
 

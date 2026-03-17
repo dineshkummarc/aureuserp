@@ -156,7 +156,6 @@ class OrderResource extends Resource
                                         name: 'requisition',
                                         titleAttribute: 'name',
                                         modifyQueryUsing: fn (Builder $query, Get $get) => $query
-                                            ->where('state', RequisitionState::CONFIRMED)
                                             ->where('partner_id', $get('partner_id'))
                                             ->where(function ($query) {
                                                 $query->whereNull('ends_at')
@@ -165,6 +164,13 @@ class OrderResource extends Resource
                                             ->where(function ($query) {
                                                 $query->whereNull('starts_at')
                                                     ->orWhere('starts_at', '<=', now());
+                                            })
+                                            ->where(function ($query) {
+                                                $query->whereNotNull('deleted_at')
+                                                    ->orWhere(function ($query) {
+                                                        $query->whereNull('deleted_at')
+                                                            ->where('state', RequisitionState::CONFIRMED);
+                                                    });
                                             })
                                     )
                                     ->getOptionLabelFromRecordUsing(function ($record): string {
@@ -484,7 +490,7 @@ class OrderResource extends Resource
                     EditAction::make(),
                     DeleteAction::make()
                         ->hidden(fn (Model $record) => $record->state == OrderState::DONE)
-                        ->action(function (Model $record) {
+                        ->action(function (DeleteAction $deleteAction, Model $record) {
                             try {
                                 $record->delete();
                             } catch (QueryException $e) {
@@ -493,6 +499,7 @@ class OrderResource extends Resource
                                     ->title(__('purchases::filament/admin/clusters/orders/resources/order.table.actions.delete.notification.error.title'))
                                     ->body(__('purchases::filament/admin/clusters/orders/resources/order.table.actions.delete.notification.error.body'))
                                     ->send();
+                                $deleteAction->cancel();
                             }
                         })
                         ->successNotification(
@@ -505,7 +512,7 @@ class OrderResource extends Resource
             ])
             ->toolbarActions([
                 DeleteBulkAction::make()
-                    ->action(function (Collection $records) {
+                    ->action(function (DeleteBulkAction $action, Collection $records) {
                         try {
                             $records->each(fn (Model $record) => $record->delete());
                         } catch (QueryException $e) {
@@ -514,6 +521,7 @@ class OrderResource extends Resource
                                 ->title(__('purchases::filament/admin/clusters/orders/resources/order.table.bulk-actions.delete.notification.error.title'))
                                 ->body(__('purchases::filament/admin/clusters/orders/resources/order.table.bulk-actions.delete.notification.error.body'))
                                 ->send();
+                            $action->cancel();
                         }
                     })
                     ->successNotification(
