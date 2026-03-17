@@ -329,9 +329,6 @@ class InvoiceResource extends Resource
                                             ->getOptionLabelFromRecordUsing(function ($record): string {
                                                 return $record->account_number.' - '.$record->bank->name.($record->trashed() ? ' (Deleted)' : '');
                                             })
-                                            ->disableOptionWhen(function ($label) {
-                                                return str_contains($label, ' (Deleted)');
-                                            })
                                             ->searchable()
                                             ->preload()
                                             ->createOptionForm(fn (Schema $schema, Get $get) => BankAccountResource::form($schema)->fill([
