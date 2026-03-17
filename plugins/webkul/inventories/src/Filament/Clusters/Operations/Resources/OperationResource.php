@@ -205,6 +205,23 @@ class OperationResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
+                            ->live()
+                            ->afterStateUpdated(function (Get $get, ?Operation $record): void {
+                                $destinationLocationId = $get('destination_location_id');
+
+                                if (
+                                    ! $record?->id
+                                    || ! $destinationLocationId
+                                ) {
+                                    return;
+                                }
+
+                                $record->update(['destination_location_id' => $destinationLocationId]);
+
+                                $record->moves()->update(['destination_location_id' => $destinationLocationId]);
+
+                                $record->moveLines()->update(['destination_location_id' => $destinationLocationId]);
+                            })
                             ->visible(fn (Get $get): bool => static::getWarehouseSettings()->enable_locations && OperationType::withTrashed()->find($get('operation_type_id'))?->type != Enums\OperationType::OUTGOING)
                             ->disabled(fn ($record): bool => in_array($record?->state, [OperationState::DONE, OperationState::CANCELED])),
                     ])
