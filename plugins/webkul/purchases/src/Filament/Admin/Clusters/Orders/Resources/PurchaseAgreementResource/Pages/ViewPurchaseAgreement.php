@@ -22,12 +22,12 @@ class ViewPurchaseAgreement extends ViewRecord
             ChatterAction::make()
                 ->resource(static::$resource),
             DeleteAction::make()
-                ->hidden(fn () => $this->getRecord()->state == RequisitionState::CLOSED)
+                ->hidden(fn() => in_array($this->getRecord()->state, [RequisitionState::CLOSED, RequisitionState::CONFIRMED]))
                 ->successNotification(
                     Notification::make()
                         ->success()
-                        ->title(__('inventories::filament/clusters/orders/resources/purchase-agreement/pages/view-purchase-agreement.header-actions.delete.notification.title'))
-                        ->body(__('inventories::filament/clusters/orders/resources/purchase-agreement/pages/view-purchase-agreement.header-actions.delete.notification.body')),
+                        ->title(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement/pages/edit-purchase-agreement.header-actions.delete.notification.title'))
+                        ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement/pages/edit-purchase-agreement.header-actions.delete.notification.body')),
                 ),
         ];
     }

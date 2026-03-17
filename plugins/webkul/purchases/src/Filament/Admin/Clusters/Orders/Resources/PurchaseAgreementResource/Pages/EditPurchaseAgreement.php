@@ -115,7 +115,7 @@ class EditPurchaseAgreement extends EditRecord
                     }, 'Purchase Agreement-' . str_replace('/', '_', $record->name) . '.pdf');
                 }),
             DeleteAction::make()
-                ->hidden(fn() => $this->getRecord()->state == RequisitionState::CLOSED)
+                ->hidden(fn() => in_array($this->getRecord()->state, [RequisitionState::CLOSED, RequisitionState::CONFIRMED]))
                 ->successNotification(
                     Notification::make()
                         ->success()

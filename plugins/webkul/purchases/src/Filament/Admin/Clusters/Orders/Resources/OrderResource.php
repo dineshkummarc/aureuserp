@@ -155,24 +155,24 @@ class OrderResource extends Resource
                                     ->relationship(
                                         name: 'requisition',
                                         titleAttribute: 'name',
-                                        modifyQueryUsing: fn (Builder $query, Get $get) => $query
-                                            ->where('partner_id', $get('partner_id'))
-                                            ->where(function ($query) {
-                                                $query->whereNull('ends_at')
-                                                    ->orWhere('ends_at', '>=', now());
-                                            })
-                                            ->where(function ($query) {
-                                                $query->whereNull('starts_at')
-                                                    ->orWhere('starts_at', '<=', now());
-                                            })
-                                            ->where(function ($query) {
-                                                $query->whereNotNull('deleted_at')
-                                                    ->orWhere(function ($query) {
-                                                        $query->whereNull('deleted_at')
-                                                            ->where('state', RequisitionState::CONFIRMED);
-                                                    });
-                                            })
-                                    )
+                                        modifyQueryUsing: function (Builder $query, Get $get, $operation, $state) {
+                                            $query
+                                                ->where('partner_id', $get('partner_id'))
+                                                ->where(function ($query) use ($operation, $state) {
+                                                    $query->where('state', RequisitionState::CONFIRMED);
+                                                    if ($operation !== 'create' && $state) {
+                                                        $query->orWhere('id', $state);
+                                                    }
+                                                })
+                                                ->where(function ($query) {
+                                                    $query->whereNull('ends_at')
+                                                        ->orWhere('ends_at', '>=', now());
+                                                })
+                                                ->where(function ($query) {
+                                                    $query->whereNull('starts_at')
+                                                        ->orWhere('starts_at', '<=', now());
+                                                });
+                                        })
                                     ->getOptionLabelFromRecordUsing(function ($record): string {
                                         return $record->name.($record->trashed() ? ' (Deleted)' : '');
                                     })
