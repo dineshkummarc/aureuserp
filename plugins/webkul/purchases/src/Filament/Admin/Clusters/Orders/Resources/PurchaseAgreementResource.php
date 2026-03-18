@@ -586,10 +586,7 @@ class PurchaseAgreementResource extends Resource
                                 ->body(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.table.bulk-actions.force-delete.notification.success.body')),
                         ),
                 ]),
-            ])
-            ->checkIfRecordIsSelectableUsing(
-                fn (Model $record): bool => static::can('delete', $record) && in_array($record->state, [RequisitionState::CANCELED, RequisitionState::DRAFT]),
-            );
+            ]);
     }
 
     public static function infolist(Schema $schema): Schema
