@@ -1007,6 +1007,7 @@ class SaleManager
         $newOperation = InventoryOperation::create([
             'state'                   => InventoryEnums\OperationState::DRAFT,
             'origin'                  => $record->name,
+            'partner_id'              => $record->partner_id,
             'operation_type_id'       => $rule->operation_type_id,
             'source_location_id'      => $rule->source_location_id,
             'destination_location_id' => $rule->destination_location_id,
