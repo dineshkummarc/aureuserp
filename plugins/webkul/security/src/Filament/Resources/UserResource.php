@@ -108,12 +108,14 @@ class UserResource extends Resource
                                             ->label(__('security::filament/resources/user.form.sections.general-information.fields.password'))
                                             ->password()
                                             ->required()
+                                            ->revealable(filament()->arePasswordsRevealable())
                                             ->hiddenOn('edit')
                                             ->maxLength(255)
                                             ->rule('min:8'),
                                         TextInput::make('password_confirmation')
                                             ->label(__('security::filament/resources/user.form.sections.general-information.fields.password-confirmation'))
                                             ->password()
+                                            ->revealable(filament()->arePasswordsRevealable())
                                             ->hiddenOn('edit')
                                             ->rule('required', fn($get) => (bool) $get('password'))
                                             ->same('password'),
