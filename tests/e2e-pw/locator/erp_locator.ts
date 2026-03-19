@@ -96,18 +96,24 @@ export class ErpLocators {
 
     readonly salesCustomersTable: Locator;
     readonly salesCustomerCreateButton: Locator;
+    readonly salesCustomerNewCreateButton: Locator;
     readonly salesCustomerNameInput: Locator;
     readonly salesCustomerEmailInput: Locator;
     readonly salesCustomerSaveButton: Locator;
     readonly salesCustomerSearchInput: Locator;
+    readonly salesCustomerEditButton: Locator;
+    readonly salesCustomerDeleteButton: Locator;
+
 
     readonly salesProductsTable: Locator;
-    readonly salesProductCreateButton: Locator;
+    readonly salesProductNewCreateButton: Locator;
     readonly salesProductNameInput: Locator;
     readonly salesProductCategorySelect: Locator;
     readonly salesProductPriceInput: Locator;
     readonly salesProductUomSelect: Locator;
     readonly salesProductSaveButton: Locator;
+    readonly salesProductCreateButton: Locator;
+
 
     readonly salesQuotationCreateButton: Locator;
     readonly salesQuotationCustomerSelect: Locator;
@@ -228,20 +234,24 @@ export class ErpLocators {
          * Sales - Customers, Products, Quotations
          */
 
-        this.salesCustomersTable = page.locator("table");
-        this.salesCustomerCreateButton = page.locator("a,button").filter({ hasText: /new customer|create customer|add customer|create/i }).first();
+        this.salesCustomersTable = page.locator("div.fi-ta-content-grid");
+        this.salesCustomerNewCreateButton = page.locator("a,button").filter({ hasText: /new customer|create customer|add customer|create/i }).first();
         this.salesCustomerNameInput = page.locator('input[id="form.name"]').first();
         this.salesCustomerEmailInput = page.locator('input[id="form.email"]').first();
-        this.salesCustomerSaveButton = page.locator('button[type="submit"]').first();
+        this.salesCustomerCreateButton = page.locator('button[id="key-bindings-1"]').first();
+        this.salesCustomerSaveButton = page.locator('button[id="key-bindings-2"]').first();
+        this.salesCustomerDeleteButton = page.locator('button[id="key-bindings-1"]').first();
         this.salesCustomerSearchInput = page.locator('.fi-input.fi-input-has-inline-prefix').nth(1);
+        this.salesCustomerEditButton = page.getByRole('link', { name: 'Edit' }).first();
 
         this.salesProductsTable = page.locator("table");
-        this.salesProductCreateButton = page.locator("a,button").filter({ hasText: /new product|create product|add product|create/i }).first();
+        this.salesProductNewCreateButton = page.locator("a,button").filter({ hasText: /new product|create product|add product|create/i }).first();
         this.salesProductNameInput = page.locator('input[id="form.name"]').first();
         this.salesProductCategorySelect = page.locator('input[id="form.category_id"], [role="combobox"][aria-label*="Category"], [role="combobox"][aria-labelledby*="Category"]').first();
         this.salesProductPriceInput = page.locator('input[id="form.price"]').first();
         this.salesProductUomSelect = page.locator('input[id="form.uom_id"], [role="combobox"][aria-label*="UOM"], [role="combobox"][aria-labelledby*="UOM"]').first();
-        this.salesProductSaveButton = page.locator('button[type="submit"]').first();
+        this.salesProductCreateButton = page.locator('button[id="key-bindings-1"]').first();
+        this.salesProductSaveButton = page.locator('button[id="key-bindings-2"]').first();
 
         this.salesQuotationCreateButton = page.locator("a,button").filter({ hasText: /new quotation|create quotation|add quotation|create/i }).first();
         this.salesQuotationCustomerSelect = page.locator('input[id="form.partner_id"], [role="combobox"][aria-label*="Customer"], [role="combobox"][aria-labelledby*="Customer"]').first();
@@ -256,7 +266,7 @@ export class ErpLocators {
         this.salesInvoicesTable = page.locator("table");
 
         this.salesSearchInput = page.locator(".fi-input.fi-input-has-inline-prefix").nth(1);
-        this.salesRowActionsButton = page.locator('button[title="Actions"], [data-action="actions"]').first();
+        this.salesRowActionsButton = page.getByRole('button', { name: 'Actions' });
         this.salesEditAction = page.getByRole("menuitem", { name: /Edit/i }).first();
         this.salesDeleteAction = page.getByRole("menuitem", { name: /Delete/i }).first();
         this.salesConfirmDeleteButton = page.getByRole("dialog").getByRole("button", { name: /Delete/i }).first();

@@ -41,7 +41,7 @@ export class SalesFlowPage {
 
     async createCustomer(customer: SalesCustomerData) {
         await this.gotoCustomersPage();
-        await this.erpLocators.salesCustomerCreateButton.click();
+        await this.erpLocators.salesCustomerNewCreateButton.click();
         await expect(this.page).toHaveURL(/customers\/create/);
 
         await this.erpLocators.salesCustomerNameInput.fill(customer.name);
@@ -56,8 +56,9 @@ export class SalesFlowPage {
     async editCustomer(originalName: string, updates: Partial<SalesCustomerData>) {
         await this.gotoCustomersPage();
         await this.searchList(originalName);
-        await this.openRowActions();
-        await this.clickMenuAction(/Edit/i);
+        // await this.openRowActions();
+        // await this.clickMenuAction(/Edit/i);
+        await this.erpLocators.salesCustomerEditButton.click();
 
         if (updates.name) {
             await this.erpLocators.salesCustomerNameInput.fill(updates.name);
@@ -73,8 +74,9 @@ export class SalesFlowPage {
     async deleteCustomer(name: string) {
         await this.gotoCustomersPage();
         await this.searchList(name);
-        await this.openRowActions();
-        await this.clickMenuAction(/Delete/i);
+        // await this.openRowActions();
+        // await this.clickMenuAction(/Delete/i);
+        await this.erpLocators.salesCustomerDeleteButton.click();
         await this.erpLocators.salesConfirmDeleteButton.click();
         await this.expectSuccessToast();
     }
@@ -87,15 +89,13 @@ export class SalesFlowPage {
 
     async createProduct(product: SalesProductData) {
         await this.gotoProductsPage();
-        await this.erpLocators.salesProductCreateButton.click();
+        await this.erpLocators.salesProductNewCreateButton.click();
         await expect(this.page).toHaveURL(/products\/create/);
 
         await this.erpLocators.salesProductNameInput.fill(product.name);
-        await this.selectFirstOption(this.erpLocators.salesProductCategorySelect);
         await this.erpLocators.salesProductPriceInput.fill(product.price);
-        await this.selectFirstOption(this.erpLocators.salesProductUomSelect);
 
-        await this.erpLocators.salesProductSaveButton.click();
+        await this.erpLocators.salesProductCreateButton.click();
         await this.expectSuccessToast();
     }
 

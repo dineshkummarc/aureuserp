@@ -24,12 +24,4 @@ test.describe('Plugin Installation', () => {
         const pluginManagementPage = new PluginManagementPage(adminPage);
         await pluginManagementPage.uninstallAllPlugins();
     });
-
-    /**
-     * Accounting plugin installation test
-     */
-    // test('Accounting Plugin Installation Test', async ({ adminPage }) => {
-    //     const pluginManagementPage = new PluginManagementPage(adminPage);
-    //     await pluginManagementPage.AccountingInstall();
-    // });
 });

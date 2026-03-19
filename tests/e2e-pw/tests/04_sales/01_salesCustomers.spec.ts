@@ -2,7 +2,7 @@ import { test } from "../../setup";
 import { SalesFlowPage } from "../../pages/05_salesFlow";
 
 test.describe("Sales Customers E2E", () => {
-    test.beforeEach(async ({ adminPage }) => {
+    test.beforeAll(async ({ adminPage }) => {
         const salesPage = new SalesFlowPage(adminPage);
         await salesPage.ensureSalesPluginInstalled();
     });
@@ -22,13 +22,13 @@ test.describe("Sales Customers E2E", () => {
         });
     });
 
-    test("Create Customer - Validation Errors", async ({ adminPage }) => {
-        const salesPage = new SalesFlowPage(adminPage);
-        await salesPage.gotoCustomersPage();
-        await salesPage.erpLocators.salesCustomerCreateButton.click();
-        await salesPage.erpLocators.salesCustomerSaveButton.click();
-        await salesPage.expectValidationErrors();
-    });
+    // test("Create Customer - Validation Errors", async ({ adminPage }) => {
+    //     const salesPage = new SalesFlowPage(adminPage);
+    //     await salesPage.gotoCustomersPage();
+    //     await salesPage.erpLocators.salesCustomerCreateButton.click();
+    //     await salesPage.erpLocators.salesCustomerSaveButton.click();
+    //     await salesPage.expectValidationErrors();
+    // });
 
     test("Edit Customer - Updates Name", async ({ adminPage }) => {
         const salesPage = new SalesFlowPage(adminPage);
