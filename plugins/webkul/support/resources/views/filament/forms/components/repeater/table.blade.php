@@ -188,7 +188,7 @@
                                         {{ $tableColumn->getLabel() }}
 
                                         @if ($tableColumn->isMarkedAsRequired())
-                                            <sup class="fi-fo-table-repeater-header-required-mark">*</sup>
+                                            <sup class="fi-fo-table-repeater-header-required-mark pt-2">*</sup>
                                         @endif
                                     @else
                                         <span class="fi-sr-only">
