@@ -57,9 +57,11 @@ use Webkul\Product\Models\Packaging;
 use Webkul\Purchase\Enums\OrderState;
 use Webkul\Purchase\Enums\QtyReceivedMethod;
 use Webkul\Purchase\Enums\RequisitionState;
+use Webkul\Purchase\Enums\RequisitionType;
 use Webkul\Purchase\Filament\Admin\Clusters\Products\Resources\ProductResource;
 use Webkul\Purchase\Livewire\OrderSummary;
 use Webkul\Purchase\Models\Order;
+use Webkul\Purchase\Models\OrderLine;
 use Webkul\Purchase\Models\Product;
 use Webkul\Purchase\Models\Requisition;
 use Webkul\Purchase\Settings\OrderSettings;
@@ -157,18 +159,28 @@ class OrderResource extends Resource
                                     ->relationship(
                                         name: 'requisition',
                                         titleAttribute: 'name',
-                                        modifyQueryUsing: fn (Builder $query, Get $get) => $query
-                                            ->where('state', RequisitionState::CONFIRMED)
-                                            ->where('partner_id', $get('partner_id'))
-                                            ->where(function ($query) {
-                                                $query->whereNull('ends_at')
-                                                    ->orWhere('ends_at', '>=', now());
-                                            })
-                                            ->where(function ($query) {
-                                                $query->whereNull('starts_at')
-                                                    ->orWhere('starts_at', '<=', now());
-                                            })
-                                    )
+                                        modifyQueryUsing: function (Builder $query, Get $get, $operation, $state) {
+                                            $query
+                                                ->where('partner_id', $get('partner_id'))
+                                                ->where(function ($query) use ($operation, $state) {
+                                                    $query->where('state', RequisitionState::CONFIRMED);
+                                                    if ($operation !== 'create' && $state) {
+                                                        $query->orWhere('id', $state);
+                                                    }
+                                                })
+                                                ->where(function ($query) {
+                                                    $query->whereNull('ends_at')
+                                                        ->orWhere('ends_at', '>=', now());
+                                                })
+                                                ->where(function ($query) {
+                                                    $query->whereNull('starts_at')
+                                                        ->orWhere('starts_at', '<=', now());
+                                                });
+                                        })
+                                    ->getOptionLabelFromRecordUsing(function ($record): string {
+                                        return $record->name.($record->trashed() ? ' (Deleted)' : '');
+                                    })
+                                    ->disableOptionWhen(fn ($label) => str_contains($label, ' (Deleted)'))
                                     ->searchable()
                                     ->preload()
                                     ->visible(static::getOrderSettings()->enable_purchase_agreements)
@@ -482,7 +494,7 @@ class OrderResource extends Resource
                     EditAction::make(),
                     DeleteAction::make()
                         ->hidden(fn (Model $record) => $record->state == OrderState::DONE)
-                        ->action(function (Model $record) {
+                        ->action(function (DeleteAction $deleteAction, Model $record) {
                             try {
                                 $record->delete();
                             } catch (QueryException $e) {
@@ -491,6 +503,7 @@ class OrderResource extends Resource
                                     ->title(__('purchases::filament/admin/clusters/orders/resources/order.table.actions.delete.notification.error.title'))
                                     ->body(__('purchases::filament/admin/clusters/orders/resources/order.table.actions.delete.notification.error.body'))
                                     ->send();
+                                $deleteAction->cancel();
                             }
                         })
                         ->successNotification(
@@ -503,7 +516,7 @@ class OrderResource extends Resource
             ])
             ->toolbarActions([
                 DeleteBulkAction::make()
-                    ->action(function (Collection $records) {
+                    ->action(function (DeleteBulkAction $action, Collection $records) {
                         try {
                             $records->each(fn (Model $record) => $record->delete());
                         } catch (QueryException $e) {
@@ -512,6 +525,7 @@ class OrderResource extends Resource
                                 ->title(__('purchases::filament/admin/clusters/orders/resources/order.table.bulk-actions.delete.notification.error.title'))
                                 ->body(__('purchases::filament/admin/clusters/orders/resources/order.table.bulk-actions.delete.notification.error.body'))
                                 ->send();
+                            $action->cancel();
                         }
                     })
                     ->successNotification(
@@ -1201,6 +1215,8 @@ class OrderResource extends Resource
         $set('price_unit', round($priceUnit, 2));
 
         self::calculateLineTotals($set, $get);
+
+        self::checkBlanketOrderQtyLimit($get);
     }
 
     private static function afterUOMUpdated(Set $set, Get $get): void
@@ -1527,7 +1543,9 @@ class OrderResource extends Resource
             $products[] = [
                 'product_id'  => $product?->id,
                 'uom_id'      => $uom?->id,
-                'product_qty' => $line->qty,
+                'product_qty' => $requisition->type === RequisitionType::BLANKET_ORDER
+                    ? 0
+                    : $line->qty,
                 'price_unit'  => $line->price_unit,
                 'planned_at'  => now(),
                 'taxes'       => $product?->productTaxes->pluck('id')->toArray() ?? [],
@@ -1572,6 +1590,58 @@ class OrderResource extends Resource
             $set("products.$key.price_unit", round($vendorPrice, 2));
 
             self::calculateLineTotals($set, $get, "products.$key.");
+        }
+    }
+
+    /**
+     * Check if the product quantity exceeds the blanket order limit and show warning if needed.
+     */
+    private static function checkBlanketOrderQtyLimit(Get $get, ?string $prefix = ''): void
+    {
+        $requisitionId = $get('../../requisition_id');
+
+        if (! $requisitionId) {
+            return;
+        }
+
+        $requisition = Requisition::find($requisitionId);
+
+        if (! $requisition || $requisition->type !== RequisitionType::BLANKET_ORDER) {
+            return;
+        }
+
+        $productId = $get($prefix.'product_id');
+        $productQty = floatval($get($prefix.'product_qty') ?? 0);
+
+        if (! $productId || $productQty <= 0) {
+            return;
+        }
+
+        $requisitionLine = $requisition->lines->where('product_id', $productId)->first();
+
+        if (! $requisitionLine) {
+            return;
+        }
+
+        $orderedQty = (float) OrderLine::query()
+            ->where('product_id', $productId)
+            ->whereHas('order', fn ($query) => $query
+                ->where('requisition_id', $requisitionId)
+                ->whereIn('state', [OrderState::PURCHASE->value, OrderState::DONE->value])
+            )
+            ->sum('product_qty');
+
+        $availableQty = $requisitionLine->qty - $orderedQty;
+
+        if ($productQty > $availableQty) {
+            Notification::make()
+                ->warning()
+                ->title(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.notifications.blanket-order-qty-limit.title'))
+                ->body(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.notifications.blanket-order-qty-limit.body', [
+                    'product_qty'     => $productQty,
+                    'available_qty'   => $availableQty,
+                ]))
+                ->send();
         }
     }
 }
