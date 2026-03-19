@@ -1,4 +1,4 @@
-# 🚀 CHANGELOG — v1.3.0-BETA3
+# 🚀 CHANGELOG — v1.3.0-BETA4
 
 ### 🧩 Features
 
