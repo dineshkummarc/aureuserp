@@ -129,4 +129,11 @@ class TableColumn extends Component
 
         return $maxWidth !== null ? (string) $maxWidth : null;
     }
+
+    public function wrapHeader(bool|Closure $condition = false): static
+    {
+        $this->canHeaderWrap = $condition;
+
+        return $this;
+    }
 }

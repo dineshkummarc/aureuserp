@@ -661,46 +661,47 @@ class OperationResource extends Resource
             ->table(fn ($record) => [
                 TableColumn::make('product_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.product'))
-                    ->width(250)
+                    ->width(300)
+                    ->resizable()
                     ->markAsRequired(),
                 TableColumn::make('final_location_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.final-location'))
-                    ->width(250)
+                    ->resizable()
                     ->visible(static::getWarehouseSettings()->enable_locations)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('description_picking')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.description'))
-                    ->width(250)
+                    ->resizable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('scheduled_at')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.scheduled-at'))
-                    ->width(250)
+                    ->resizable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('deadline')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.deadline'))
-                    ->width(250)
+                    ->resizable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TableColumn::make('product_packaging_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.packaging'))
-                    ->width(250)
+                    ->resizable()
                     ->visible(static::getProductSettings()->enable_packagings),
                 TableColumn::make('product_uom_qty')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.demand'))
-                    ->width(150)
+                    ->resizable()
                     ->markAsRequired(),
                 TableColumn::make('quantity')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.quantity'))
-                    ->width(150)
+                    ->resizable()
                     ->markAsRequired()
                     ->visible(fn () => $record?->moves->contains(fn ($move) => $move->id && $move->state !== MoveState::DRAFT)),
                 TableColumn::make('uom_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.unit'))
-                    ->width(200)
+                    ->resizable()
                     ->markAsRequired()
                     ->visible(static::getProductSettings()->enable_uom),
                 TableColumn::make('is_picked')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.picked'))
-                    ->width(80)
+                    ->resizable()
                     ->toggleable(),
             ])
             ->schema([
@@ -717,6 +718,7 @@ class OperationResource extends Resource
                     ->required()
                     ->searchable()
                     ->preload()
+                    ->wrapOptionLabels(false)
                     ->getOptionLabelFromRecordUsing(function ($record): string {
                         return $record->name.($record->trashed() ? ' (Deleted)' : '');
                     })
@@ -761,6 +763,7 @@ class OperationResource extends Resource
                     })
                     ->searchable()
                     ->preload()
+                    ->wrapOptionLabels(false)
                     ->visible(static::getWarehouseSettings()->enable_locations)
                     ->disabled(fn ($record): bool => in_array($record?->state, [MoveState::DONE, MoveState::CANCELED])),
                 TextInput::make('description_picking')
@@ -787,6 +790,7 @@ class OperationResource extends Resource
                     )
                     ->searchable()
                     ->preload()
+                    ->wrapOptionLabels(false)
                     ->visible(static::getProductSettings()->enable_packagings)
                     ->disabled(fn ($record): bool => in_array($record?->state, [MoveState::DONE, MoveState::CANCELED])),
                 TextInput::make('product_uom_qty')
@@ -826,6 +830,7 @@ class OperationResource extends Resource
                     ->required()
                     ->live()
                     ->native(false)
+                    ->wrapOptionLabels(false)
                     ->afterStateUpdated(function (Set $set, Get $get) {
                         static::afterUOMUpdated($set, $get);
                     })

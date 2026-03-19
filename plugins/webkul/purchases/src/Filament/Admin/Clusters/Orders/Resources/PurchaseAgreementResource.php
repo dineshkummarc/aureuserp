@@ -257,20 +257,21 @@ class PurchaseAgreementResource extends Resource
             ->table([
                 TableColumn::make('product_id')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.columns.product'))
-                    ->width(250)
+                    ->width(300)
+                    ->resizable()
                     ->markAsRequired(),
                 TableColumn::make('qty')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.columns.quantity'))
-                    ->width(250)
+                    ->resizable()
                     ->markAsRequired(),
                 TableColumn::make('uom_id')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.columns.uom'))
-                    ->width(250)
+                    ->resizable()
                     ->visible(static::getProductSettings()->enable_uom)
                     ->markAsRequired(),
                 TableColumn::make('price_unit')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/purchase-agreement.form.tabs.products.columns.unit-price'))
-                    ->width(250)
+                    ->resizable()
                     ->markAsRequired(),
             ])
             ->schema([
@@ -286,6 +287,7 @@ class PurchaseAgreementResource extends Resource
                     ->searchable()
                     ->preload()
                     ->distinct()
+                    ->wrapOptionLabels(false)
                     ->getOptionLabelFromRecordUsing(function ($record): string {
                         return $record->name.($record->trashed() ? ' (Deleted)' : '');
                     })
@@ -335,6 +337,7 @@ class PurchaseAgreementResource extends Resource
                     ->searchable()
                     ->preload()
                     ->required()
+                    ->wrapOptionLabels(false)
                     ->visible(static::getProductSettings()->enable_uom)
                     ->disabled(fn ($record): bool => in_array($record?->requisition->state, [RequisitionState::CLOSED, RequisitionState::CANCELED])),
                 TextInput::make('price_unit')
