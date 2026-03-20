@@ -1058,31 +1058,29 @@ class QuotationResource extends Resource
             ->table([
                 TableColumn::make('product_id')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.product-optional.columns.product'))
-                    ->width(250)
+                    ->width(300)
                     ->markAsRequired()
                     ->toggleable()
                     ->resizable(),
                 TableColumn::make('quantity')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.product-optional.columns.quantity'))
-                    ->width(150)
                     ->markAsRequired()
                     ->resizable(),
                 TableColumn::make('product_uom_id')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.product-optional.columns.uom'))
-                    ->width(150)
                     ->markAsRequired()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->resizable(),
                 TableColumn::make('price_unit')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.product-optional.columns.unit-price'))
-                    ->width(150)
                     ->markAsRequired()
-                    ->resizable(),
+                    ->resizable()
+                    ->wrapHeader(false),
                 TableColumn::make('discount')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.product-optional.columns.discount-percentage'))
-                    ->width(150)
                     ->toggleable()
-                    ->resizable(),
+                    ->resizable()
+                    ->wrapHeader(false),
             ])
             ->schema([
                 Select::make('product_id')
@@ -1096,6 +1094,7 @@ class QuotationResource extends Resource
                     ->preload()
                     ->live()
                     ->dehydrated(true)
+                    ->wrapOptionLabels(false)
                     ->getOptionLabelFromRecordUsing(function ($record): string {
                         return $record->name . ($record->trashed() ? ' (Deleted)' : '');
                     })
@@ -1154,6 +1153,7 @@ class QuotationResource extends Resource
                         },
                     )
                     ->required()
+                    ->wrapOptionLabels(false)
                     ->selectablePlaceholder(false)
                     ->dehydrated()
                     ->visible(fn(ProductSettings $settings) => $settings->enable_uom),
@@ -1316,73 +1316,87 @@ class QuotationResource extends Resource
                 TableColumn::make('product_id')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.product'))
                     ->resizable()
+                    ->wrapHeader(false)
                     ->width(300)
                     ->markAsRequired()
                     ->toggleable(),
                 TableColumn::make('product_qty')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.quantity'))
                     ->markAsRequired()
-                    ->resizable(),
+                    ->resizable()
+                    ->wrapHeader(false),
                 TableColumn::make('qty_delivered')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.qty-delivered'))
                     ->toggleable()
                     ->markAsRequired()
                     ->resizable()
+                    ->wrapHeader(false)
                     ->visible(fn () => in_array($record?->state, [OrderState::SALE])),
                 TableColumn::make('qty_invoiced')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.qty-invoiced'))
                     ->markAsRequired()
                     ->toggleable()
                     ->resizable()
+                    ->wrapHeader(false)
                     ->visible(fn () => in_array($record?->state, [OrderState::SALE])),
                 TableColumn::make('product_uom_id')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.uom'))
                     ->toggleable()
                     ->markAsRequired()
                     ->resizable()
+                    ->wrapHeader(false)
                     ->visible(fn () => resolve(ProductSettings::class)->enable_uom),
                 TableColumn::make('customer_lead')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.lead-time'))
                     ->markAsRequired()
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->resizable(),
+                    ->resizable()
+                    ->wrapHeader(false),
                 TableColumn::make('product_packaging_qty')
                     ->toggleable()
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.packaging-qty'))
                     ->resizable()
+                    ->wrapHeader(false)
                     ->visible(fn () => resolve(ProductSettings::class)->enable_packagings),
                 TableColumn::make('product_packaging_id')
                     ->toggleable()
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.packaging'))
                     ->resizable()
+                    ->wrapHeader(false)
                     ->visible(fn () => resolve(ProductSettings::class)->enable_packagings),
                 TableColumn::make('price_unit')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.unit-price'))
                     ->markAsRequired()
-                    ->resizable(),
+                    ->resizable()
+                    ->wrapHeader(false),
                 TableColumn::make('margin')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.margin'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->resizable()
+                    ->wrapHeader(false)
                     ->visible(fn () => resolve(PriceSettings::class)->enable_margin),
                 TableColumn::make('margin_percent')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.margin-percentage'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->resizable()
+                    ->wrapHeader(false)
                     ->visible(fn () => resolve(PriceSettings::class)->enable_margin),
                 TableColumn::make('taxes')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.taxes'))
                     ->toggleable()
-                    ->resizable(),
+                    ->resizable()
+                    ->wrapHeader(false),
                 TableColumn::make('discount')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.discount-percentage'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->resizable()
+                    ->wrapHeader(false)
                     ->visible(fn () => resolve(PriceSettings::class)->enable_discount),
                 TableColumn::make('price_subtotal')
                     ->label(__('sales::filament/clusters/orders/resources/quotation.form.tabs.order-line.repeater.products.columns.amount'))
                     ->toggleable()
-                    ->resizable(),
+                    ->resizable()
+                    ->wrapHeader(false),
             ])
             ->schema(fn($record) => [
                 Select::make('product_id')
