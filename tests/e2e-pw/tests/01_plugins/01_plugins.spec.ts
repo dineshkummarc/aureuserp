@@ -1,5 +1,5 @@
-import { test, expect } from '../setup';
-import { PluginManagementPage } from '../pages/01_pluginManagement';
+import { test, expect } from "../../setup";
+import { PluginManagementPage } from "../../pages/01_pluginManagement";
 
 test.describe('Plugin Installation', () => {
 
@@ -24,12 +24,4 @@ test.describe('Plugin Installation', () => {
         const pluginManagementPage = new PluginManagementPage(adminPage);
         await pluginManagementPage.uninstallAllPlugins();
     });
-
-    /**
-     * Accounting plugin installation test
-     */
-    // test('Accounting Plugin Installation Test', async ({ adminPage }) => {
-    //     const pluginManagementPage = new PluginManagementPage(adminPage);
-    //     await pluginManagementPage.AccountingInstall();
-    // });
 });
