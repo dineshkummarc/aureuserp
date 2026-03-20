@@ -2,8 +2,8 @@
 
 return [
     'model-label' => 'سمة المنتج',
-    'navigation' => [
+    'navigation'  => [
         'title' => 'سمات المنتج',
-        'group' => 'المحاسبة',
+        'group' => 'المنتجات',
     ],
 ];

@@ -2,8 +2,8 @@
 
 return [
     'model-label' => 'شروط الدفع',
-    'navigation' => [
+    'navigation'  => [
         'title' => 'شروط الدفع',
-        'group' => 'المحاسبة',
+        'group' => 'الفوترة',
     ],
 ];

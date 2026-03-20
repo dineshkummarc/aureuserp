@@ -1,22 +1,57 @@
 <?php
 
 return [
-    'asset-receivable'      => 'الذمم المدينة',
-    'asset-cash'            => 'البنك والنقد',
-    'asset-current'         => 'الأصول المتداولة',
-    'asset-non-current'     => 'الأصول غير المتداولة',
-    'asset-prepayments'     => 'المدفوعات المقدمة',
-    'asset-fixed'           => 'الأصول الثابتة',
-    'liability-payable'     => 'الذمم الدائنة',
-    'liability-credit-card' => 'بطاقة الائتمان',
-    'liability-current'     => 'الالتزامات المتداولة',
-    'liability-non-current' => 'الالتزامات غير المتداولة',
-    'equity'                => 'حقوق الملكية',
-    'equity-unaffected'     => 'أرباح السنة الحالية',
-    'income'                => 'الإيرادات',
-    'income-other'          => 'إيرادات أخرى',
-    'expense'               => 'المصروفات',
-    'expense-depreciation'  => 'الإهلاك',
-    'expense-direct-cost'   => 'تكلفة الإيرادات',
-    'off-balance'           => 'خارج الميزانية',
+    'assets' => [
+        'label'   => 'الأصول',
+        'options' => [
+            'receivable'  => 'الذمم المدينة',
+            'cash'        => 'البنك والنقد',
+            'current'     => 'الأصول المتداولة',
+            'non-current' => 'الأصول غير المتداولة',
+            'prepayments' => 'المدفوعات المقدمة',
+            'fixed'       => 'الأصول الثابتة',
+        ],
+    ],
+
+    'liabilities' => [
+        'label'   => 'الالتزامات',
+        'options' => [
+            'payable'     => 'الذمم الدائنة',
+            'credit-card' => 'بطاقة الائتمان',
+            'current'     => 'الالتزامات المتداولة',
+            'non-current' => 'الالتزامات غير المتداولة',
+        ],
+    ],
+
+    'equity' => [
+        'label'   => 'حقوق الملكية',
+        'options' => [
+            'equity'     => 'حقوق الملكية',
+            'unaffected' => 'أرباح السنة الحالية',
+        ],
+    ],
+
+    'income' => [
+        'label'   => 'الإيرادات',
+        'options' => [
+            'income' => 'الإيرادات',
+            'other'  => 'إيرادات أخرى',
+        ],
+    ],
+
+    'expenses' => [
+        'label'   => 'المصروفات',
+        'options' => [
+            'expense'      => 'المصروفات',
+            'depreciation' => 'الإهلاك',
+            'direct-cost'  => 'تكلفة الإيرادات',
+        ],
+    ],
+
+    'off-balance' => [
+        'label'   => 'خارج الميزانية',
+        'options' => [
+            'off-balance' => 'خارج الميزانية',
+        ],
+    ],
 ];

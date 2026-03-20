@@ -117,6 +117,7 @@ return [
         'columns' => [
             'number'           => 'الرقم',
             'state'            => 'الحالة',
+            'created-by'       => 'أنشئ بواسطة',
             'customer'         => 'العميل',
             'invoice-date'     => 'تاريخ الفاتورة',
             'checked'          => 'تم التحقق',
@@ -130,6 +131,10 @@ return [
             'total'            => 'الإجمالي',
             'amount-due'       => 'المبلغ المستحق',
             'invoice-currency' => 'عملة الفاتورة',
+        ],
+
+        'summarizers' => [
+            'total' => 'الإجمالي',
         ],
 
         'groups' => [
@@ -172,6 +177,12 @@ return [
                     'title' => 'تم حذف الدفعات',
                     'body'  => 'تم حذف الدفعات بنجاح.',
                 ],
+            ],
+        ],
+
+        'toolbar-actions' => [
+            'export' => [
+                'label' => 'تصدير',
             ],
         ],
     ],

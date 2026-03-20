@@ -8,6 +8,12 @@ return [
         'group' => 'الفواتير',
     ],
 
+    'global-search' => [
+        'partner' => 'الشريك',
+        'amount'  => 'المبلغ',
+        'date'    => 'التاريخ',
+    ],
+
     'form' => [
         'sections' => [
             'fields' => [
@@ -15,52 +21,54 @@ return [
                 'memo'                  => 'مذكرة',
                 'date'                  => 'التاريخ',
                 'amount'                => 'المبلغ',
+                'currency'              => 'العملة',
                 'payment-method'        => 'طريقة الدفع',
                 'customer'              => 'العميل',
+                'vendor'                => 'المورد',
                 'journal'               => 'اليومية',
                 'customer-bank-account' => 'الحساب البنكي للعميل',
+                'vendor-bank-account'   => 'الحساب البنكي للمورد',
             ],
         ],
     ],
 
     'table' => [
         'columns' => [
-            'name'                             => 'الاسم',
-            'company'                          => 'الشركة',
-            'bank-account-holder'              => 'صاحب الحساب البنكي',
-            'paired-internal-transfer-payment' => 'دفعة التحويل الداخلي المقترنة',
-            'payment-method-line'              => 'بند طريقة الدفع',
-            'payment-method'                   => 'طريقة الدفع',
-            'currency'                         => 'العملة',
-            'partner'                          => 'الشريك',
-            'outstanding-amount'               => 'المبلغ المستحق',
-            'destination-account'              => 'حساب الوجهة',
-            'created-by'                       => 'أنشئ بواسطة',
-            'payment-transaction'              => 'معاملة الدفع',
+            'name'            => 'الاسم',
+            'date'            => 'التاريخ',
+            'journal'         => 'اليومية',
+            'payment-method'  => 'طريقة الدفع',
+            'partner'         => 'الشريك',
+            'amount-currency' => 'المبلغ (العملة)',
+            'amount'          => 'المبلغ',
+            'state'           => 'الحالة',
+            'company'         => 'الشركة',
+            'currency'        => 'العملة',
+            'created-by'      => 'أنشئ بواسطة',
         ],
 
         'groups' => [
-            'name'                             => 'الاسم',
-            'company'                          => 'الشركة',
-            'partner'                          => 'الشريك',
-            'payment-method-line'              => 'بند طريقة الدفع',
-            'payment-method'                   => 'طريقة الدفع',
-            'partner-bank-account'             => 'الحساب البنكي للشريك',
-            'paired-internal-transfer-payment' => 'دفعة التحويل الداخلي المقترنة',
-            'created-at'                       => 'تاريخ الإنشاء',
-            'updated-at'                       => 'تاريخ التحديث',
+            'name'                 => 'الاسم',
+            'company'              => 'الشركة',
+            'journal'              => 'اليومية',
+            'partner'              => 'الشريك',
+            'payment-method-line'  => 'بند طريقة الدفع',
+            'payment-method'       => 'طريقة الدفع',
+            'partner-bank-account' => 'الحساب البنكي للشريك',
+            'created-at'           => 'تاريخ الإنشاء',
+            'updated-at'           => 'تاريخ التحديث',
         ],
 
         'filters' => [
-            'company'                          => 'الشركة',
-            'customer-bank-account'            => 'الحساب البنكي للعميل',
-            'paired-internal-transfer-payment' => 'دفعة التحويل الداخلي المقترنة',
-            'payment-method'                   => 'طريقة الدفع',
-            'currency'                         => 'العملة',
-            'partner'                          => 'الشريك',
-            'payment-method-line'              => 'بند طريقة الدفع',
-            'created-at'                       => 'تاريخ الإنشاء',
-            'updated-at'                       => 'تاريخ التحديث',
+            'company'               => 'الشركة',
+            'journal'               => 'اليومية',
+            'customer-bank-account' => 'الحساب البنكي للعميل',
+            'payment-method'        => 'طريقة الدفع',
+            'currency'              => 'العملة',
+            'partner'               => 'الشريك',
+            'payment-method-line'   => 'بند طريقة الدفع',
+            'created-at'            => 'تاريخ الإنشاء',
+            'updated-at'            => 'تاريخ التحديث',
         ],
 
         'actions' => [
@@ -80,6 +88,12 @@ return [
                 ],
             ],
         ],
+
+        'toolbar-actions' => [
+            'export' => [
+                'label' => 'تصدير',
+            ],
+        ],
     ],
 
     'infolist' => [
@@ -88,29 +102,18 @@ return [
                 'title'   => 'معلومات الدفع',
                 'entries' => [
                     'state'                 => 'الحالة',
+                    'vendor'                => 'المورد',
+                    'customer'              => 'العميل',
                     'payment-type'          => 'نوع الدفع',
                     'journal'               => 'اليومية',
                     'customer-bank-account' => 'الحساب البنكي للعميل',
-                    'customer'              => 'العميل',
-                ],
-            ],
-
-            'payment-details' => [
-                'title'   => 'تفاصيل الدفع',
-                'entries' => [
-                    'amount' => 'المبلغ',
-                    'date'   => 'التاريخ',
-                    'memo'   => 'مذكرة',
-                ],
-            ],
-
-            'payment-method' => [
-                'title'   => 'طريقة الدفع',
-                'entries' => [
-                    'payment-method' => 'طريقة الدفع',
+                    'vendor-bank-account'   => 'الحساب البنكي للمورد',
+                    'amount'                => 'المبلغ',
+                    'payment-method'        => 'طريقة الدفع',
+                    'date'                  => 'التاريخ',
+                    'memo'                  => 'مذكرة',
                 ],
             ],
         ],
     ],
-
 ];
