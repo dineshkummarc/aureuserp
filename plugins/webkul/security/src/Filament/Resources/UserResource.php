@@ -356,7 +356,18 @@ class UserResource extends Resource
                                 ->body(__('security::filament/resources/user.table.actions.edit.notification.body')),
                         ),
                     DeleteAction::make()
-                        ->hidden(fn ($record) => $record->trashed() || ! self::canDeleteUser($record))
+                        ->hidden(fn ($record) => $record->trashed())
+                        ->before(function (DeleteAction $action, $record): void {
+                            if (! self::canDeleteUser($record)) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('security::filament/resources/user.table.actions.delete.notification.error.title'))
+                                    ->body(__('security::filament/resources/user.table.actions.delete.notification.error.body'))
+                                    ->send();
+
+                                $action->cancel();
+                            }
+                        })
                         ->successNotification(
                             Notification::make()
                                 ->success()
