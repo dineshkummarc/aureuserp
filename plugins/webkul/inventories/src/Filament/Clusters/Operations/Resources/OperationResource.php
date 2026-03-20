@@ -11,6 +11,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -34,7 +35,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use InvalidArgumentException;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper as FormProgressStepper;
 use Webkul\Field\Filament\Infolists\Components\ProgressStepper as InfolistProgressStepper;
 use Webkul\Field\Filament\Traits\HasCustomFields;
@@ -205,6 +205,23 @@ class OperationResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
+                            ->live()
+                            ->afterStateUpdated(function (Get $get, ?Operation $record): void {
+                                $destinationLocationId = $get('destination_location_id');
+
+                                if (
+                                    ! $record?->id
+                                    || ! $destinationLocationId
+                                ) {
+                                    return;
+                                }
+
+                                $record->update(['destination_location_id' => $destinationLocationId]);
+
+                                $record->moves()->update(['destination_location_id' => $destinationLocationId]);
+
+                                $record->moveLines()->update(['destination_location_id' => $destinationLocationId]);
+                            })
                             ->visible(fn (Get $get): bool => static::getWarehouseSettings()->enable_locations && OperationType::withTrashed()->find($get('operation_type_id'))?->type != Enums\OperationType::OUTGOING)
                             ->disabled(fn ($record): bool => in_array($record?->state, [OperationState::DONE, OperationState::CANCELED])),
                     ])
@@ -806,19 +823,25 @@ class OperationResource extends Resource
                     ->default(0)
                     ->required()
                     ->visible(fn (?Move $record): bool => $record?->id && $record?->state !== MoveState::DRAFT)
-                    ->disabled(fn ($record): bool => in_array($record?->state, [MoveState::DONE, MoveState::CANCELED]))
-                    ->suffixAction(fn ($record) => static::getMoveLinesAction($record)),
+                    ->disabled(fn (?Move $record): bool => in_array($record?->state, [MoveState::DONE, MoveState::CANCELED]))
+                    ->suffixAction(fn (Move $record) => static::getMoveLinesAction($record)),
                 Select::make('uom_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.fields.unit'))
                     ->relationship(
                         'uom',
                         'name',
-                        fn ($query) => $query->where('category_id', 1),
+                        function (Builder $query, Get $get) {
+                            $product = Product::find($get('product_id'));
+                            $categoryId = $product?->uom?->category_id;
+
+                            return $query->when($categoryId, fn ($q) => $q->where('category_id', $categoryId))->orderBy('id');
+                        },
                     )
                     ->searchable()
                     ->preload()
                     ->required()
                     ->live()
+                    ->native(false)
                     ->afterStateUpdated(function (Set $set, Get $get) {
                         static::afterUOMUpdated($set, $get);
                     })
@@ -885,14 +908,8 @@ class OperationResource extends Resource
             ->addable(fn ($record): bool => ! in_array($record?->state, [OperationState::DONE, OperationState::CANCELED]));
     }
 
-    public static function getMoveLinesAction($record): Action
+    public static function getMoveLinesAction(Move $move): Action
     {
-        $move = $record instanceof Move ? $record : $record->move;
-
-        if (! $move instanceof Move) {
-            throw new InvalidArgumentException('Expected Move model or model with move relationship, got '.get_class($record));
-        }
-
         $columns = 2;
 
         if (
@@ -1120,7 +1137,7 @@ class OperationResource extends Resource
 
                         return $data;
                     })
-                    ->mutateRelationshipDataBeforeSaveUsing(function (array $data): array {
+                    ->mutateRelationshipDataBeforeSaveUsing(function (array $data) use ($move): array {
                         if (isset($data['quantity_id'])) {
                             $productQuantity = ProductQuantity::find($data['quantity_id']);
 
@@ -1129,20 +1146,26 @@ class OperationResource extends Resource
                             $data['package_id'] = $productQuantity?->package_id;
                         }
 
+                        if (isset($data['qty'])) {
+                            $data['uom_qty'] = static::calculateProductQuantity($data['uom_id'] ?? $move->uom_id, $data['qty']);
+                        }
+
                         return $data;
                     })
                     ->deletable(fn (): bool => ! in_array($move->state, [MoveState::DONE, MoveState::CANCELED]))
                     ->addable(fn (): bool => ! in_array($move->state, [MoveState::DONE, MoveState::CANCELED])),
             ])
             ->modalWidth('6xl')
-            ->mountUsing(function (Schema $schema, $record) {
+            ->mountUsing(function (Schema $schema) {
                 $schema->fill([]);
             })
             ->modalSubmitAction(
-                fn ($action, $record) => $action
+                fn ($action) => $action
                     ->visible(! in_array($move->state, [MoveState::DONE, MoveState::CANCELED]))
             )
-            ->action(function (Set $set, array $data, $record) use ($move): void {
+            ->action(function (Set $set, Move $move, Schema $schema): void {
+                $schema->saveRelationships();
+
                 $totalQty = $move->lines()->sum('qty');
 
                 $move->fill([
@@ -1202,7 +1225,7 @@ class OperationResource extends Resource
 
         $set('uom_id', $product->uom_id);
 
-        $productQuantity = static::calculateProductQuantity($get('uom_id'), $get('product_uom_qty'));
+        $productQuantity = static::calculateProductQuantity($product->uom_id, $get('product_uom_qty'));
 
         $set('product_qty', round($productQuantity, 2));
 
@@ -1232,6 +1255,18 @@ class OperationResource extends Resource
             return;
         }
 
+        $product = Product::find($get('product_id'));
+
+        $selectedUom = UOM::find($get('uom_id'));
+
+        if ($product?->uom && $selectedUom && $selectedUom->factor > $product->uom->factor) {
+            Notification::make()
+                ->title(__('inventories::filament/clusters/operations/resources/operation.notifications.uom-precision-warning.title'))
+                ->body(__('inventories::filament/clusters/operations/resources/operation.notifications.uom-precision-warning.body'))
+                ->warning()
+                ->send();
+        }
+
         $productQuantity = static::calculateProductQuantity($get('uom_id'), $get('product_uom_qty'));
 
         $set('product_qty', round($productQuantity, 2));
@@ -1247,13 +1282,19 @@ class OperationResource extends Resource
             return self::normalizeZero((float) ($uomQuantity ?? 0));
         }
 
-        $uom = Uom::find($uomId);
+        $uom = UOM::find($uomId);
 
         if (! $uom || ! is_numeric($uom->factor) || $uom->factor == 0) {
             return 0;
         }
 
-        $quantity = (float) ($uomQuantity ?? 0) / $uom->factor;
+        $referenceUom = UOM::where('category_id', $uom->category_id)->where('factor', 1)->first();
+
+        if (! $referenceUom) {
+            return self::normalizeZero((float) ($uomQuantity ?? 0) / $uom->factor);
+        }
+
+        $quantity = $uom->computeQuantity((float) ($uomQuantity ?? 0), $referenceUom, false);
 
         return self::normalizeZero($quantity);
     }
