@@ -36,6 +36,8 @@ export class SalesFlowPage {
     async gotoCustomersPage() {
         await this.page.goto("/admin/sale/orders/customers");
         await expect(this.page).toHaveURL(/sale\/orders\/customers/);
+        await this.page.waitForLoadState("networkidle");
+        await expect(this.erpLocators.salesCustomerNewCreateButton).toBeVisible();
         await expect(this.erpLocators.salesCustomersTable.first()).toBeVisible();
     }
 
@@ -84,6 +86,7 @@ export class SalesFlowPage {
     async gotoProductsPage() {
         await this.page.goto("/admin/sale/products/products");
         await expect(this.page).toHaveURL(/sale\/products\/products/);
+        await expect(this.erpLocators.salesProductNewCreateButton).toBeVisible();
         await expect(this.erpLocators.salesProductsTable.first()).toBeVisible();
     }
 
@@ -128,7 +131,8 @@ export class SalesFlowPage {
     async gotoQuotationsPage() {
         await this.page.goto("/admin/sale/orders/quotations");
         await expect(this.page).toHaveURL(/sale\/orders\/quotations/);
-        await expect(this.erpLocators.salesCustomersTable.first()).toBeVisible();
+        await expect(this.erpLocators.salesQuotationCreateButton).toBeVisible();
+        await expect(this.erpLocators.salesProductsTable.first()).toBeVisible();
     }
 
     async createQuotation(quotation: SalesQuotationData) {

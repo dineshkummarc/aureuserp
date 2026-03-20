@@ -234,7 +234,7 @@ export class ErpLocators {
          * Sales - Customers, Products, Quotations
          */
 
-        this.salesCustomersTable = page.locator("div.fi-ta-content-grid");
+        this.salesCustomersTable = page.locator("div.fi-ta-content-grid, div.fi-ta-empty-state, table");
         this.salesCustomerNewCreateButton = page.locator("a,button").filter({ hasText: /new customer|create customer|add customer|create/i }).first();
         this.salesCustomerNameInput = page.locator('input[id="form.name"]').first();
         this.salesCustomerEmailInput = page.locator('input[id="form.email"]').first();
@@ -244,7 +244,7 @@ export class ErpLocators {
         this.salesCustomerSearchInput = page.locator('.fi-input.fi-input-has-inline-prefix').nth(1);
         this.salesCustomerEditButton = page.getByRole('link', { name: 'Edit' }).first();
 
-        this.salesProductsTable = page.locator("table");
+        this.salesProductsTable = page.locator("table, div.fi-ta-empty-state");
         this.salesProductNewCreateButton = page.locator("a,button").filter({ hasText: /new product|create product|add product|create/i }).first();
         this.salesProductNameInput = page.locator('input[id="form.name"]').first();
         this.salesProductCategorySelect = page.locator('input[id="form.category_id"], [role="combobox"][aria-label*="Category"], [role="combobox"][aria-labelledby*="Category"]').first();
@@ -263,7 +263,7 @@ export class ErpLocators {
         this.salesQuotationConfirmButton = page.getByRole("button", { name: /Confirm/i }).first();
         this.salesQuotationCreateInvoiceButton = page.getByRole("button", { name: /Create Invoice/i }).first();
         this.salesQuotationInvoiceSubmitButton = page.getByRole("button", { name: /Create Invoice/i }).last();
-        this.salesInvoicesTable = page.locator("table");
+        this.salesInvoicesTable = page.locator("table, div.fi-ta-empty-state");
 
         this.salesSearchInput = page.locator(".fi-input.fi-input-has-inline-prefix").nth(1);
         this.salesRowActionsButton = page.getByRole('button', { name: 'Actions' });

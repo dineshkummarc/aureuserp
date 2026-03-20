@@ -22,14 +22,6 @@ test.describe("Sales Products E2E", () => {
         });
     });
 
-    // test("Create Product - Validation Errors", async ({ adminPage }) => {
-    //     const salesPage = new SalesFlowPage(adminPage);
-    //     await salesPage.gotoProductsPage();
-    //     await salesPage.erpLocators.salesProductNewCreateButton.click();
-    //     await salesPage.erpLocators.salesProductCreateButton.click();
-    //     await salesPage.expectValidationErrors();
-    // });
-
     test("Edit Product - Updates Name", async ({ adminPage }) => {
         const salesPage = new SalesFlowPage(adminPage);
         const key = Date.now();
