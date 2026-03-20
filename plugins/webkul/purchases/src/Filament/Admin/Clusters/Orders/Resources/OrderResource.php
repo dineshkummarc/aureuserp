@@ -1122,6 +1122,9 @@ class OrderResource extends Resource
 
                 Hidden::make('price_total')
                     ->default(0),
+
+                Hidden::make('from_requisition')
+                    ->default(false),
             ])
             ->mutateRelationshipDataBeforeCreateUsing(function (array $data, $record) {
                 $product = Product::find($data['product_id']);
@@ -1210,9 +1213,11 @@ class OrderResource extends Resource
 
         $set('product_packaging_qty', $packaging['packaging_qty'] ?? null);
 
-        $priceUnit = static::calculateUnitPrice($get);
+        if (! $get('from_requisition')) {
+            $priceUnit = static::calculateUnitPrice($get);
 
-        $set('price_unit', round($priceUnit, 2));
+            $set('price_unit', round($priceUnit, 2));
+        }
 
         self::calculateLineTotals($set, $get);
 
@@ -1541,15 +1546,14 @@ class OrderResource extends Resource
             $uom = $line->uom;
 
             $products[] = [
-                'product_id'  => $product?->id,
-                'uom_id'      => $uom?->id,
-                'product_qty' => $requisition->type === RequisitionType::BLANKET_ORDER
-                    ? 0
-                    : $line->qty,
-                'price_unit'  => $line->price_unit,
-                'planned_at'  => now(),
-                'taxes'       => $product?->productTaxes->pluck('id')->toArray() ?? [],
-                'discount'    => 0,
+                'product_id'        => $product?->id,
+                'uom_id'            => $uom?->id,
+                'product_qty'       => $line->qty,
+                'price_unit'        => $line->price_unit,
+                'planned_at'        => now(),
+                'taxes'             => $product?->productTaxes->pluck('id')->toArray() ?? [],
+                'discount'          => 0,
+                'from_requisition'  => true,
             ];
         }
 
