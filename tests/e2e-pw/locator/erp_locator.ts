@@ -113,7 +113,8 @@ export class ErpLocators {
     readonly salesProductUomSelect: Locator;
     readonly salesProductSaveButton: Locator;
     readonly salesProductCreateButton: Locator;
-
+    readonly salesProductEditButton: Locator;
+    readonly salesProductDeleteButton: Locator;
 
     readonly salesQuotationCreateButton: Locator;
     readonly salesQuotationCustomerSelect: Locator;
@@ -251,7 +252,9 @@ export class ErpLocators {
         this.salesProductPriceInput = page.locator('input[id="form.price"]').first();
         this.salesProductUomSelect = page.locator('input[id="form.uom_id"], [role="combobox"][aria-label*="UOM"], [role="combobox"][aria-labelledby*="UOM"]').first();
         this.salesProductCreateButton = page.locator('button[id="key-bindings-1"]').first();
+        this.salesProductEditButton = page.getByRole('link', { name: 'Edit' });
         this.salesProductSaveButton = page.locator('button[id="key-bindings-2"]').first();
+        this.salesProductDeleteButton = page.getByRole('button', { name: 'Delete' });
 
         this.salesQuotationCreateButton = page.locator("a,button").filter({ hasText: /new quotation|create quotation|add quotation|create/i }).first();
         this.salesQuotationCustomerSelect = page.locator('input[id="form.partner_id"], [role="combobox"][aria-label*="Customer"], [role="combobox"][aria-labelledby*="Customer"]').first();

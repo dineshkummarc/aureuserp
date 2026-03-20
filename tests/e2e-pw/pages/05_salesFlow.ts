@@ -106,7 +106,8 @@ export class SalesFlowPage {
         await this.gotoProductsPage();
         await this.searchList(originalName);
         await this.openRowActions();
-        await this.clickMenuAction(/Edit/i);
+        await this.erpLocators.salesProductEditButton.click();
+        // await this.clickMenuAction(/Edit/i);
 
         if (updates.name) {
             await this.erpLocators.salesProductNameInput.fill(updates.name);
@@ -123,7 +124,8 @@ export class SalesFlowPage {
         await this.gotoProductsPage();
         await this.searchList(name);
         await this.openRowActions();
-        await this.clickMenuAction(/Delete/i);
+        await this.erpLocators.salesProductDeleteButton.click();
+        // await this.clickMenuAction(/Delete/i);
         await this.erpLocators.salesConfirmDeleteButton.click();
         await this.expectSuccessToast();
     }
