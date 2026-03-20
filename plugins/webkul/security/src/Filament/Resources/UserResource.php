@@ -108,12 +108,14 @@ class UserResource extends Resource
                                             ->label(__('security::filament/resources/user.form.sections.general-information.fields.password'))
                                             ->password()
                                             ->required()
+                                            ->revealable(filament()->arePasswordsRevealable())
                                             ->hiddenOn('edit')
                                             ->maxLength(255)
                                             ->rule('min:8'),
                                         TextInput::make('password_confirmation')
                                             ->label(__('security::filament/resources/user.form.sections.general-information.fields.password-confirmation'))
                                             ->password()
+                                            ->revealable(filament()->arePasswordsRevealable())
                                             ->hiddenOn('edit')
                                             ->rule('required', fn ($get) => (bool) $get('password'))
                                             ->same('password'),
@@ -183,7 +185,7 @@ class UserResource extends Resource
                                     ->schema([
                                         FileUpload::make('avatar')
                                             ->hiddenLabel()
-                                            ->imageResizeMode('cover')
+                                            ->automaticallyResizeImagesMode('cover')
                                             ->image()
                                             ->imageEditor()
                                             ->directory('users/avatars')
@@ -285,7 +287,6 @@ class UserResource extends Resource
                     ->badge()
                     ->listWithLineBreaks(),
                 TextColumn::make('roles.name')
-                    ->sortable()
                     ->label(__('security::filament/resources/user.table.columns.role')),
                 TextColumn::make('resource_permission')
                     ->label(__('security::filament/resources/user.table.columns.resource-permission'))
