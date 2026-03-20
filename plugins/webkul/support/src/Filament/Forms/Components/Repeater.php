@@ -185,7 +185,7 @@ class Repeater extends BaseRepeater
 
     public function hasDeferredColumnManager(): bool
     {
-        return false;
+        return true;
     }
 
     public function getSummaryForColumn(string $columnName): ?string
