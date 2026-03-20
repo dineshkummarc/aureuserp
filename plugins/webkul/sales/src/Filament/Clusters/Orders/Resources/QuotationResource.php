@@ -1692,6 +1692,10 @@ class QuotationResource extends Resource
 
         $set('price_unit', round($priceUnit, 2));
 
+        $purchasePrice = static::calculatePurchasePrice($product, $get('product_uom_id'));
+
+        $set('purchase_price', round($purchasePrice, 2));
+
         self::calculateLineTotals($set, $get);
     }
 
@@ -1789,6 +1793,19 @@ class QuotationResource extends Resource
         $uomQty = UOM::find($get('product_uom_id'))->computeQuantity(1, $product->uom, false);
 
         return (float) ($vendorPrice * $uomQty);
+    }
+
+    private static function calculatePurchasePrice($product, $uomId): float
+    {
+        $cost = (float) ($product->cost ?? 0);
+
+        if (! $uomId || ! $product->uom) {
+            return $cost;
+        }
+
+        $uomQty = UOM::find($uomId)->computeQuantity(1, $product->uom, false);
+
+        return $cost * $uomQty;
     }
 
     private static function getBestPackaging($productId, $quantity)
