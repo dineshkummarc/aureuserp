@@ -182,7 +182,17 @@ export class SalesFlowPage {
 
     async createInvoice() {
         await this.erpLocators.salesQuotationCreateInvoiceButton.click();
+        await expect(this.erpLocators.salesQuotationInvoiceSubmitButton).toBeVisible();
         await this.erpLocators.salesQuotationInvoiceSubmitButton.click();
+        await this.expectSuccessToast();
+    }
+
+    async sendQuotation() {
+        await expect(this.erpLocators.salesQuotationSendButton).toBeVisible();
+        await this.erpLocators.salesQuotationSendButton.click();
+        // await expect(this.erpLocators.salesQuotationSendSubmitButton).toBeVisible();
+        await this.page.waitForLoadState("networkidle");
+        await this.erpLocators.salesQuotationSendSubmitButton.click();
         await this.expectSuccessToast();
     }
 
@@ -200,6 +210,36 @@ export class SalesFlowPage {
         await expect(this.erpLocators.salesInvoicesTable.first()).toBeVisible();
 
         return quotationId;
+    }
+
+    async openDeliveriesForCurrentQuotation(): Promise<string> {
+        const url = this.page.url();
+        const match = url.match(/quotations\/(\d+)/);
+
+        if (!match) {
+            throw new Error(`Unable to determine quotation id from URL: ${url}`);
+        }
+
+        const quotationId = match[1];
+        await this.page.waitForLoadState("networkidle");
+        await this.page.goto(`/admin/sale/orders/quotations/${quotationId}/deliveries`, { waitUntil: "domcontentloaded" });
+        await expect(this.page).toHaveURL(new RegExp(`/quotations/${quotationId}/deliveries`));
+        await expect(this.erpLocators.salesQuotationDeliveriesTable.first()).toBeVisible();
+
+        return quotationId;
+    }
+
+    async validateFirstDeliveryForCurrentQuotation() {
+        await this.openDeliveriesForCurrentQuotation();
+        await this.erpLocators.salesQuotationDeliveryEditButton.click();
+        await expect(this.erpLocators.salesDeliveryValidateButton).toBeVisible();
+        await this.erpLocators.salesDeliveryValidateButton.click();
+
+        if (await this.erpLocators.salesDeliveryNoBackorderButton.isVisible().catch(() => false)) {
+            await this.erpLocators.salesDeliveryNoBackorderButton.click();
+        }
+
+        await this.expectSuccessToast();
     }
 
     async expectInvoiceRowPresent() {

@@ -126,8 +126,15 @@ export class ErpLocators {
     readonly salesQuotationSaveButton: Locator;
     readonly salesQuotationDeleteButton: Locator;
     readonly salesQuotationConfirmButton: Locator;
+    readonly salesQuotationSendButton: Locator;
+    readonly salesQuotationSendSubmitButton: Locator;
+    readonly salesQuotationSentRadio: Locator;
     readonly salesQuotationCreateInvoiceButton: Locator;
     readonly salesQuotationInvoiceSubmitButton: Locator;
+    readonly salesQuotationDeliveriesTable: Locator;
+    readonly salesQuotationDeliveryEditButton: Locator;
+    readonly salesDeliveryValidateButton: Locator;
+    readonly salesDeliveryNoBackorderButton: Locator;
     readonly salesInvoicesTable: Locator;
 
     readonly salesSearchInput: Locator;
@@ -268,8 +275,15 @@ export class ErpLocators {
         this.salesQuotationDeleteButton = page.getByRole('button', { name: 'Delete' }).first();
         this.salesQuotationSaveButton = page.getByRole('button', { name: /^(Create|Save changes|Submit)$/i }).first();
         this.salesQuotationConfirmButton = page.getByRole("button", { name: /Confirm/i }).first();
+        this.salesQuotationSendButton = page.getByRole("button", { name: /Send by Email|Send/i }).first();
+        this.salesQuotationSendSubmitButton = page.getByRole("dialog").getByRole("button", { name: /Send|Submit/i }).first(); 
+        this.salesQuotationSentRadio = page.getByRole("radio", { name: /Quotation Sent/i });
         this.salesQuotationCreateInvoiceButton = page.getByRole("button", { name: /Create Invoice/i }).first();
-        this.salesQuotationInvoiceSubmitButton = page.getByRole("button", { name: /Create Invoice/i }).last();
+        this.salesQuotationInvoiceSubmitButton = page.getByRole("dialog").getByRole("button", { name: /Create Invoice/i }).first();
+        this.salesQuotationDeliveriesTable = page.locator("table, div.fi-ta-empty-state");
+        this.salesQuotationDeliveryEditButton = page.getByRole('table').getByRole('link', { name: 'Edit' });
+        this.salesDeliveryValidateButton = page.getByRole("button", { name: /Validate/i }).first();
+        this.salesDeliveryNoBackorderButton = page.getByRole("button", { name: /No Backorder/i }).first();
         this.salesInvoicesTable = page.locator("table, div.fi-ta-empty-state");
 
         this.salesSearchInput = page.locator(".fi-input.fi-input-has-inline-prefix").nth(1);
