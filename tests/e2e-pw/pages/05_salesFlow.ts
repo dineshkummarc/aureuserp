@@ -143,7 +143,7 @@ export class SalesFlowPage {
         await expect(this.page).toHaveURL(/quotations\/create/);
 
         await this.selectBySearch(this.erpLocators.salesQuotationCustomerSelect, quotation.customerName);
-        await this.selectFirstOptionIfEmpty(this.erpLocators.salesQuotationPaymentTermSelect);
+        await this.selectFirstOption(this.erpLocators.salesQuotationPaymentTermSelect);
 
         await this.erpLocators.salesQuotationAddProductButton.scrollIntoViewIfNeeded();
         await this.erpLocators.salesQuotationAddProductButton.click();
@@ -158,7 +158,8 @@ export class SalesFlowPage {
         await this.gotoQuotationsPage();
         await this.searchList(searchKey);
         await this.openRowActions();
-        await this.clickMenuAction(/Edit/i);
+        // await this.clickMenuAction(/Edit/i);
+        await this.erpLocators.salesQuotationEditButton.click();
         await this.erpLocators.salesQuotationQuantityInput.first().fill(quantity);
         await this.erpLocators.salesQuotationSaveButton.click();
         await this.expectSuccessToast();
@@ -168,7 +169,8 @@ export class SalesFlowPage {
         await this.gotoQuotationsPage();
         await this.searchList(searchKey);
         await this.openRowActions();
-        await this.clickMenuAction(/Delete/i);
+        await this.erpLocators.salesQuotationDeleteButton.click();
+        // await this.clickMenuAction(/Delete/i);
         await this.erpLocators.salesConfirmDeleteButton.click();
         await this.expectSuccessToast();
     }
@@ -234,24 +236,36 @@ export class SalesFlowPage {
 
     async selectBySearch(trigger: ReturnType<Page["locator"]>, value: string) {
         await trigger.click();
+
+        const option = this.erpLocators.salesSelectOption
+            .filter({ hasText: new RegExp(this.escapeRegExp(value), "i") })
+            .first();
+
+        await expect(this.erpLocators.salesSelectSearchInput).toBeVisible();
         await this.erpLocators.salesSelectSearchInput.fill(value);
-        await this.erpLocators.salesSelectOption.filter({ hasText: value }).first().click();
+        await expect(option).toBeVisible();
+        await option.click();
     }
 
     private async selectFirstOption(trigger: ReturnType<Page["locator"]>) {
         await trigger.click();
+        await expect(this.erpLocators.salesSelectOption.first()).toBeVisible();
         await this.erpLocators.salesSelectOption.first().click();
     }
 
     private async selectFirstOptionIfEmpty(trigger: ReturnType<Page["locator"]>) {
-        const currentValue = await trigger.inputValue().catch(() => "");
-        if (!currentValue) {
+        const currentValue = (await trigger.textContent())?.trim() ?? "";
+
+        if (!currentValue || /select an option/i.test(currentValue)) {
             await this.selectFirstOption(trigger);
         }
     }
 
+    private escapeRegExp(value: string): string {
+        return value.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&");
+    }
+
     private async expectSuccessToast() {
-        await this.page.waitForLoadState("networkidle");
         await expect(this.erpLocators.salesSuccessToast).toBeVisible();
     }
 }

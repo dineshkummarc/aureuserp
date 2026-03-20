@@ -117,12 +117,14 @@ export class ErpLocators {
     readonly salesProductDeleteButton: Locator;
 
     readonly salesQuotationCreateButton: Locator;
+    readonly salesQuotationEditButton: Locator;
     readonly salesQuotationCustomerSelect: Locator;
     readonly salesQuotationPaymentTermSelect: Locator;
     readonly salesQuotationAddProductButton: Locator;
     readonly salesQuotationProductSelectInput: Locator;
     readonly salesQuotationQuantityInput: Locator;
     readonly salesQuotationSaveButton: Locator;
+    readonly salesQuotationDeleteButton: Locator;
     readonly salesQuotationConfirmButton: Locator;
     readonly salesQuotationCreateInvoiceButton: Locator;
     readonly salesQuotationInvoiceSubmitButton: Locator;
@@ -257,12 +259,14 @@ export class ErpLocators {
         this.salesProductDeleteButton = page.getByRole('button', { name: 'Delete' });
 
         this.salesQuotationCreateButton = page.locator("a,button").filter({ hasText: /new quotation|create quotation|add quotation|create/i }).first();
-        this.salesQuotationCustomerSelect = page.locator('input[id="form.partner_id"], [role="combobox"][aria-label*="Customer"], [role="combobox"][aria-labelledby*="Customer"]').first();
-        this.salesQuotationPaymentTermSelect = page.locator('input[id="form.payment_term_id"], [role="combobox"][aria-label*="Payment Term"], [role="combobox"][aria-labelledby*="Payment Term"]').first();
+        this.salesQuotationEditButton = page.getByRole('link', { name: 'Edit' }).first();
+        this.salesQuotationCustomerSelect = page.locator('[wire\\:key$="form.partner_id"] button.fi-select-input-btn').first();
+        this.salesQuotationPaymentTermSelect = page.locator('[wire\\:key$="form.payment_term_id"] button.fi-select-input-btn').first();
         this.salesQuotationAddProductButton = page.getByRole("button", { name: /Add Product/i }).first();
-        this.salesQuotationProductSelectInput = page.locator('input[id^="form.products."][id$=".product_id"]');
+        this.salesQuotationProductSelectInput = page.locator('[wire\\:key*=".form.products."][wire\\:key*=".product_id."] button.fi-select-input-btn');
         this.salesQuotationQuantityInput = page.locator('input[id^="form.products."][id$=".product_qty"]');
-        this.salesQuotationSaveButton = page.locator('button[type="submit"]').first();
+        this.salesQuotationDeleteButton = page.getByRole('button', { name: 'Delete' }).first();
+        this.salesQuotationSaveButton = page.getByRole('button', { name: /^(Create|Save changes|Submit)$/i }).first();
         this.salesQuotationConfirmButton = page.getByRole("button", { name: /Confirm/i }).first();
         this.salesQuotationCreateInvoiceButton = page.getByRole("button", { name: /Create Invoice/i }).first();
         this.salesQuotationInvoiceSubmitButton = page.getByRole("button", { name: /Create Invoice/i }).last();
@@ -274,8 +278,8 @@ export class ErpLocators {
         this.salesDeleteAction = page.getByRole("menuitem", { name: /Delete/i }).first();
         this.salesConfirmDeleteButton = page.getByRole("dialog").getByRole("button", { name: /Delete/i }).first();
 
-        this.salesSelectSearchInput = page.locator('input[type="search"], input[placeholder*="Search"], input[placeholder*="search"]').first();
-        this.salesSelectOption = page.locator('[role="option"], .fi-select-option, li').filter({ hasText: /./ });
+        this.salesSelectSearchInput = page.locator('.fi-dropdown-panel[role="listbox"]:visible input.fi-input[aria-label="Search"]').last();
+        this.salesSelectOption = page.locator('.fi-dropdown-panel[role="listbox"]:visible [role="option"]');
         this.salesSuccessToast = page.locator("h3.fi-no-notification-title, .fi-toast-message-success").first();
         this.salesValidationMessage = page.locator(".fi-fo-field-wrp-error-message, .text-danger, .invalid-feedback");
     }

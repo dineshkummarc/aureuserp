@@ -43,7 +43,7 @@ test.describe("Sales Quotations E2E", () => {
         await salesPage.expectValidationErrors();
     });
 
-    test("Create Quotation - Validation Errors (Missing Product)", async ({ adminPage }) => {
+    test("Create Quotation - Validation Errors (Missing PaymentTerm)", async ({ adminPage }) => {
         const salesPage = new SalesFlowPage(adminPage);
         const key = Date.now();
         const customerName = `E2E Sales Customer ${key}`;
